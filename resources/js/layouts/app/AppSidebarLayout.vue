@@ -9,6 +9,7 @@ import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { getInitials } from '@/composables/useInitials';
 import { dashboard, logout } from '@/routes';
 import { edit as editProfile } from '@/routes/profile';
+import {index as users} from '@/routes/users';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
@@ -52,27 +53,27 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Users',
-        href: dashboard(),
+        href: users(),
         icon: 'mdi-account-group-outline',
     },
     {
         title: 'Clubs',
-        href: dashboard(),
+        href: users(),
         icon: 'mdi-cards-outline',
     },
     {
         title: 'CYEOs',
-        href: dashboard(),
+        href: users(),
         icon: 'mdi-account-group',
     },
     {
         title: 'DYEOs',
-        href: dashboard(),
+        href: users(),
         icon: 'mdi-account-multiple',
     },
     {
         title: 'Applications',
-        href: dashboard(),
+        href: users(),
         icon: 'mdi-folder-open',
     },
 ];
