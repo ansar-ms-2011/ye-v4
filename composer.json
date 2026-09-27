@@ -36,7 +36,12 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/helpers/generalHelpers.php",
+            "app/helpers/campsFormFiller.php",
+            "app/helpers/stepFormFiller.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

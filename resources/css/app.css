@@ -219,12 +219,12 @@
 
     .app-frame-header {
         align-items: center;
-        border-bottom: 1px solid
-            rgba(var(--v-border-color), var(--v-border-opacity));
+        border-bottom: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
         display: flex;
         gap: 12px;
-        height: 72px;
-        padding: 0 18px;
+        height: 50px;
+        padding: 0 10px;
+        background: #d4e4ef;
     }
 
     .app-frame-header .v-btn {
@@ -242,7 +242,9 @@
     }
 
     .app-frame-body {
-        padding: 28px 20px 48px;
+        padding: 20px;
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
     }
 
     .auth-card {

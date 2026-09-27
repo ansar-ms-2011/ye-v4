@@ -118,9 +118,8 @@ watch(
     { immediate: true },
 );
 const isRail = computed(() => !isMobile.value && rail.value);
-const isCollapsed = computed(
-    () => isRail.value || (isMobile.value && !drawer.value),
-);
+const isCollapsed = computed(() => isRail.value || (isMobile.value && !drawer.value));
+console.log(isCollapsed.value);
 </script>
 
 <template>
@@ -277,7 +276,9 @@ const isCollapsed = computed(
                         variant="text"
                         @click="toggleSidebar"
                     />
-                    <span class="app-frame-title">{{ pageTitle }}</span>
+                    <span class="app-frame-title">
+                        {{ pageTitle }}
+                    </span>
                 </header>
 
                 <main class="app-frame-body">
