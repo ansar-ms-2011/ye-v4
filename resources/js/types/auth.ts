@@ -39,6 +39,6 @@ export interface UserFormModel {
     role_id: number | null;
     password: string;
     password_confirmation: string;
-    active: number;
+    active: boolean | null;
 }
 

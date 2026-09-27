@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { usePage, Head, Form, router } from '@inertiajs/vue3';
-import { onMounted, ref, shallowRef, toRef, computed } from 'vue';
+import { ref, shallowRef, toRef, computed } from 'vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { index, store, update, destroy } from '@/routes/users';
 import type { User, UserFormModel } from '@/types';
@@ -15,7 +15,7 @@ function createNewUser(): UserFormModel {
         role_id: null,
         password: '',
         password_confirmation: '',
-        active: 1,
+        active: true,
     };
 }
 
@@ -27,6 +27,9 @@ const districts = computed(() => (page.props as any).districts ?? []);
 const clubs = computed(() => (page.props as any).clubs ?? []);
 const roles = computed(() => (page.props as any).roles ?? []);
 
+const deleteDialog = ref(false);
+const deleteTarget = ref<any>(null); // the full object
+const deleting = ref(false);
 const formModel = ref<UserFormModel>(createNewUser());
 const dialog = shallowRef(false);
 const isEditing = toRef(() => !!formModel.value.id);
@@ -66,7 +69,7 @@ function edit(user: User) {
         role_id: user.roles != null ? Number(user.roles?.[0]?.id) : null,
         password: '',
         password_confirmation: '',
-        active: user.active ? 1 : 0,
+        active: user.active,
     };
 
     dialog.value = true;
@@ -107,11 +110,6 @@ function onFormSuccess() {
     reset();
 }
 
-const deleteDialog = ref(false);
-const deleteTarget = ref<any>(null); // the full object
-const deleting = ref(false);
-
-// Whatever opens the dialog
 function confirmRemove(item: null) {
     deleteTarget.value = item;
     deleteDialog.value = true;
@@ -237,6 +235,9 @@ function cancelRemove() {
                 :reset-on-success="['password']"
                 v-slot="{ errors, processing }"
                 @success="onFormSuccess"
+                :transform="
+                    (data) => ({ ...data, active: !!formModel.active })
+                "
             >
                 <v-card
                     :subtitle="`${isEditing ? 'Update' : 'Create'} user account`"
@@ -325,11 +326,15 @@ function cancelRemove() {
                                 <v-checkbox
                                     label="Active"
                                     v-model="formModel.active"
-                                    name="active"
                                     hide-details="auto"
                                     :error-messages="errors.active"
                                 >
                                 </v-checkbox>
+                                <input
+                                    type="hidden"
+                                    name="active"
+                                    :value="!!formModel.active"
+                                />
                             </VCol>
                         </v-row>
                     </template>
