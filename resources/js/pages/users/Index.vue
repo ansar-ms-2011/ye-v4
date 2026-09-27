@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { usePage, Head, Form, router } from '@inertiajs/vue3';
 import { onMounted, ref, shallowRef, toRef, computed } from 'vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { index, store, update, destroy } from '@/routes/users';
 import type { User, UserFormModel } from '@/types';
 
@@ -44,10 +45,6 @@ const headers = [
         sortable: false,
     },
 ];
-
-onMounted(() => {
-    //
-});
 
 function add() {
     formModel.value = createNewUser();
@@ -110,37 +107,42 @@ function onFormSuccess() {
     reset();
 }
 
-const deleteDialog = shallowRef(false);
-const deleteTarget = ref<User | null>(null);
-const deleting = shallowRef(false);
+const deleteDialog = ref(false);
+const deleteTarget = ref<any>(null); // the full object
+const deleting = ref(false);
 
-function confirmRemove(user: User) {
-    deleteTarget.value = user;
+// Whatever opens the dialog
+function confirmRemove(item: null) {
+    deleteTarget.value = item;
     deleteDialog.value = true;
 }
 
-function cancelRemove() {
-    deleteDialog.value = false;
-    deleteTarget.value = null;
-}
-
-function remove() {
+async function remove() {
     if (!deleteTarget.value) {
         return;
     }
 
     deleting.value = true;
 
-    router.delete(destroy(deleteTarget.value.id).url, {
-        preserveScroll: true,
-        preserveState: true,
-        onSuccess: () => {
-            cancelRemove();
-        },
-        onFinish: () => {
-            deleting.value = false;
-        },
-    });
+    try {
+        router.delete(destroy(deleteTarget.value?.id).url, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                cancelRemove();
+            },
+            onFinish: () => {
+                deleting.value = false;
+            },
+        });
+    } finally {
+        deleting.value = false;
+    }
+}
+
+function cancelRemove() {
+    deleteDialog.value = false;
+    deleteTarget.value = null;
 }
 </script>
 
@@ -151,6 +153,8 @@ function remove() {
             <v-data-table-server
                 density="compact"
                 :headers="headers"
+                hover
+                class="elevation-1"
                 :items="users"
                 :items-length="usersPage.total"
                 :items-per-page="usersPage.per_page"
@@ -173,11 +177,12 @@ function remove() {
                         </v-toolbar-title>
 
                         <v-btn
+                            color="primary"
                             class="me-2"
                             prepend-icon="mdi-plus"
                             rounded="lg"
-                            text="Add a user"
-                            border
+                            text="Add New User"
+                            variant="outlined"
                             @click="add"
                         ></v-btn>
                     </v-toolbar>
@@ -355,47 +360,16 @@ function remove() {
                 </v-card>
             </Form>
         </v-dialog>
-        <v-dialog v-model="deleteDialog" max-width="420" persistent>
-            <v-card>
-                <v-card-title class="d-flex align-center ga-2">
-                    <v-icon color="error" icon="mdi-alert-circle" />
-                    Confirm Delete
-                </v-card-title>
-
-                <v-card-text>
-                    Are you sure you want to delete
-                    <strong>{{ deleteTargetName }}</strong
-                    >?
-                    <br />
-                    <span class="text-medium-emphasis">
-                        This action cannot be undone.
-                    </span>
-                </v-card-text>
-
-                <v-divider />
-
-                <v-card-actions class="bg-surface-light">
-                    <v-btn
-                        text="Cancel"
-                        variant="plain"
-                        :disabled="deleting"
-                        @click="cancelRemove"
-                    ></v-btn>
-
-                    <v-spacer></v-spacer>
-
-                    <v-btn
-                        color="error"
-                        variant="tonal"
-                        class="rounded-md"
-                        :loading="deleting"
-                        @click="remove"
-                    >
-                        Delete
-                    </v-btn>
-                </v-card-actions>
-            </v-card>
-        </v-dialog>
+        <ConfirmDialog
+            v-model="deleteDialog"
+            title="Confirm Delete"
+            message="Are you sure you want to delete?"
+            :target-name="deleteTarget?.name"
+            confirm-text="Delete"
+            :loading="deleting"
+            @confirm="remove"
+            @cancel="cancelRemove"
+        />
     </div>
 </template>
 
