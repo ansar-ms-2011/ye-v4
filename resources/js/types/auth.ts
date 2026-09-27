@@ -13,7 +13,9 @@ export type User = {
     district: string | null;
     application_id: number | null;
     rotary_club_id: number | null;
+    club: { club_name: string } | null;
     role_id: number | null;
+    roles: { id: number; name: string }[];
     active: boolean | null;
     [key: string]: unknown;
 };
@@ -27,3 +29,16 @@ export type TwoFactorConfigContent = {
     description: string;
     buttonText: string;
 };
+
+export interface UserFormModel {
+    id: number | null;
+    full_name: string;
+    email: string;
+    district: number | null;
+    rotary_club_id: number | null;
+    role_id: number | null;
+    password: string;
+    password_confirmation: string;
+    active: number;
+}
+

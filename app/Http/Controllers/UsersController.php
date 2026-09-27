@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserStoreRequest;
 use App\Models\District;
 use App\Models\RibiClub;
 use App\Models\RibiCyeo;
@@ -87,7 +88,7 @@ class UsersController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(UserStoreRequest $request)
     {
         $data = $request->all();
         $data['active'] = ($data['active'] == 'Yes' ? 1 : 0);
@@ -98,7 +99,8 @@ class UsersController extends Controller
             $user->syncRoles($role);
             $user->load('club');
 
-            return redirect()->back()->with('success', 'User Created Successfully');
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'User account created successfully.']);
+            return redirect()->back();
         } else {
             return redirect()->back()->with('error', 'Something went wrong, please check again');
         }
@@ -114,8 +116,8 @@ class UsersController extends Controller
             if ($role) {
                 $user->syncRoles($role);
             }
-
-            return redirect()->back()->with('success', 'User Profile Updated Successfully');
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'User account Updated successfully.']);
+            return redirect()->back();
         } catch (Exception $ex) {
             return redirect()->back()->with('error', 'Something went wrong, please check again');
         }
@@ -126,16 +128,11 @@ class UsersController extends Controller
         try {
             $user = User::find($id);
             $user->delete();
-
-            return response()->json(['message' => 'User Removed Successfully']);
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'User account deleted successfully.']);
+            return redirect()->back();
         } catch (Exception $ex) {
             throw new Exception($ex->getMessage());
         }
-    }
-
-    public function GetProfile()
-    {
-        return view('profile');
     }
 
     public function SaveProfileData(Request $request)
