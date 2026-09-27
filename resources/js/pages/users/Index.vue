@@ -28,7 +28,7 @@ const clubs = computed(() => (page.props as any).clubs ?? []);
 const roles = computed(() => (page.props as any).roles ?? []);
 
 const deleteDialog = ref(false);
-const deleteTarget = ref<any>(null); // the full object
+const deleteTarget = ref<any>(null);
 const deleting = ref(false);
 const formModel = ref<UserFormModel>(createNewUser());
 const dialog = shallowRef(false);
@@ -57,6 +57,7 @@ const headers = [
 if (typeof window !== 'undefined') {
     const urlParams = new URLSearchParams(window.location.search);
     const urlSearch = urlParams.get('searchText');
+
     if (urlSearch) {
         searchText.value = urlSearch;
     }
@@ -70,7 +71,7 @@ watch(searchText, (newValue) => {
 
     debounceTimer = setTimeout(() => {
         performSearch(newValue);
-    }, 400); // 400ms debounce delay
+    }, 400);
 });
 
 function performSearch(search: string) {
@@ -122,6 +123,23 @@ function edit(user: User) {
 function reset() {
     dialog.value = false;
     formModel.value = createNewUser();
+}
+
+function clearSearch() {
+    searchText.value = '';
+    isSearching.value = true;
+    router.get(
+        index().url,
+        {},
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['users'],
+            onFinish: () => {
+                isSearching.value = false;
+            },
+        },
+    );
 }
 
 function closeDialog() {
@@ -232,6 +250,7 @@ function cancelRemove() {
                             rounded="lg"
                             placeholder="Search"
                             class="me-2"
+                            density="compact"
                         ></VTextField>
 
                         <v-btn
@@ -277,14 +296,15 @@ function cancelRemove() {
                 </template>
 
                 <template v-slot:no-data>
-                    <v-btn
-                        prepend-icon="mdi-backup-restore"
-                        rounded="lg"
-                        text="Reset data"
-                        variant="text"
-                        border
-                        @click="reset"
-                    ></v-btn>
+                    <div class="d-flex justify-center pa-4">
+                        <v-btn
+                            prepend-icon="mdi-backup-restore"
+                            rounded="lg"
+                            text="Reset filters"
+                            variant="text"
+                            @click="clearSearch"
+                        ></v-btn>
+                    </div>
                 </template>
             </v-data-table-server>
         </v-sheet>
@@ -395,10 +415,7 @@ function cancelRemove() {
                                 />
                             </VCol>
                         </v-row>
-                        <VRow
-                            density="compact"
-                            class="ma-0"
-                        >
+                        <VRow density="compact" class="ma-0">
                             <v-col cols="12" md="6" class="py-1">
                                 <VTextField
                                     name="password"

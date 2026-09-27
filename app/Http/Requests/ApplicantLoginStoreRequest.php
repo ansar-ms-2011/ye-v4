@@ -24,7 +24,7 @@ class ApplicantLoginStoreRequest extends FormRequest
     {
         return [
             'application_no' => ['required', 'integer'],
-            'applicant_dob' => ['required', 'date'],
+            'applicant_dob' => ['required', 'date:d-m-Y'],
         ];
     }
 }

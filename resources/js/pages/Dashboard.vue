@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
-import PlaceholderPattern from '@/components/PlaceholderPattern.vue';
+import { Head, usePage } from '@inertiajs/vue3';
+//import PlaceholderPattern from '@/components/PlaceholderPattern.vue';
 import { dashboard } from '@/routes';
-
+const pageProps = usePage().props.auth;
+console.log(pageProps);
 defineOptions({
     layout: {
         breadcrumbs: [
@@ -13,7 +14,6 @@ defineOptions({
         ],
     },
 });
-
 </script>
 
 <template>
@@ -23,11 +23,11 @@ defineOptions({
         <VSheet
             v-for="index in 3"
             :key="index"
+            color="primary-light"
             class="dashboard-placeholder dashboard-placeholder-card"
             border
             rounded="lg"
         >
-            <PlaceholderPattern />
         </VSheet>
 
         <VSheet
@@ -35,31 +35,6 @@ defineOptions({
             border
             rounded="lg"
         >
-            <VSelect
-                density="compact"
-                variant="outlined"
-                :items="[
-                    'California',
-                    'Colorado',
-                    'Florida',
-                    'Georgia',
-                    'Texas',
-                    'Wyoming',
-                ]"
-                multiple
-            ></VSelect>
-            <VTextField
-                id="email"
-                type="email"
-                name="email"
-                density="compact"
-                variant="outlined"
-                hide-details="auto"
-                required
-                autofocus
-                autocomplete="email"
-            />
-                <PlaceholderPattern />
         </VSheet>
     </div>
 </template>

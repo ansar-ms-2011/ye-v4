@@ -7,18 +7,17 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Log;
-use phpDocumentor\Reflection\Types\Expression;
 
 class Application extends Model
 {
-    use HasFactory;
 
-    protected $casts=[
-        'parent_div_sep'=>'boolean',
-        'parent1_rotarian'=>BooleanToYesNo::class,
-        'parent2_rotarian'=>BooleanToYesNo::class,
+    protected $casts = [
+        'parent_div_sep' => 'boolean',
+        'parent1_rotarian' => BooleanToYesNo::class,
+        'parent2_rotarian' => BooleanToYesNo::class,
+        'dob' => 'date:d-m-Y',
     ];
+
     protected $fillable = [
         'idapplication',
         'media_id',
@@ -100,7 +99,7 @@ class Application extends Model
         'em_email',
         'country_citizenship',
         'image_location',
-        'date_of_app'
+        'date_of_app',
     ];
 
     protected $appends = ['image_data', 'full_name', 'row_class'];
@@ -109,34 +108,42 @@ class Application extends Model
     {
         return $this->hasOne(User::class);
     }
+
     public function club()
     {
         return $this->belongsTo(RibiClub::class, 'rotary_club_id');
     }
+
     public function dyeo()
     {
         return $this->belongsTo(RibiDyeo::class, 'dyeo_id');
     }
+
     public function address_home()
     {
         return $this->hasOne(ApplicationAddress::class)->where('address_type', 'HOME');
     }
+
     public function address_postal()
     {
         return $this->hasOne(ApplicationAddress::class)->where('address_type', 'POSTAL');
     }
+
     public function address_emergency()
     {
         return $this->hasOne(ApplicationAddress::class)->where('address_type', 'EMERGENCY');
     }
+
     public function address_parent1()
     {
         return $this->hasOne(ApplicationAddress::class)->where('address_type', 'PARENT1');
     }
+
     public function address_parent2()
     {
-        return $this->hasOne(ApplicationAddress::class)->where('address_type', 'PARENT2');;
+        return $this->hasOne(ApplicationAddress::class)->where('address_type', 'PARENT2');
     }
+
     public function languages(): HasMany
     {
         return $this->hasMany(ApplicationLanguage::class);
@@ -151,20 +158,26 @@ class Application extends Model
     {
         return $this->hasMany(Media::class, 'application_id');
     }
+
     public function getGenderAttribute($value): string
     {
-        return ($value===1 || $value==='1' || $value==='Female')? 'Female': 'Male';
+        return ($value === 1 || $value === '1' || $value === 'Female') ? 'Female' : 'Male';
     }
-    public function getImageDataAttribute(){
-        if($this->media_id > 0){
-            $obj = Media::find($this->media_id);
-            return $obj->media?? "";
-        }
-        return "";
-    }
-    private  function getEmptyAddress(): ApplicationAddress
+
+    public function getImageDataAttribute()
     {
-        $obj =new ApplicationAddress();
+        if ($this->media_id > 0) {
+            $obj = Media::find($this->media_id);
+
+            return $obj->media ?? '';
+        }
+
+        return '';
+    }
+
+    private function getEmptyAddress(): ApplicationAddress
+    {
+        $obj = new ApplicationAddress;
         $obj->id = '';
         $obj->application_no = '9999';
         $obj->address_type = '';
@@ -174,20 +187,27 @@ class Application extends Model
         $obj->country = '';
         $obj->postcode = '';
         $obj->application_id = '';
+
         return $obj;
     }
 
-    public function getFullNameAttribute(){
+    public function getFullNameAttribute()
+    {
         return strtoupper($this->surname).' '.$this->firstname;
     }
-    public function getGuideNameAttribute(){
-        return strtoupper($this->firstname .' '.$this->surname);
+
+    public function getGuideNameAttribute()
+    {
+        return strtoupper($this->firstname.' '.$this->surname);
     }
-    public function getRowClassAttribute(){
+
+    public function getRowClassAttribute()
+    {
         return getAppClass(new Carbon($this->date_of_app));
     }
 
-    public function getDateOfAppAttribute($value){
+    public function getDateOfAppAttribute($value)
+    {
         return date('Y-m-d', strtotime($value));
     }
 }

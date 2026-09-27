@@ -36,10 +36,11 @@ class UserStoreRequest extends FormRequest
             'password_confirmation' => 'required|string|min:8',
         ];
 
-        if (!$this->id) {
+        if (! $this->id) {
             $rules['password'] = 'required|string|min:8|confirmed';
             $rules['password_confirmation'] = 'required_with:password|confirmed|string|min:8';
         }
+
         return $rules;
     }
 }
