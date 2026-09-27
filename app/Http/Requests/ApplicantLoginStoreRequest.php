@@ -23,8 +23,8 @@ class ApplicantLoginStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'application_no'=>['required', 'integer'],
-            'applicant_dob'=>['required', 'date']
+            'application_no' => ['required', 'integer'],
+            'applicant_dob' => ['required', 'date'],
         ];
     }
 }

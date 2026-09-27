@@ -1,22 +1,18 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
-import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
-import { index as applicantLogin } from '@/routes/applicant';
-import { store } from '@/routes/login';
-import { request } from '@/routes/password';
+import { login } from '@/routes';
+import { store } from '@/routes/applicant';
 
 defineOptions({
     layout: {
         title: 'Log in to your account',
-        description: 'Enter your email and password below to log in',
+        description: 'Enter your application number and dob log in',
     },
 });
 
 defineProps<{
     status?: string;
-    canResetPassword: boolean;
-    canRegister: boolean;
 }>();
 </script>
 
@@ -33,40 +29,37 @@ defineProps<{
         v-slot="{ errors, processing }"
     >
         <div class="starter-field mb-4">
-            <label for="email">Email address</label>
+            <label for="email">Application Number</label>
             <VTextField
-                id="email"
-                type="email"
-                name="email"
+                id="application_no"
+                type="application_no"
+                name="application_no"
                 density="compact"
                 variant="outlined"
                 hide-details="auto"
                 required
                 autofocus
-                autocomplete="email"
-                placeholder="Enter your email address"
-                :error-messages="errors.email"
+                placeholder="Enter your application number i.e 45698"
+                autocomplete="application_no"
+                :error-messages="errors.application_no"
             />
         </div>
 
-        <div class="d-flex align-center justify-space-between">
-            <label for="password" class="auth-field-label">Password</label>
-            <TextLink v-if="canResetPassword" :href="request()" :tabindex="5">
-                Forgot password?
-            </TextLink>
-        </div>
-
         <div class="starter-field mb-2">
-            <PasswordInput
-                id="password"
-                name="password"
+            <label for="email">Application's DOB</label>
+            <VDateInput
+                id="applicant_dob"
+                name="applicant_dob"
                 density="compact"
+                prepend-icon=""
                 variant="outlined"
+                inputFormat="dd-mm-yyyy"
+                placeholder="Enter your application's DOB (dd-mm-yyyy)"
+                persistent-placeholder
                 hide-details="auto"
                 required
-                autocomplete="current-password"
-                placeholder="Enter your password"
-                :error-messages="errors.password"
+                autocomplete="applicant_dob"
+                :error-messages="errors.applicant_dob"
             />
         </div>
 
@@ -93,7 +86,7 @@ defineProps<{
 
         <div class="text-center text-body-2 mt-6">
             Don't have an account?
-            <TextLink :href="applicantLogin()" :tabindex="5">Applicant Log In</TextLink>
+            <TextLink :href="login()" :tabindex="5">Official Log In</TextLink>
         </div>
     </Form>
 </template>

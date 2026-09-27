@@ -9,7 +9,7 @@ import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { getInitials } from '@/composables/useInitials';
 import { dashboard, logout } from '@/routes';
 import { edit as editProfile } from '@/routes/profile';
-import {index as users} from '@/routes/users';
+import { index as users } from '@/routes/users';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
@@ -33,8 +33,7 @@ const pageTitle = computed(
     () =>
         props.title ??
         props.breadcrumbs.at(-1)?.title ??
-        props.breadcrumbs[0]?.title ??
-        'Laravel Starter Kit',
+        props.breadcrumbs[0]?.title ?? ''
 );
 
 const sidebarToggleIcon = computed(() => {
@@ -118,7 +117,9 @@ watch(
     { immediate: true },
 );
 const isRail = computed(() => !isMobile.value && rail.value);
-const isCollapsed = computed(() => isRail.value || (isMobile.value && !drawer.value));
+const isCollapsed = computed(
+    () => isRail.value || (isMobile.value && !drawer.value),
+);
 console.log(isCollapsed.value);
 </script>
 
@@ -193,14 +194,14 @@ console.log(isCollapsed.value);
                                 <VImg
                                     v-if="auth.user.avatar"
                                     :src="auth.user.avatar"
-                                    :alt="auth.user.name"
+                                    :alt="auth.user.full_name"
                                 />
                                 <span v-else>
-                                    {{ getInitials(auth.user.name) }}
+                                    {{ getInitials(auth.user.full_name) }}
                                 </span>
                             </VAvatar>
                             <span class="app-sidebar-user-name">
-                                {{ auth.user.name }}
+                                {{ auth.user.full_name }}
                             </span>
                             <VIcon
                                 class="app-sidebar-user-chevron"
@@ -213,7 +214,7 @@ console.log(isCollapsed.value);
                     <VCard class="app-sidebar-user-menu" min-width="260">
                         <VList>
                             <VListItem
-                                :title="auth.user.name"
+                                :title="auth.user.full_name"
                                 :subtitle="auth.user.email"
                             >
                                 <template #prepend>
@@ -225,10 +226,12 @@ console.log(isCollapsed.value);
                                         <VImg
                                             v-if="auth.user.avatar"
                                             :src="auth.user.avatar"
-                                            :alt="auth.user.name"
+                                            :alt="auth.user.full_name"
                                         />
                                         <span v-else>
-                                            {{ getInitials(auth.user.name) }}
+                                            {{
+                                                getInitials(auth.user.full_name)
+                                            }}
                                         </span>
                                     </VAvatar>
                                 </template>

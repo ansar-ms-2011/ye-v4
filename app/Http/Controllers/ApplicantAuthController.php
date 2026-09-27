@@ -7,10 +7,15 @@ use App\Models\Application;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
+use Inertia\Inertia;
 
 class ApplicantAuthController extends Controller
 {
-    public function storeLogin(ApplicantLoginStoreRequest $request) : RedirectResponse
+    public function index()
+    {
+        return Inertia::render('auth/ApplicantLogin', []);
+    }
+    public function store(ApplicantLoginStoreRequest $request): RedirectResponse
     {
         $app = Application::with(['user'])->where(function ($query) use ($request) {
             $query->where('application_no', $request->application_no)
@@ -30,7 +35,7 @@ class ApplicantAuthController extends Controller
             }
             auth()->loginUsingId($app->user_id);
         } else {
-            return redirect()->back()->withErrors(['applicant_login_error' => 'Invalid Application Number / Date Of Birth']);
+            return redirect()->back()->withErrors(['application_no' => 'These credentials do not match our records.']);
         }
 
         return redirect('application/'.$app->id.'/edit');

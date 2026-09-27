@@ -1,16 +1,9 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import WelcomeLogo from '@/assets/images/welcome-logo.png';
-import { dashboard, login, register } from '@/routes';
+import { dashboard, login as officialLogin } from '@/routes';
+import { index as applicantLogin } from '@/routes/applicant';
 
-withDefaults(
-    defineProps<{
-        canRegister: boolean;
-    }>(),
-    {
-        canRegister: true,
-    },
-);
 </script>
 
 <template>
@@ -26,12 +19,12 @@ withDefaults(
                             <VBtn color="primary">Dashboard</VBtn>
                         </Link>
                         <template v-else>
-                            <Link :href="login()">
+                            <Link :href="officialLogin()">
                                 <VBtn variant="outlined" color="primary"
                                     >Officials Log in</VBtn
                                 >
                             </Link>
-                            <Link v-if="canRegister" :href="register()">
+                            <Link :href="applicantLogin()">
                                 <VBtn variant="outlined" color="primary"
                                     >Applicant Login</VBtn
                                 >
@@ -48,7 +41,11 @@ withDefaults(
                             color="surface-variant"
                             max-width="500"
                         >
-                            <img :src="WelcomeLogo" alt="Youth Exchange Logo" class="welcome-logo"/>
+                            <img
+                                :src="WelcomeLogo"
+                                alt="Youth Exchange Logo"
+                                class="welcome-logo"
+                            />
                         </v-card>
                     </VCol>
                 </VRow>
@@ -61,7 +58,7 @@ withDefaults(
 .min-screen {
     min-height: calc(100vh - 180px);
 }
-.welcome-logo{
+.welcome-logo {
     width: 100%;
     height: auto;
 }

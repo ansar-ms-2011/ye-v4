@@ -6,41 +6,35 @@ use App\Http\Controllers\ClubController;
 use App\Http\Controllers\CyeoController;
 use App\Http\Controllers\DyeoController;
 use App\Http\Controllers\EmailGuideController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\UsersController;
 use App\Models\Application;
+use App\Models\Media;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
 
-Route::get('/clear-cache', function () {
-    Artisan::call('cache:clear');
 
-    return 'Application cache cleared';
+Route::inertia('/', 'Welcome')->name('home');
+
+Route::middleware(['guest'])->group(function () {
+    Route::resource('applicant', ApplicantAuthController::class)->only(['index', 'store']);
 });
 
-Route::inertia('/', 'Welcome', [
-    'canRegister' => Features::enabled(Features::registration()),
-])->name('home');
-
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
-    Route::resource('users', UsersController::class);
-    Route::post('applicant/login', [ApplicantAuthController::class, 'storeLogin'])->name('applicant-login.store');
+    Route::resource('users', UsersController::class)->only(['index', 'store', 'update', 'destroy']);
 });
 
 require __DIR__.'/settings.php';
-
 
 Route::middleware(['auth'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
 
     Route::group(['middleware' => ['role:admin']], function () {
-        Route::resource('users', UserController::class)->only(['index', 'store', 'update', 'destroy'])->names('users');
-        Route::get('users-json', [UserController::class, 'usersJson']);
-        Route::get('get-users-table-clubs/{district_code?}', [UserController::class, 'usersTableClubsJson']);
-        Route::get('check-email-exists/{email}/{id}', [UserController::class, 'EmailExists']);
-        Route::post('re-establish-dyeo-users', [UserController::class, 'reEstablishDyeoUsers']);
-        Route::post('re-establish-cyeo-users', [UserController::class, 'reEstablishCyeoUsers']);
+        Route::resource('users', UsersController::class)->only(['index', 'store', 'update', 'destroy'])->names('users');
+        Route::get('users-json', [UsersController::class, 'usersJson']);
+        Route::get('get-users-table-clubs/{district_code?}', [UsersController::class, 'usersTableClubsJson']);
+        Route::get('check-email-exists/{email}/{id}', [UsersController::class, 'EmailExists']);
+        Route::post('re-establish-dyeo-users', [UsersController::class, 'reEstablishDyeoUsers']);
+        Route::post('re-establish-cyeo-users', [UsersController::class, 'reEstablishCyeoUsers']);
     });
 
     Route::group(['middleware' => ['role:admin|dyeo|cyeo']], function () {
@@ -77,9 +71,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::group(['middleware' => ['role:cyeo|dyeo']], function () {
-        Route::get('profile', [UserController::class, 'GetProfile']);
-        Route::get('get-profile-data', [UserController::class, 'GetProfileData']);
-        Route::post('save-profile-data', [UserController::class, 'SaveProfileData']);
+        Route::get('profile', [UsersController::class, 'GetProfile']);
+        Route::get('get-profile-data', [UsersController::class, 'GetProfileData']);
+        Route::post('save-profile-data', [UsersController::class, 'SaveProfileData']);
     });
 
     // Separated Application Edit route for applicant
@@ -201,4 +195,10 @@ Route::get('/update-media', function () {
     }
 
     return 'All media files updated successfully';
+});
+
+Route::get('/clear-cache', function () {
+    Artisan::call('cache:clear');
+
+    return 'Application cache cleared';
 });

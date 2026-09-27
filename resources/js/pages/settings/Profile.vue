@@ -27,7 +27,7 @@ defineOptions({
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
-const name = ref(user.value.name);
+const full_name = ref(user.value.full_name);
 const email = ref(user.value.email);
 </script>
 
@@ -46,17 +46,17 @@ const email = ref(user.value.email);
             v-slot="{ errors, processing }"
         >
             <div class="starter-field mb-4">
-                <label for="name">Name</label>
+                <label for="name">Full Name</label>
                 <VTextField
                     id="name"
-                    v-model="name"
+                    v-model="full_name"
                     name="name"
                     density="compact"
                     variant="outlined"
                     hide-details="auto"
                     required
                     autocomplete="name"
-                    :error-messages="errors.name"
+                    :error-messages="errors.full_name"
                 />
             </div>
 

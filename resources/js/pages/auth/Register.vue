@@ -3,7 +3,7 @@ import { Form, Head } from '@inertiajs/vue3';
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
 import { login } from '@/routes';
-import { store } from '@/routes/register';
+// import { store } from '@/routes/register';
 
 defineOptions({
     layout: {
@@ -17,7 +17,6 @@ defineOptions({
     <Head title="Register" />
 
     <Form
-        v-bind="store.form()"
         :reset-on-success="['password', 'password_confirmation']"
         v-slot="{ errors, processing }"
     >
