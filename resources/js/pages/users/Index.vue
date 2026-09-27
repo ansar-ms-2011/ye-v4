@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { usePage, Head, Form, router } from '@inertiajs/vue3';
-import { ref, shallowRef, toRef, computed } from 'vue';
+import { ref, shallowRef, toRef, computed, watch } from 'vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { index, store, update, destroy } from '@/routes/users';
 import type { User, UserFormModel } from '@/types';
@@ -32,7 +32,11 @@ const deleteTarget = ref<any>(null); // the full object
 const deleting = ref(false);
 const formModel = ref<UserFormModel>(createNewUser());
 const dialog = shallowRef(false);
+const searchText = ref('');
 const isEditing = toRef(() => !!formModel.value.id);
+
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+const isSearching = ref(false);
 
 const headers = [
     { title: 'Full name', key: 'full_name', align: 'start' as const },
@@ -48,6 +52,46 @@ const headers = [
         sortable: false,
     },
 ];
+
+// Initialize searchText from URL query params
+if (typeof window !== 'undefined') {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlSearch = urlParams.get('searchText');
+    if (urlSearch) {
+        searchText.value = urlSearch;
+    }
+}
+
+// Debounced search watcher
+watch(searchText, (newValue) => {
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
+    }
+
+    debounceTimer = setTimeout(() => {
+        performSearch(newValue);
+    }, 400); // 400ms debounce delay
+});
+
+function performSearch(search: string) {
+    isSearching.value = true;
+    router.get(
+        index().url,
+        {
+            page: 1,
+            perPage: usersPage.value.per_page,
+            searchText: search || undefined,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['users'],
+            onFinish: () => {
+                isSearching.value = false;
+            },
+        },
+    );
+}
 
 function add() {
     formModel.value = createNewUser();
@@ -89,7 +133,8 @@ function onPageChange(newPage: number) {
         index().url,
         {
             page: newPage,
-            per_page: usersPage.value.per_page,
+            perPage: usersPage.value.perPage,
+            searchText: searchText.value,
         },
         { preserveState: true, preserveScroll: true, only: ['users'] },
     );
@@ -100,9 +145,14 @@ function onPerPageChange(newPerPage: number) {
         index().url,
         {
             page: 1,
-            per_page: newPerPage,
+            perPage: newPerPage,
+            searchText: searchText.value,
         },
-        { preserveState: true, preserveScroll: true, only: ['users'] },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['users'],
+        },
     );
 }
 
@@ -157,6 +207,7 @@ function cancelRemove() {
                 :items-length="usersPage.total"
                 :items-per-page="usersPage.per_page"
                 :page="usersPage.current_page"
+                :loading="isSearching"
                 :items-per-page-options="[15, 35, 65, 100]"
                 @update:page="onPageChange"
                 @update:items-per-page="onPerPageChange"
@@ -173,6 +224,15 @@ function cancelRemove() {
 
                             Users
                         </v-toolbar-title>
+
+                        <VSpacer></VSpacer>
+                        <VTextField
+                            v-model="searchText"
+                            prepend-inner-icon="mdi-magnify"
+                            rounded="lg"
+                            placeholder="Search"
+                            class="me-2"
+                        ></VTextField>
 
                         <v-btn
                             color="primary"
@@ -235,9 +295,7 @@ function cancelRemove() {
                 :reset-on-success="['password']"
                 v-slot="{ errors, processing }"
                 @success="onFormSuccess"
-                :transform="
-                    (data) => ({ ...data, active: !!formModel.active })
-                "
+                :transform="(data) => ({ ...data, active: !!formModel.active })"
             >
                 <v-card
                     :subtitle="`${isEditing ? 'Update' : 'Create'} user account`"
@@ -337,6 +395,31 @@ function cancelRemove() {
                                 />
                             </VCol>
                         </v-row>
+                        <VRow
+                            density="compact"
+                            class="ma-0"
+                        >
+                            <v-col cols="12" md="6" class="py-1">
+                                <VTextField
+                                    name="password"
+                                    label="Password"
+                                    density="compact"
+                                    variant="outlined"
+                                    hide-details="auto"
+                                    :error-messages="errors.password"
+                                ></VTextField>
+                            </v-col>
+                            <v-col cols="12" md="6" class="py-1">
+                                <VTextField
+                                    name="password_confirmation"
+                                    label="Password Confirmation"
+                                    density="compact"
+                                    variant="outlined"
+                                    hide-details="auto"
+                                    :error-messages="errors.password"
+                                ></VTextField>
+                            </v-col>
+                        </VRow>
                     </template>
 
                     <v-divider></v-divider>
@@ -357,7 +440,7 @@ function cancelRemove() {
                             text="Save"
                             type="submit"
                             color="primary"
-                            variant="tonal"
+                            variant="flat"
                         >
                             Save User
                         </v-btn>

@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-
 use Spatie\Permission\Models\Role;
+
 use function response;
 
 class UsersController extends Controller
@@ -45,7 +45,7 @@ class UsersController extends Controller
         // --- Sorting ---
         $allowedSortColumns = ['id', 'full_name', 'email', 'district', 'created_at'];
         $orderBy = $request->input('sortBy.0', 'id');
-        if (!in_array($orderBy, $allowedSortColumns, true)) {
+        if (! in_array($orderBy, $allowedSortColumns, true)) {
             $orderBy = 'id';
         }
 
@@ -53,8 +53,7 @@ class UsersController extends Controller
 
         // --- Filters ---
         $searchText = $request->input('searchText', '');
-        $showApplicant = $request->boolean('showApplicant');
-        $perPage = (int)$request->input('per_page', 15);
+        $perPage = (int) $request->input('perPage', 15);
 
         // --- Query ---
         $users = User::query()
@@ -79,12 +78,10 @@ class UsersController extends Controller
             'districts' => $districts,
             'clubs' => $clubs,
             'roles' => $roles,
-            'filters' => [
-                'searchText' => $searchText,
-                'showApplicant' => $showApplicant,
-                'sortBy' => $orderBy,
-                'sortDesc' => $sortDir === 'desc',
-            ],
+            'perPage' => $perPage,
+            'searchText' => $searchText,
+            'sortBy' => $orderBy,
+            'sortDesc' => $sortDir === 'desc',
         ]);
     }
 
@@ -100,6 +97,7 @@ class UsersController extends Controller
             $user->load('club');
 
             Inertia::flash('toast', ['type' => 'success', 'message' => 'User account created successfully.']);
+
             return redirect()->back();
         } else {
             return redirect()->back()->with('error', 'Something went wrong, please check again');
@@ -117,6 +115,7 @@ class UsersController extends Controller
                 $user->syncRoles($role);
             }
             Inertia::flash('toast', ['type' => 'success', 'message' => 'User account Updated successfully.']);
+
             return redirect()->back();
         } catch (Exception $ex) {
             return redirect()->back()->with('error', 'Something went wrong, please check again');
@@ -129,6 +128,7 @@ class UsersController extends Controller
             $user = User::find($id);
             $user->delete();
             Inertia::flash('toast', ['type' => 'success', 'message' => 'User account deleted successfully.']);
+
             return redirect()->back();
         } catch (Exception $ex) {
             throw new Exception($ex->getMessage());

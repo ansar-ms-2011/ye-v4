@@ -23,7 +23,7 @@ class UserStoreRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'full_name' => 'required|string|max:255',
             'email' => [
                 'required',
@@ -32,6 +32,14 @@ class UserStoreRequest extends FormRequest
             ],
             'role_id' => 'required|exists:roles,id',
             'active' => 'required|boolean',
+            'password' => 'required|string|min:8|confirmed',
+            'password_confirmation' => 'required|string|min:8',
         ];
+
+        if (!$this->id) {
+            $rules['password'] = 'required|string|min:8|confirmed';
+            $rules['password_confirmation'] = 'required_with:password|confirmed|string|min:8';
+        }
+        return $rules;
     }
 }
