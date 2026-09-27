@@ -12,6 +12,8 @@ export type User = {
     updated_at: string | null;
     district: string | null;
     application_id: number | null;
+    rotary_club_id: number | null;
+    role_id: number | null;
     active: boolean | null;
     [key: string]: unknown;
 };

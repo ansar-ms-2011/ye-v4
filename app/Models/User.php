@@ -13,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['full_name', 'email', 'password', 'application_id', 'district', 'active'])]
+#[Fillable(['full_name', 'email', 'password', 'application_id', 'district', 'rotary_club_id' ,'active'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {

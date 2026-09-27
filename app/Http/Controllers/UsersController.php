@@ -7,6 +7,7 @@ use App\Models\RibiClub;
 use App\Models\RibiCyeo;
 use App\Models\RibiDyeo;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
+use Spatie\Permission\Models\Role;
 use function response;
 
 class UsersController extends Controller
@@ -42,7 +44,7 @@ class UsersController extends Controller
         // --- Sorting ---
         $allowedSortColumns = ['id', 'full_name', 'email', 'district', 'created_at'];
         $orderBy = $request->input('sortBy.0', 'id');
-        if (! in_array($orderBy, $allowedSortColumns, true)) {
+        if (!in_array($orderBy, $allowedSortColumns, true)) {
             $orderBy = 'id';
         }
 
@@ -51,7 +53,7 @@ class UsersController extends Controller
         // --- Filters ---
         $searchText = $request->input('searchText', '');
         $showApplicant = $request->boolean('showApplicant');
-        $perPage = (int) $request->input('per_page', 10);
+        $perPage = (int)$request->input('per_page', 15);
 
         // --- Query ---
         $users = User::query()
@@ -91,24 +93,32 @@ class UsersController extends Controller
         $data['active'] = ($data['active'] == 'Yes' ? 1 : 0);
         $data['password'] = Hash::make($data['password']);
         $user = User::create($data);
-        if ($user) {
-            $user->syncRoles($data['role_id']);
+        if ($user && $data['role_id']) {
+            $role = Role::find($data['role_id']);
+            $user->syncRoles($role);
             $user->load('club');
 
-            return response()->json(['message' => 'User Created Successfully', 'user' => $user]);
+            return redirect()->back()->with('success', 'User Created Successfully');
         } else {
-            abort(500, 'Something went wrong, please check again');
+            return redirect()->back()->with('error', 'Something went wrong, please check again');
         }
     }
 
     public function update(Request $request, User $user)
     {
-        $data = $request->all();
-        $user->update($data);
-        $user->syncRoles($data['role_id']);
-        $user->load(['club', 'roles']);
+        try {
+            $data = $request->all();
+            $user->update($data);
 
-        return response()->json(['message' => 'User Profile Updated Successfully', 'user' => $user]);
+            $role = Role::find($data['role_id']);
+            if ($role) {
+                $user->syncRoles($role);
+            }
+
+            return redirect()->back()->with('success', 'User Profile Updated Successfully');
+        } catch (Exception $ex) {
+            return redirect()->back()->with('error', 'Something went wrong, please check again');
+        }
     }
 
     public function destroy($id)
@@ -118,8 +128,8 @@ class UsersController extends Controller
             $user->delete();
 
             return response()->json(['message' => 'User Removed Successfully']);
-        } catch (\Exception $ex) {
-            throw new \Exception($ex->getMessage());
+        } catch (Exception $ex) {
+            throw new Exception($ex->getMessage());
         }
     }
 
