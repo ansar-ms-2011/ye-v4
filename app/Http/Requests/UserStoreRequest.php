@@ -32,13 +32,15 @@ class UserStoreRequest extends FormRequest
             ],
             'role_id' => 'required|exists:roles,id',
             'active' => 'required|boolean',
-            'password' => 'required|string|min:8|confirmed',
-            'password_confirmation' => 'required|string|min:8',
         ];
 
-        if (! $this->id) {
-            $rules['password'] = 'required|string|min:8|confirmed';
-            $rules['password_confirmation'] = 'required_with:password|confirmed|string|min:8';
+        if (! $this->route('user')) {
+            $rules['password'] = [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+            ];
         }
 
         return $rules;

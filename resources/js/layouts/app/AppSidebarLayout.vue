@@ -194,10 +194,10 @@ console.log(isCollapsed.value);
                                 <VImg
                                     v-if="auth.user.avatar"
                                     :src="auth.user.avatar"
-                                    :alt="auth.user.full_name"
+                                    :alt="auth.user.full_name ?? 'user-name'"
                                 />
                                 <span v-else>
-                                    {{ getInitials(auth.user.full_name) }}
+                                    {{ getInitials(auth.user.full_name as string) }}
                                 </span>
                             </VAvatar>
                             <span class="app-sidebar-user-name">
@@ -227,11 +227,11 @@ console.log(isCollapsed.value);
                                         <VImg
                                             v-if="auth.user.avatar"
                                             :src="auth.user.avatar"
-                                            :alt="auth.user.full_name"
+                                            :alt="auth.user.full_name ?? 'user-name'"
                                         />
                                         <span v-else>
                                             {{
-                                                getInitials(auth.user.full_name)
+                                                getInitials(auth.user.full_name as string)
                                             }}
                                         </span>
                                     </VAvatar>

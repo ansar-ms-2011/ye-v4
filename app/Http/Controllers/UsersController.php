@@ -107,13 +107,23 @@ class UsersController extends Controller
     public function update(UserStoreRequest $request, User $user)
     {
         try {
-            $data = $request->all();
-            $user->update($data);
+            $user->update([
+                'full_name' => $request->full_name,
+                'email' => $request->email,
+                'district' => $request->district,
+                'rotary_club_id' => $request->rotary_club_id,
+                'active' => ($request->active == 'Yes' ? 1 : 0),
+            ]);
 
-            $role = Role::find($data['role_id']);
+            $role = Role::find($request->role_id);
             if ($role) {
                 $user->syncRoles($role);
             }
+
+            if ($request->password) {
+                $user->update(['password' => Hash::make($request->password)]);
+            }
+
             Inertia::flash('toast', ['type' => 'success', 'message' => 'User account Updated successfully.']);
 
             return redirect()->back();

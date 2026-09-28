@@ -178,7 +178,7 @@ function onFormSuccess() {
     reset();
 }
 
-function confirmRemove(item: null) {
+function confirmRemove(item: User) {
     deleteTarget.value = item;
     deleteDialog.value = true;
 }
@@ -265,19 +265,19 @@ function cancelRemove() {
                     </v-toolbar>
                 </template>
 
-                <template v-slot:item.role_id="{ item }">
+                <template v-slot:[`item.role_id`]="{ item }">
                     {{ item.roles?.[0]?.name }}
                 </template>
 
-                <template v-slot:item.club="{ item }">
+                <template v-slot:[`item.club`]="{ item }">
                     {{ item.club?.club_name }}
                 </template>
 
-                <template v-slot:item.active="{ item }">
+                <template v-slot:[`item.active`]="{ item }">
                     {{ item.active ? 'Yes' : 'No' }}
                 </template>
 
-                <template v-slot:item.actions="{ item }">
+                <template v-slot:[`item.actions`]="{ item }">
                     <div class="d-flex ga-2 justify-end">
                         <v-icon
                             color="success"
@@ -290,7 +290,7 @@ function cancelRemove() {
                             color="red"
                             icon="mdi-delete"
                             size="small"
-                            @click="confirmRemove(item)"
+                            @click="confirmRemove(item as User)"
                         ></v-icon>
                     </div>
                 </template>
