@@ -16,6 +16,6 @@
         </x-inertia::head>
     </head>
     <body>
-        <x-inertia::app />
+        <x-inertia::app v-cloak />
     </body>
 </html>

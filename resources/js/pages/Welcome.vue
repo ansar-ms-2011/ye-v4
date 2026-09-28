@@ -45,6 +45,7 @@ import { index as applicantLogin } from '@/routes/applicant';
                                 :src="WelcomeLogo"
                                 alt="Youth Exchange Logo"
                                 class="welcome-logo"
+                                width="500"
                             />
                         </v-card>
                     </VCol>

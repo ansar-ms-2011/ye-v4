@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Models\District;
+use App\Models\RibiClub;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,9 +21,25 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $clubs = null;
+        $districts = null;
+        $user = $request->user();
+
+        if ($user->hasRole('dyeo')) {
+            $user->load('dyeo');
+            $districts = District::select('id', 'code')->get();
+        } elseif ($user->hasRole('cyeo')) {
+            $user->load('cyeo');
+            $clubs = RibiClub::select('id', 'club_name as name')->get();
+        }
+
         return Inertia::render('settings/Profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+            'cyeo' => $user->cyeo,
+            'dyeo' => $user->dyeo,
+            'clubs' => $clubs,
+            'districts' => $districts,
         ]);
     }
 

@@ -16,6 +16,7 @@ export type User = {
     club: { club_name: string } | null;
     role_id: number | null;
     roles: { id: number; name: string }[];
+    role: { id: number; name: string };
     active: boolean | null;
     [key: string]: unknown;
 };
@@ -41,4 +42,3 @@ export interface UserFormModel {
     password_confirmation: string;
     active: boolean | null;
 }
-

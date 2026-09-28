@@ -224,6 +224,10 @@
         gap: 12px;
         height: 50px;
         padding: 0 10px;
+        /*background: #d4e4ef;*/
+    }
+
+    .app-frame-header:not(:has(.v-theme--dark)){
         background: #d4e4ef;
     }
 
@@ -278,15 +282,19 @@
         }
     }
 
+    .v-input__details{
+        padding: unset !important;
+    }
+
     .settings-layout {
-        max-width: 930px;
+        max-width: 1080px;
     }
 
     .settings-grid {
         align-items: start;
         display: grid;
         gap: 54px;
-        grid-template-columns: 220px minmax(0, 656px);
+        grid-template-columns: 220px 1fr;
     }
 
     .settings-nav {
@@ -312,7 +320,7 @@
     }
 
     .settings-panel {
-        max-width: 656px;
+        /*max-width: 656px;*/
     }
 
     .settings-section + .settings-section {

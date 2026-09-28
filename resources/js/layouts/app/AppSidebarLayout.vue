@@ -33,7 +33,8 @@ const pageTitle = computed(
     () =>
         props.title ??
         props.breadcrumbs.at(-1)?.title ??
-        props.breadcrumbs[0]?.title ?? ''
+        props.breadcrumbs[0]?.title ??
+        '',
 );
 
 const sidebarToggleIcon = computed(() => {
@@ -43,7 +44,6 @@ const sidebarToggleIcon = computed(() => {
 
     return rail.value ? 'mdi-dock-right' : 'mdi-dock-left';
 });
-
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
@@ -202,6 +202,7 @@ console.log(isCollapsed.value);
                             </VAvatar>
                             <span class="app-sidebar-user-name">
                                 {{ auth.user.full_name }}
+                                (<span class="text-uppercase">{{ auth.user.role?.name }}</span>)
                             </span>
                             <VIcon
                                 class="app-sidebar-user-chevron"
@@ -214,7 +215,7 @@ console.log(isCollapsed.value);
                     <VCard class="app-sidebar-user-menu" min-width="260">
                         <VList>
                             <VListItem
-                                :title="auth.user.full_name"
+                                :title="auth.user.full_name + '(' + auth.user.role?.name + ')'"
                                 :subtitle="auth.user.email"
                             >
                                 <template #prepend>
