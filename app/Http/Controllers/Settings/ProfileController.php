@@ -7,6 +7,8 @@ use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
 use App\Models\District;
 use App\Models\RibiClub;
+use App\Models\RibiCyeo;
+use App\Models\RibiDyeo;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -48,13 +50,34 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($request->user()->isAdmin()) {
+            $request->user()->fill($request->validated());
+            //if ($request->user()->isDirty('email')) {
+            //    $request->user()->email_verified_at = null;
+            //}
         }
 
-        $request->user()->save();
+        if ($request->user()->isCyeo()) {
+            RibiCyeo::updateOrCreate([
+                'user_id' => $request->user()->id,
+            ], $request->validated());
+            $request->user()->update([
+                'full_name' => $request->validated()['cyeo_name'],
+                'email' => $request->validated()['cyeo_email'],
+                'rotary_club_id' => $request->validated()['ribi_club_id'],
+            ]);
+        }
+
+        if ($request->user()->isDyeo()) {
+            RibiDyeo::updateOrCreate([
+                'user_id' => $request->user()->id,
+            ], $request->validated());
+            $request->user()->update([
+                'full_name' => $request->validated()['dyeo_name'],
+                'email' => $request->validated()['dyeo_email'],
+                'district' => $request->validated()['district_code'],
+            ]);
+        }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
 

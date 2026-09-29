@@ -17,9 +17,15 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = $this->profileRules($this->user()->id);
+        $rules = [];
+
+        if ($this->user()->isAdmin()) {
+            $rules = $this->profileRules($this->user()->id);
+        }
 
         if ($this->user()->isDyeo()) {
+            $rules['dyeo_name'] = ['required', 'string', 'max:255'];
+            $rules['dyeo_email'] = ['required', 'string','email' ,'max:255'];
             $rules['district_code'] = ['required', 'numeric'];
             $rules['dyeo_address'] = ['required', 'string', 'max:255'];
             $rules['dyeo_city'] = ['required', 'string', 'max:100'];
@@ -27,9 +33,12 @@ class ProfileUpdateRequest extends FormRequest
             $rules['dyeo_postcode'] = ['required', 'string', 'max:10'];
             $rules['dyeo_country'] = ['required', 'string', 'max:100'];
             $rules['dyeo_mobile'] = ['required', 'string', 'max:15'];
+
         }
 
         if ($this->user()->isCyeo()) {
+            $rules['cyeo_name'] = ['required', 'string', 'max:255'];
+            $rules['cyeo_email'] = ['required', 'string','email' ,'max:255'];
             $rules['cyeo_address'] = ['required', 'string', 'max:255'];
             $rules['cyeo_city'] = ['required', 'string', 'max:100'];
             $rules['cyeo_state'] = ['required', 'string', 'max:100'];
