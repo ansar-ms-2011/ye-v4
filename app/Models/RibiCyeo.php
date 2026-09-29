@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class RibiCyeo extends Model
 {
     protected $table = 'ribi_cyeo';
+    protected $appends = ['district_id'];
 
     protected $fillable = [
         'id',
@@ -34,5 +35,14 @@ class RibiCyeo extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function getDistrictIdAttribute()
+    {
+        if ($this->relationLoaded('club') && $this->club && $this->club->relationLoaded('district')) {
+            return $this->club->district?->id;
+        }
+
+        return null;
     }
 }

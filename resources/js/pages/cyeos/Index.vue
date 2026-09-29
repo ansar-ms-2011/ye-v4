@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Form, router } from '@inertiajs/vue3';
-import { computed, ref, shallowRef, toRef, watch } from 'vue';
+import { ref, shallowRef, toRef, watch } from 'vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { getNewCyeo } from '@/helpers';
 import { index, store, update, destroy } from '@/routes/cyeos';
@@ -20,7 +20,6 @@ const formModel = ref<Cyeo>(getNewCyeo());
 const dialog = shallowRef(false);
 const searchText = ref(props.filters?.searchText ?? '');
 const isEditing = toRef(() => !!formModel.value.id);
-const selectedDistrict = computed(() => formModel.value.club?.district?.id);
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 const isSearching = ref(false);
 
@@ -162,6 +161,7 @@ function edit(cyeo: Cyeo) {
         cyeo_email: cyeo.cyeo_email ?? '',
         application_no: cyeo.application_no ?? null,
         ribi_club_id: cyeo.ribi_club_id ?? null,
+        district_id: cyeo.club?.district_id ?? null,
         user_id: cyeo.user_id ?? null,
         created_at: cyeo.created_at ?? null,
         updated_at: cyeo.updated_at ?? null,
@@ -493,23 +493,23 @@ function cancelRemove() {
                             </v-col>
                             <v-col cols="12" md="6" class="py-1">
                                 <VAutocomplete
-                                    name="district_code"
+                                    name="district_id"
                                     itemValue="id"
                                     itemTitle="code"
                                     variant="outlined"
                                     density="compact"
-                                    v-model="formModel.club.district.id"
+                                    v-model="formModel.district_id"
                                     :items="districts"
                                     label="District"
                                     hide-details="auto"
-                                    :error-messages="errors.district_code"
+                                    :error-messages="errors.district_id"
                                 ></VAutocomplete>
                             </v-col>
                             <v-col cols="12" md="6" class="py-1">
                                 <VAutocomplete
                                     name="ribi_club_id"
                                     itemValue="id"
-                                    itemTitle="code"
+                                    itemTitle="club_name"
                                     variant="outlined"
                                     density="compact"
                                     v-model="formModel.ribi_club_id"
@@ -542,7 +542,7 @@ function cancelRemove() {
                             color="primary"
                             variant="flat"
                         >
-                            Save User
+                            Save CYEO
                         </v-btn>
                     </v-card-actions>
                 </v-card>

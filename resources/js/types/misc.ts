@@ -23,6 +23,7 @@ export type Cyeo = {
     created_at: string;
     updated_at: string;
     club?: Club | null;
+    district?: District | null;
     [key: string]: unknown;
 };
 

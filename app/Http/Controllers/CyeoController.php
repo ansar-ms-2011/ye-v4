@@ -20,6 +20,9 @@ class CyeoController extends Controller
             $query->where('code', $request->user()->district);
         })->select(['id', 'code'])->get()->toArray();
 
+        $clubs = RibiClub::select(['id', 'club_name', 'district_id'])
+            ->get()->toArray();
+
         $searchText = $request->input('searchText');
 
         $perPage = $request->input('itemsPerPage');
@@ -28,8 +31,8 @@ class CyeoController extends Controller
                 $query->where('district_code', request()->user()->district);
             })
                 ->where('cyeo_name', 'like', "%$searchText%")
-                ->with(['club' => function ($query) {
-                    $query->select(['id', 'club_name', 'district_id'])
+                ->with(['club' => function ($q) {
+                    $q->select('id', 'club_name', 'district_id')
                         ->with('district:id,code');
                 }])
                 ->paginate($perPage ?? 15);
@@ -39,19 +42,18 @@ class CyeoController extends Controller
                     $query->where('club_name', 'like', "%$searchText%");
                     $query->orWhere('district_code', 'like', "%$searchText%");
                 })
-                ->with(['club' => function ($query) {
-                    $query->select(['id', 'club_name', 'district_id'])
+                ->with(['club' => function ($q) {
+                    $q->select('id', 'club_name', 'district_id')
                         ->with('district:id,code');
                 }])
                 ->paginate($perPage ?? 15);
         }
 
-//        return $cyeosPaginator;
-
+        //        return  $cyeosPaginator;
         return Inertia::render('cyeos/Index', [
             'cyeoPaginator' => $cyeosPaginator,
             'districts' => $districts,
-            'clubs' => [],
+            'clubs' => $clubs,
             'filters' => [
                 'searchText' => $searchText ?? '',
             ],
