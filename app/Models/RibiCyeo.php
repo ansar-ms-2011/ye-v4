@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class RibiCyeo extends Model
 {
     protected $table = 'ribi_cyeo';
+
     protected $fillable = [
         'id',
         'cyeo_name',
@@ -23,7 +23,7 @@ class RibiCyeo extends Model
         'cyeo_fax',
         'ribi_club_id',
         'application_no',
-        'user_id'
+        'user_id',
     ];
 
     public function club()

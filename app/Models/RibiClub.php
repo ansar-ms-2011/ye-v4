@@ -4,12 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RibiClub extends Model
 {
-    use HasFactory;
-
-    protected $table='ribi_clubs';
+    protected $table = 'ribi_clubs';
 
     protected $fillable = [
         'id',
@@ -27,5 +26,10 @@ class RibiClub extends Model
     public function cyeo()
     {
         return $this->hasOne(RibiCyeo::class, 'ribi_club_id');
+    }
+
+    public function district(): BelongsTo
+    {
+        return $this->belongsTo(District::class, 'district_id');
     }
 }

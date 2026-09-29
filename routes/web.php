@@ -38,12 +38,14 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('clubs', ClubController::class)->except(['create', 'show', 'edit']);
 
         Route::resource('cyeos', CyeoController::class)->except(['create', 'show', 'edit']);
+
         Route::get('cyeo-json', [CyeoController::class, 'cyeoJson']);
         Route::get('cyeo-json-data', [CyeoController::class, 'cyeoJsonData']);
     });
 
     Route::group(['middleware' => ['role:admin|dyeo']], function () {
         Route::resource('dyeos', DyeoController::class)->except(['create', 'show', 'edit']);
+
         Route::get('dyeo-json', [DyeoController::class, 'dyeoJson']);
         Route::get('dyeo-json-data', [DyeoController::class, 'dyeoJsonData']);
 

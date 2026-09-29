@@ -8,9 +8,11 @@ import RotaryIcon from '@/components/RotaryIcon.vue';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { getInitials } from '@/composables/useInitials';
 import { dashboard, logout } from '@/routes';
+import { index as clubs } from '@/routes/clubs';
+import { index as cyeos } from '@/routes/cyeos';
+import { index as dyeos } from '@/routes/dyeos';
 import { edit as editProfile } from '@/routes/profile';
 import { index as users } from '@/routes/users';
-import { index as clubs } from '@/routes/clubs';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
@@ -63,12 +65,12 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'CYEOs',
-        href: users(),
+        href: cyeos(),
         icon: 'mdi-account-group',
     },
     {
         title: 'DYEOs',
-        href: users(),
+        href: dyeos(),
         icon: 'mdi-account-multiple',
     },
     {

@@ -22,6 +22,8 @@ export type Cyeo = {
     user_id: string | null;
     created_at: string;
     updated_at: string;
+    club?: Club | null;
+    [key: string]: unknown;
 };
 
 export type Dyeo = {
@@ -59,6 +61,10 @@ export type Club = {
     updated_at: string | null;
 };
 
+export type District = {
+    id: number | null;
+    code: string | null;
+}
 
 export interface ClubFormModel {
     id: number | null;
@@ -71,4 +77,5 @@ export interface ClubFormModel {
     club_other_sig: string | null;
     district_code: string | null;
     district_id: string | number | null;
+    [key: string]: unknown;
 }

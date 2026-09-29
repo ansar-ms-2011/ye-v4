@@ -19,7 +19,7 @@ export function getNewCyeo(): Cyeo {
         cyeo_htel: '',
         cyeo_wtel: '',
         cyeo_mobile: '',
-        ribi_club_id: null
+        ribi_club_id: null,
     };
 }
 
