@@ -47,16 +47,15 @@ const headers = [
     },
     {
         title: 'President Name',
-        key: 'club_president_name',
-        align: 'center' as const,
+        key: 'club_president',
+        align: 'start' as const,
     },
     {
         title: 'President Mobile',
         key: 'club_president_mobile',
-        align: 'center' as const,
+        align: 'start' as const,
     },
-    { title: 'Other Name', key: 'club_other_name', align: 'center' as const },
-    { title: 'Active', key: 'active', align: 'center' as const },
+    { title: 'Other Name', key: 'club_other_name', align: 'start' as const },
     {
         title: 'Actions',
         key: 'actions',
@@ -269,7 +268,7 @@ function cancelRemove() {
                             class="me-2"
                             prepend-icon="mdi-plus"
                             rounded="lg"
-                            text="Add New User"
+                            text="Add New Club"
                             variant="outlined"
                             @click="add"
                         ></v-btn>
@@ -392,8 +391,8 @@ function cancelRemove() {
                             <v-col cols="12" md="6" class="py-1">
                                 <VAutocomplete
                                     name="district_id"
-                                    itemValue="value"
-                                    itemText="text"
+                                    itemValue="id"
+                                    itemTitle="code"
                                     variant="outlined"
                                     density="compact"
                                     v-model="formModel.district_id"

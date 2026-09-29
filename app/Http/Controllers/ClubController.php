@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ClubFormRequest;
 use App\Models\District;
 use App\Models\RibiClub;
+use DB;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ClubController extends Controller
 {
     public function index(Request $request)
     {
-        $districts = District::query()
-            ->get(['code as value', 'code as title'])
-            ->toArray();
+        $districts = District::when($request->user()->hasAnyRole(['dyeo']), function ($query) use ($request) {
+            $query->where('code', $request->user()->district);
+        })->select(['id', 'code'])->get()->toArray();
 
         $user = auth()->user();
         $role = $user->roles[0]->name;
@@ -51,27 +53,44 @@ class ClubController extends Controller
     /**
      * @throws Exception
      */
-    public function store(Request $request)
+    public function store(ClubFormRequest $request)
     {
         $data = $request->all();
-        $data['club_id'] = '12345';
-        $dist = District::where('code', $data['district_code'])->first();
-        if ($dist) {
-            $data['district_id'] = $dist->id;
-            $club = RibiClub::create($data);
 
-            return response()->json(['message' => 'Club Added successfully', 'clubs' => $club]);
-        } else {
-            throw new Exception('District Code Selected not found in Database');
+        try {
+            RibiClub::create([
+                'id' => DB::table('ribi_clubs')->max('id') + 1,
+                'district_code' => DB::table('districts')->find($data['district_id'])?->code,
+                ...$data,
+            ]);
+
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'New club created successfully.']);
+
+            return redirect()->back();
+        } catch (Exception $ex) {
+            Log::error($ex->getMessage());
+
+            return redirect()->back()->with('error', 'Something went wrong, please check again');
         }
     }
 
-    public function update($id, Request $request)
+    public function update(RibiClub $club, ClubFormRequest $request)
     {
-        $data = $request->all();
-        $club = RibiClub::findOrfail($id)->update($data);
+        try {
+            $club->update([
+                'district_code' => DB::table('districts')->find($request->district_id)?->code,
+                ...$request->all(),
+            ]);
 
-        return response()->json(['message' => 'Club Updated successfully', 'clubs' => $club]);
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'Club Updated successfully.']);
+
+            return redirect()->back();
+        } catch (Exception $ex) {
+            Log::error($ex->getMessage());
+            Inertia::flash('toast', ['type' => 'error', 'message' => 'An error has been occurred, please check again']);
+
+            return redirect()->back();
+        }
     }
 
     public function destroy($club)
