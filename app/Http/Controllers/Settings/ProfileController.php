@@ -79,7 +79,7 @@ class ProfileController extends Controller
             ]);
         }
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Your profile has been updated successfully.')]);
 
         return to_route('profile.edit');
     }

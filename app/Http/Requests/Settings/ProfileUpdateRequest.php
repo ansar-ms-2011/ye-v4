@@ -25,7 +25,7 @@ class ProfileUpdateRequest extends FormRequest
 
         if ($this->user()->isDyeo()) {
             $rules['dyeo_name'] = ['required', 'string', 'max:255'];
-            $rules['dyeo_email'] = ['required', 'string','email' ,'max:255'];
+            $rules['dyeo_email'] = ['required', 'string', 'email', 'max:255'];
             $rules['district_code'] = ['required', 'numeric'];
             $rules['dyeo_address'] = ['required', 'string', 'max:255'];
             $rules['dyeo_city'] = ['required', 'string', 'max:100'];
@@ -38,7 +38,7 @@ class ProfileUpdateRequest extends FormRequest
 
         if ($this->user()->isCyeo()) {
             $rules['cyeo_name'] = ['required', 'string', 'max:255'];
-            $rules['cyeo_email'] = ['required', 'string','email' ,'max:255'];
+            $rules['cyeo_email'] = ['required', 'string', 'email', 'max:255'];
             $rules['cyeo_address'] = ['required', 'string', 'max:255'];
             $rules['cyeo_city'] = ['required', 'string', 'max:100'];
             $rules['cyeo_state'] = ['required', 'string', 'max:100'];

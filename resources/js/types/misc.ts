@@ -58,3 +58,17 @@ export type Club = {
     created_at: string | null;
     updated_at: string | null;
 };
+
+
+export interface ClubFormModel {
+    id: number | null;
+    club_name: string | null;
+    club_president: string | null;
+    club_president_email: string | null;
+    club_president_mobile: string | null;
+    club_president_sig: string | null;
+    club_other_name: string | null;
+    club_other_sig: string | null;
+    district_code: string | null;
+    district_id: string | number | null;
+}

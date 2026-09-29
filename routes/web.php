@@ -11,7 +11,6 @@ use App\Models\Application;
 use App\Models\Media;
 use Illuminate\Support\Facades\Route;
 
-
 Route::inertia('/', 'Welcome')->name('home');
 
 Route::resource('applicant', ApplicantAuthController::class)->only(['index', 'store']);
@@ -28,7 +27,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::group(['middleware' => ['role:admin']], function () {
         Route::resource('users', UsersController::class)->only(['index', 'store', 'update', 'destroy'])->names('users');
-        Route::get('users-json', [UsersController::class, 'usersJson']);
+
         Route::get('get-users-table-clubs/{district_code?}', [UsersController::class, 'usersTableClubsJson']);
         Route::get('check-email-exists/{email}/{id}', [UsersController::class, 'EmailExists']);
         Route::post('re-establish-dyeo-users', [UsersController::class, 'reEstablishDyeoUsers']);
@@ -37,10 +36,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::group(['middleware' => ['role:admin|dyeo|cyeo']], function () {
         Route::resource('clubs', ClubController::class)->except(['create', 'show', 'edit']);
-        Route::get('clubs-json', [ClubController::class, 'clubsJson']);
-    });
 
-    Route::group(['middleware' => ['role:admin|dyeo|cyeo']], function () {
         Route::resource('cyeos', CyeoController::class)->except(['create', 'show', 'edit']);
         Route::get('cyeo-json', [CyeoController::class, 'cyeoJson']);
         Route::get('cyeo-json-data', [CyeoController::class, 'cyeoJsonData']);

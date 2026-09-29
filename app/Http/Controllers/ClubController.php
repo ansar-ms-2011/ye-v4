@@ -4,13 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\District;
 use App\Models\RibiClub;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class ClubController extends Controller
 {
-    public function clubsJson(Request $request)
+    public function index(Request $request)
     {
+        $districts = District::query()
+            ->get(['code as value', 'code as title'])
+            ->toArray();
+
         $user = auth()->user();
         $role = $user->roles[0]->name;
         $orderBy = $request->get('sortBy');
@@ -20,7 +26,7 @@ class ClubController extends Controller
         $searchText = $request->get('searchText');
 
         $perPage = $request->get('itemsPerPage');
-        //If dyeo is looking clubs then only show club associated with dyeo district
+        // If dyeo is looking for clubs, then only show club associated with dyeo district
         if ($role === 'dyeo') {
             $clubs = RibiClub::where('district_code', '=', $user->district)->where(function ($query) use ($searchText) {
                 $query->orWhere('club_name', 'like', "%$searchText%");
@@ -32,22 +38,18 @@ class ClubController extends Controller
                 $query->orWhere('club_president', 'like', "%$searchText%");
                 $query->orWhere('club_president_email', 'like', "%$searchText%");
                 $query->orWhere('club_president_mobile', 'like', "%$searchText%");
-            })->orderBy($orderBy, $sortDir)->paginate($perPage > 0 ? $perPage : 3000);
+            })->orderBy($orderBy, $sortDir)
+                ->paginate($perPage ?? 15);
         }
 
-        return response()->json($clubs);
-    }
-
-    public function index()
-    {
-        $districts = DB::table('districts')->get('code')->toArray();
-        $districts = array_column($districts, 'code');
-
-        return view('clubs')->with(['districts' => $districts]);
+        return Inertia::render('clubs/Index', [
+            'districts' => $districts,
+            'clubs' => $clubs,
+        ]);
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function store(Request $request)
     {
@@ -57,9 +59,10 @@ class ClubController extends Controller
         if ($dist) {
             $data['district_id'] = $dist->id;
             $club = RibiClub::create($data);
+
             return response()->json(['message' => 'Club Added successfully', 'clubs' => $club]);
         } else {
-            throw new \Exception('District Code Selected not found in Database');
+            throw new Exception('District Code Selected not found in Database');
         }
     }
 
@@ -67,15 +70,14 @@ class ClubController extends Controller
     {
         $data = $request->all();
         $club = RibiClub::findOrfail($id)->update($data);
+
         return response()->json(['message' => 'Club Updated successfully', 'clubs' => $club]);
     }
 
     public function destroy($club)
     {
-        try {
-            $club = RibiClub::findOrfail($club)->delete();
-            return response()->json(['message' => 'Club Deleted successfully']);
-        } catch (\Exception $exception) {
-        }
+        $club = RibiClub::findOrfail($club)->delete();
+
+        return response()->json(['message' => 'Club Deleted successfully']);
     }
 }

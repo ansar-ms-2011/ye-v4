@@ -10,6 +10,7 @@ import { getInitials } from '@/composables/useInitials';
 import { dashboard, logout } from '@/routes';
 import { edit as editProfile } from '@/routes/profile';
 import { index as users } from '@/routes/users';
+import { index as clubs } from '@/routes/clubs';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
@@ -57,7 +58,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Clubs',
-        href: users(),
+        href: clubs(),
         icon: 'mdi-cards-outline',
     },
     {
@@ -197,12 +198,19 @@ console.log(isCollapsed.value);
                                     :alt="auth.user.full_name ?? 'user-name'"
                                 />
                                 <span v-else>
-                                    {{ getInitials(auth.user.full_name as string) }}
+                                    {{
+                                        getInitials(
+                                            auth.user.full_name as string,
+                                        )
+                                    }}
                                 </span>
                             </VAvatar>
                             <span class="app-sidebar-user-name">
                                 {{ auth.user.full_name }}
-                                (<span class="text-uppercase">{{ auth.user.role?.name }}</span>)
+                                (<span class="text-uppercase">{{
+                                    auth.user.role?.name
+                                }}</span
+                                >)
                             </span>
                             <VIcon
                                 class="app-sidebar-user-chevron"
@@ -215,7 +223,12 @@ console.log(isCollapsed.value);
                     <VCard class="app-sidebar-user-menu" min-width="260">
                         <VList>
                             <VListItem
-                                :title="auth.user.full_name + '(' + auth.user.role?.name + ')'"
+                                :title="
+                                    auth.user.full_name +
+                                    '(' +
+                                    auth.user.role?.name +
+                                    ')'
+                                "
                                 :subtitle="auth.user.email"
                             >
                                 <template #prepend>
@@ -227,11 +240,17 @@ console.log(isCollapsed.value);
                                         <VImg
                                             v-if="auth.user.avatar"
                                             :src="auth.user.avatar"
-                                            :alt="auth.user.full_name ?? 'user-name'"
+                                            :alt="
+                                                auth.user.full_name ??
+                                                'user-name'
+                                            "
                                         />
                                         <span v-else>
                                             {{
-                                                getInitials(auth.user.full_name as string)
+                                                getInitials(
+                                                    auth.user
+                                                        .full_name as string,
+                                                )
                                             }}
                                         </span>
                                     </VAvatar>
