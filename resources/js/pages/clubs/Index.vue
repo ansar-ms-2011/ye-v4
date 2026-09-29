@@ -5,6 +5,11 @@ import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { index, store, update, destroy } from '@/routes/clubs';
 import type { Club, ClubFormModel } from '@/types';
 
+const props = defineProps<{
+    clubs: any;
+    districts: any[];
+    filters?: { searchText?: string };
+}>();
 function createNewClub(): ClubFormModel {
     return {
         id: null,
@@ -23,15 +28,14 @@ function createNewClub(): ClubFormModel {
 const page = usePage();
 
 const clubsPage = computed(() => (page.props as any).clubs); // the paginator
-const clubs = computed<Club[]>(() => (page.props as any).clubs?.data ?? []);
-const districts = computed(() => (page.props as any).districts ?? []);
-console.log(districts.value);
+// const clubs = computed<Club[]>(() => (page.props as any).clubs?.data ?? []);
+
 const deleteDialog = ref(false);
 const deleteTarget = ref<any>(null);
 const deleting = ref(false);
 const formModel = ref<ClubFormModel>(createNewClub());
 const dialog = shallowRef(false);
-const searchText = ref('');
+const searchText = ref(props.filters?.searchText ?? '');
 const isEditing = toRef(() => !!formModel.value.id);
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -64,16 +68,6 @@ const headers = [
     },
 ];
 
-// Initialize searchText from URL query params
-if (typeof window !== 'undefined') {
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlSearch = urlParams.get('searchText');
-
-    if (urlSearch) {
-        searchText.value = urlSearch;
-    }
-}
-
 // Debounced search watcher
 watch(searchText, (newValue) => {
     if (debounceTimer) {
@@ -84,6 +78,7 @@ watch(searchText, (newValue) => {
         performSearch(newValue);
     }, 400);
 });
+
 
 function performSearch(search: string) {
     isSearching.value = true;
@@ -97,7 +92,7 @@ function performSearch(search: string) {
         {
             preserveState: true,
             preserveScroll: true,
-            only: ['users'],
+            only: ['clubs'],
             onFinish: () => {
                 isSearching.value = false;
             },
@@ -145,7 +140,7 @@ function clearSearch() {
         {
             preserveState: true,
             preserveScroll: true,
-            only: ['users'],
+            only: ['clubs'],
             onFinish: () => {
                 isSearching.value = false;
             },
@@ -232,7 +227,7 @@ function cancelRemove() {
                 :headers="headers"
                 hover
                 class="elevation-1"
-                :items="clubs"
+                :items="clubs?.data"
                 :items-length="clubsPage.total"
                 :items-per-page="clubsPage.per_page"
                 :page="clubsPage.current_page"
@@ -281,7 +276,7 @@ function cancelRemove() {
                             color="success"
                             icon="mdi-pencil"
                             size="small"
-                            @click="edit(item)"
+                            @click="edit(item as Club)"
                         ></v-icon>
 
                         <v-icon

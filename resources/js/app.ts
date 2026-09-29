@@ -26,7 +26,8 @@ createInertiaApp({
         }
     },
     progress: {
-        color: '#1867c0',
+        // color: '#1867c0',
+        color: '#fff',
     },
     withApp: (app) => {
         app.use(vuetify);

@@ -215,11 +215,12 @@ function cancelRemove() {
 <template>
     <Head title="Users" />
     <div class="app-page">
-        <v-sheet border rounded>
+        <v-sheet border rounded class="overflow-hidden">
             <v-data-table-server
                 density="compact"
                 :headers="headers"
                 hover
+                rounded
                 class="elevation-1"
                 :items="users"
                 :items-length="usersPage.total"

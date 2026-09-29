@@ -246,7 +246,7 @@
     }
 
     .app-frame-body {
-        padding: 20px;
+        padding: 30px;
         max-height: calc(100vh - 80px);
         overflow-y: auto;
     }
