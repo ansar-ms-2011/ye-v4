@@ -157,6 +157,7 @@ console.log(isCollapsed.value);
                     :class="{
                         'app-sidebar-link-active': isCurrentUrl(item.href),
                     }"
+                    view-transition
                 >
                     <VIcon :icon="item.icon" size="20" />
                     <span class="app-sidebar-link-label">
@@ -167,7 +168,7 @@ console.log(isCollapsed.value);
 
             <template #append>
                 <nav class="app-sidebar-footer" aria-label="Resources">
-                    <a
+                    <Link
                         v-for="item in footerNavItems"
                         :key="item.title"
                         :href="toUrl(item.href)"
@@ -179,7 +180,7 @@ console.log(isCollapsed.value);
                         <span class="app-sidebar-link-label">
                             {{ item.title }}
                         </span>
-                    </a>
+                    </Link>
                 </nav>
 
                 <VMenu location="top end">
@@ -307,7 +308,9 @@ console.log(isCollapsed.value);
                 </header>
 
                 <main class="app-frame-body">
-                    <slot />
+                    <div style="view-transition-name: page-content">
+                        <slot />
+                    </div>
                 </main>
             </div>
         </VMain>

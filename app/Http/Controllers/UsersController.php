@@ -45,39 +45,19 @@ class UsersController extends Controller
         // --- Sorting ---
         $allowedSortColumns = ['id', 'full_name', 'email', 'district', 'created_at'];
         $orderBy = $request->input('sortBy.0', 'id');
-        if (! in_array($orderBy, $allowedSortColumns, true)) {
+        if (!in_array($orderBy, $allowedSortColumns, true)) {
             $orderBy = 'id';
         }
 
         $sortDir = $request->input('sortDesc.0') === 'true' ? 'desc' : 'asc';
-
-        // --- Filters ---
         $searchText = $request->input('searchText', '');
-        $perPage = (int) $request->input('perPage', 15);
-
-        // --- Query ---
-        $users = User::query()
-            ->whereNull('application_id')
-            ->when($searchText, function ($query) use ($searchText) {
-                $query->where(function ($q) use ($searchText) {
-                    $q->where('full_name', 'like', "%{$searchText}%")
-                        ->orWhere('email', 'like', "%{$searchText}%")
-                        ->orWhere('district', 'like', "%{$searchText}%");
-                });
-            })
-            ->whereHas('roles', function ($q) {
-                $q->where('name', '!=', 'applicant');
-            })
-            ->with(['club:id,club_name', 'roles:id,name'])
-            ->orderBy($orderBy, $sortDir)
-            ->paginate($perPage)
-            ->withQueryString();
+        $perPage = (int)$request->input('perPage', 15);
 
         return Inertia::render('users/Index', [
-            'users' => $users,
-            'districts' => $districts,
-            'clubs' => $clubs,
-            'roles' => $roles,
+            'users' => Inertia::defer(fn() => $this->prepareDeferredData($request)),
+            'districts' => Inertia::once(fn() => $districts),
+            'clubs' => Inertia::once(fn() => $clubs),
+            'roles' => Inertia::once(fn() => $roles),
             'perPage' => $perPage,
             'searchText' => $searchText,
             'sortBy' => $orderBy,
@@ -246,5 +226,41 @@ class UsersController extends Controller
         }
 
         return response()->json(['message' => 'Users re-established for all CYEO accounts with default password 1...8']);
+    }
+
+    private function prepareDeferredData($request)
+    {
+        // --- Sorting ---
+        $allowedSortColumns = ['id', 'full_name', 'email', 'district', 'created_at'];
+        $orderBy = $request->input('sortBy.0', 'id');
+        if (!in_array($orderBy, $allowedSortColumns, true)) {
+            $orderBy = 'id';
+        }
+
+        $sortDir = $request->input('sortDesc.0') === 'true' ? 'desc' : 'asc';
+
+        // --- Filters ---
+        $searchText = $request->input('searchText', '');
+        $perPage = (int)$request->input('perPage', 15);
+
+        // --- Query ---
+        $users = User::query()
+            ->whereNull('application_id')
+            ->when($searchText, function ($query) use ($searchText) {
+                $query->where(function ($q) use ($searchText) {
+                    $q->where('full_name', 'like', "%{$searchText}%")
+                        ->orWhere('email', 'like', "%{$searchText}%")
+                        ->orWhere('district', 'like', "%{$searchText}%");
+                });
+            })
+            ->whereHas('roles', function ($q) {
+                $q->where('name', '!=', 'applicant');
+            })
+            ->with(['club:id,club_name', 'roles:id,name'])
+            ->orderBy($orderBy, $sortDir)
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return $users;
     }
 }

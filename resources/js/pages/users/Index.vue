@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { usePage, Head, Form, router } from '@inertiajs/vue3';
+import { usePage, Head, Form, router, Deferred } from '@inertiajs/vue3';
 import { ref, shallowRef, toRef, computed, watch } from 'vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { index, store, update, destroy } from '@/routes/users';
@@ -216,98 +216,106 @@ function cancelRemove() {
     <Head title="Users" />
     <div class="app-page">
         <v-sheet border rounded class="overflow-hidden">
-            <v-data-table-server
-                density="compact"
-                :headers="headers"
-                hover
-                rounded
-                class="elevation-1"
-                :items="users"
-                :items-length="usersPage.total"
-                :items-per-page="usersPage.per_page"
-                :page="usersPage.current_page"
-                :loading="isSearching"
-                :items-per-page-options="[15, 35, 65, 100]"
-                @update:page="onPageChange"
-                @update:items-per-page="onPerPageChange"
-            >
-                <template v-slot:top>
-                    <v-toolbar flat>
-                        <v-toolbar-title>
+            <Deferred data="users">
+                <template #fallback>
+                    <div class="d-flex align-center justify-center" style="min-height: 500px">
+                        <span>Loading users' data...</span>
+                    </div>
+                </template>
+
+                <v-data-table-server
+                    density="compact"
+                    :headers="headers"
+                    hover
+                    rounded
+                    class="elevation-1"
+                    :items="users"
+                    :items-length="usersPage.total"
+                    :items-per-page="usersPage.per_page"
+                    :page="usersPage.current_page"
+                    :loading="isSearching"
+                    :items-per-page-options="[15, 35, 65, 100]"
+                    @update:page="onPageChange"
+                    @update:items-per-page="onPerPageChange"
+                >
+                    <template v-slot:top>
+                        <v-toolbar flat>
+                            <v-toolbar-title>
+                                <v-icon
+                                    color="medium-emphasis"
+                                    icon="mdi-account-multiple"
+                                    size="x-small"
+                                    start
+                                ></v-icon>
+
+                                Users
+                            </v-toolbar-title>
+
+                            <VSpacer></VSpacer>
+                            <VTextField
+                                v-model="searchText"
+                                prepend-inner-icon="mdi-magnify"
+                                rounded="lg"
+                                placeholder="Search"
+                                class="me-2"
+                                density="compact"
+                            ></VTextField>
+
+                            <v-btn
+                                color="primary"
+                                class="me-2"
+                                prepend-icon="mdi-plus"
+                                rounded="lg"
+                                text="Add New User"
+                                variant="outlined"
+                                @click="add"
+                            ></v-btn>
+                        </v-toolbar>
+                    </template>
+
+                    <template v-slot:[`item.role_id`]="{ item }">
+                        {{ item.roles?.[0]?.name }}
+                    </template>
+
+                    <template v-slot:[`item.club`]="{ item }">
+                        {{ item.club?.club_name }}
+                    </template>
+
+                    <template v-slot:[`item.active`]="{ item }">
+                        {{ item.active ? 'Yes' : 'No' }}
+                    </template>
+
+                    <template v-slot:[`item.actions`]="{ item }">
+                        <div class="d-flex ga-2 justify-end">
                             <v-icon
-                                color="medium-emphasis"
-                                icon="mdi-account-multiple"
-                                size="x-small"
-                                start
+                                color="success"
+                                icon="mdi-pencil"
+                                size="small"
+                                @click="edit(item)"
                             ></v-icon>
 
-                            Users
-                        </v-toolbar-title>
+                            <v-icon
+                                color="red"
+                                icon="mdi-delete"
+                                size="small"
+                                @click="confirmRemove(item as User)"
+                            ></v-icon>
+                        </div>
+                    </template>
 
-                        <VSpacer></VSpacer>
-                        <VTextField
-                            v-model="searchText"
-                            prepend-inner-icon="mdi-magnify"
-                            rounded="lg"
-                            placeholder="Search"
-                            class="me-2"
-                            density="compact"
-                        ></VTextField>
-
-                        <v-btn
-                            color="primary"
-                            class="me-2"
-                            prepend-icon="mdi-plus"
-                            rounded="lg"
-                            text="Add New User"
-                            variant="outlined"
-                            @click="add"
-                        ></v-btn>
-                    </v-toolbar>
-                </template>
-
-                <template v-slot:[`item.role_id`]="{ item }">
-                    {{ item.roles?.[0]?.name }}
-                </template>
-
-                <template v-slot:[`item.club`]="{ item }">
-                    {{ item.club?.club_name }}
-                </template>
-
-                <template v-slot:[`item.active`]="{ item }">
-                    {{ item.active ? 'Yes' : 'No' }}
-                </template>
-
-                <template v-slot:[`item.actions`]="{ item }">
-                    <div class="d-flex ga-2 justify-end">
-                        <v-icon
-                            color="success"
-                            icon="mdi-pencil"
-                            size="small"
-                            @click="edit(item)"
-                        ></v-icon>
-
-                        <v-icon
-                            color="red"
-                            icon="mdi-delete"
-                            size="small"
-                            @click="confirmRemove(item as User)"
-                        ></v-icon>
-                    </div>
-                </template>
-
-                <template v-slot:no-data>
-                    <div class="d-flex justify-center pa-4">
-                        <v-btn
-                            prepend-icon="mdi-backup-restore"
-                            rounded="lg"
-                            text="Reset filters"
-                            variant="text"
-                            @click="clearSearch"
-                        ></v-btn>
-                    </div>
-                </template>
-            </v-data-table-server>
+                    <template v-slot:no-data>
+                        <div class="d-flex justify-center pa-4">
+                            <v-btn
+                                prepend-icon="mdi-backup-restore"
+                                rounded="lg"
+                                text="Reset filters"
+                                variant="text"
+                                @click="clearSearch"
+                            ></v-btn>
+                        </div>
+                    </template>
+                </v-data-table-server>
+            </Deferred>
         </v-sheet>
 
         <v-dialog v-model="dialog" max-width="700">
