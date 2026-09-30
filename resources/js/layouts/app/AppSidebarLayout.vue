@@ -13,6 +13,7 @@ import { index as cyeos } from '@/routes/cyeos';
 import { index as dyeos } from '@/routes/dyeos';
 import { edit as editProfile } from '@/routes/profile';
 import { index as users } from '@/routes/users';
+import { index as applications } from '@/routes/applications';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
@@ -75,7 +76,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Applications',
-        href: users(),
+        href: applications(),
         icon: 'mdi-folder-open',
     },
 ];

@@ -46,8 +46,8 @@ Route::middleware(['auth'])->group(function () {
     Route::group(['middleware' => ['role:admin|dyeo']], function () {
         Route::resource('dyeos', DyeoController::class)->except(['create', 'show', 'edit']);
 
-        Route::get('dyeo-json', [DyeoController::class, 'dyeoJson']);
-        Route::get('dyeo-json-data', [DyeoController::class, 'dyeoJsonData']);
+//        Route::get('dyeo-json', [DyeoController::class, 'dyeoJson']);
+//        Route::get('dyeo-json-data', [DyeoController::class, 'dyeoJsonData']);
 
         Route::get('email-guide/{application}', [EmailGuideController::class, 'GetEmailGuide']);
         Route::post('send-email-guide/{application}', [EmailGuideController::class, 'SendEmailGuidePart1']);
