@@ -42,26 +42,16 @@ class UsersController extends Controller
             ->get(['id as value', 'name as title'])
             ->toArray();
 
-        // --- Sorting ---
-        $allowedSortColumns = ['id', 'full_name', 'email', 'district', 'created_at'];
-        $orderBy = $request->input('sortBy.0', 'id');
-        if (!in_array($orderBy, $allowedSortColumns, true)) {
-            $orderBy = 'id';
-        }
-
-        $sortDir = $request->input('sortDesc.0') === 'true' ? 'desc' : 'asc';
         $searchText = $request->input('searchText', '');
-        $perPage = (int)$request->input('perPage', 15);
+        $perPage = (int) $request->input('perPage', 15);
 
         return Inertia::render('users/Index', [
-            'users' => Inertia::defer(fn() => $this->prepareDeferredData($request)),
-            'districts' => Inertia::once(fn() => $districts),
-            'clubs' => Inertia::once(fn() => $clubs),
-            'roles' => Inertia::once(fn() => $roles),
+            'users' => Inertia::defer(fn () => $this->prepareDeferredData($request)),
+            'districts' => Inertia::once(fn () => $districts),
+            'clubs' => Inertia::once(fn () => $clubs),
+            'roles' => Inertia::once(fn () => $roles),
             'perPage' => $perPage,
             'searchText' => $searchText,
-            'sortBy' => $orderBy,
-            'sortDesc' => $sortDir === 'desc',
         ]);
     }
 
@@ -233,7 +223,7 @@ class UsersController extends Controller
         // --- Sorting ---
         $allowedSortColumns = ['id', 'full_name', 'email', 'district', 'created_at'];
         $orderBy = $request->input('sortBy.0', 'id');
-        if (!in_array($orderBy, $allowedSortColumns, true)) {
+        if (! in_array($orderBy, $allowedSortColumns, true)) {
             $orderBy = 'id';
         }
 
@@ -241,7 +231,7 @@ class UsersController extends Controller
 
         // --- Filters ---
         $searchText = $request->input('searchText', '');
-        $perPage = (int)$request->input('perPage', 15);
+        $perPage = (int) $request->input('perPage', 15);
 
         // --- Query ---
         $users = User::query()

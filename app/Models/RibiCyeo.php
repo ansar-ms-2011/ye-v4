@@ -20,11 +20,14 @@ class RibiCyeo extends Model
         'cyeo_postcode',
         'cyeo_country',
         'cyeo_htel',
+        'cyeo_wtel',
         'cyeo_mobile',
         'cyeo_fax',
         'ribi_club_id',
         'application_no',
         'user_id',
+        'full_name',
+        'email',
     ];
 
     public function club()

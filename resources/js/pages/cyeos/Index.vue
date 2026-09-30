@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Form, router } from '@inertiajs/vue3';
+import { Head, Form, router, Deferred } from '@inertiajs/vue3';
 import { ref, shallowRef, toRef, watch } from 'vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
 import { getNewCyeo } from '@/helpers';
@@ -24,6 +24,12 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 const isSearching = ref(false);
 
 const headers = [
+    {
+        title: 'Actions',
+        key: 'actions',
+        align: 'center' as const,
+        sortable: false,
+    },
     {
         title: 'District',
         key: 'district',
@@ -95,12 +101,6 @@ const headers = [
         key: 'cyeo_mobile',
         align: 'start' as const,
         nowrap: true,
-    },
-    {
-        title: 'Actions',
-        key: 'actions',
-        align: 'center' as const,
-        sortable: false,
     },
 ];
 
@@ -270,93 +270,122 @@ function cancelRemove() {
     <Head title="Club Youth Exchange Officers" />
     <div class="app-page">
         <v-sheet border rounded>
-            <v-data-table-server
-                density="compact"
-                :headers="headers"
-                hover
-                class="elevation-1"
-                :items="cyeoPaginator?.data"
-                :items-length="cyeoPaginator.total"
-                :items-per-page="cyeoPaginator.per_page"
-                :items-per-page-options="[15, 35, 65, 100]"
-                :page="cyeoPaginator.current_page"
-                :loading="isSearching"
-                @update:page="onPageChange"
-                @update:items-per-page="onPerPageChange"
-                @dblclick:row="onRowClick"
-            >
-                <template v-slot:top>
-                    <v-toolbar flat>
-                        <v-toolbar-title>
-                            <v-icon
-                                color="medium-emphasis"
-                                icon="mdi-account-multiple"
-                                size="x-small"
-                                start
-                            ></v-icon>
-                            CYEOs
-                        </v-toolbar-title>
-
-                        <VSpacer></VSpacer>
-                        <VTextField
-                            v-model="searchText"
-                            prepend-inner-icon="mdi-magnify"
-                            rounded="lg"
-                            placeholder="Search the Club Youth Exchange Officers"
-                            class="me-2"
-                            density="compact"
-                        ></VTextField>
-
-                        <v-btn
-                            color="primary"
-                            class="me-2"
-                            prepend-icon="mdi-plus"
-                            rounded="lg"
-                            text="Add New CYEO"
-                            variant="outlined"
-                            @click="add"
-                        ></v-btn>
-                    </v-toolbar>
-                </template>
-
-                <template v-slot:[`item.district`]="{ item }">
-                    {{ item.club?.district?.code }}
-                </template>
-
-                <template v-slot:[`item.club_name`]="{ item }">
-                    {{ item.club?.club_name }}
-                </template>
-
-                <template v-slot:[`item.actions`]="{ item }">
-                    <div class="d-flex ga-2 justify-end">
-                        <v-icon
-                            color="success"
-                            icon="mdi-pencil"
-                            size="small"
-                            @click.stop="edit(item as Cyeo)"
-                        ></v-icon>
-
-                        <v-icon
-                            color="red"
-                            icon="mdi-delete"
-                            size="small"
-                            @click.stop="confirmRemove(item as Cyeo)"
-                        ></v-icon>
+            <Deferred data="cyeoPaginator">
+                <template #fallback>
+                    <div
+                        class="d-flex align-center justify-center"
+                        style="min-height: 500px"
+                    >
+                        <span>Loading youth exchange officers' data...</span>
                     </div>
                 </template>
-
-                <template v-slot:no-data>
-                    <div class="d-flex justify-center pa-4">
-                        <v-btn
-                            prepend-icon="mdi-backup-restore"
-                            rounded="lg"
-                            text="Reset filters"
-                            variant="text"
-                            @click="clearSearch"
-                        ></v-btn>
+                <template #rescue>
+                    <div
+                        class="d-flex align-center justify-center"
+                        style="min-height: 500px"
+                    >
+                        <span class="text-red"
+                            >An error has been while fetching data.</span
+                        >
                     </div>
                 </template>
-            </v-data-table-server>
+                <template #default="{ reloading }">
+                    <v-data-table-server
+                        density="compact"
+                        :headers="headers"
+                        hover
+                        class="elevation-1"
+                        :items="cyeoPaginator?.data"
+                        :items-length="cyeoPaginator.total"
+                        :items-per-page="cyeoPaginator.per_page"
+                        :items-per-page-options="[15, 35, 65, 100]"
+                        :page="cyeoPaginator.current_page"
+                        :loading="isSearching"
+                        @update:page="onPageChange"
+                        @update:items-per-page="onPerPageChange"
+                        @dblclick:row="onRowClick"
+                    >
+                        <template v-slot:top>
+                            <v-toolbar flat>
+                                <v-toolbar-title>
+                                    <v-icon
+                                        color="medium-emphasis"
+                                        icon="mdi-account-multiple"
+                                        size="x-small"
+                                        start
+                                    ></v-icon>
+                                    CYEOs
+                                </v-toolbar-title>
+
+                                <VSpacer></VSpacer>
+                                <VTextField
+                                    v-model="searchText"
+                                    prepend-inner-icon="mdi-magnify"
+                                    rounded="lg"
+                                    placeholder="Search the Club Youth Exchange Officers"
+                                    class="me-2"
+                                    density="compact"
+                                ></VTextField>
+
+                                <v-btn
+                                    color="primary"
+                                    class="me-2"
+                                    prepend-icon="mdi-plus"
+                                    rounded="lg"
+                                    text="Add New CYEO"
+                                    variant="outlined"
+                                    @click="add"
+                                ></v-btn>
+                            </v-toolbar>
+                        </template>
+
+                        <template v-slot:[`item.actions`]="{ item }">
+                            <div class="d-flex ga-2 justify-end">
+                                <v-icon
+                                    color="success"
+                                    icon="mdi-square-edit-outline"
+                                    size="small"
+                                    @click.stop="edit(item as Cyeo)"
+                                ></v-icon>
+
+                                <v-icon
+                                    color="red"
+                                    icon="mdi-delete"
+                                    size="small"
+                                    @click.stop="confirmRemove(item as Cyeo)"
+                                ></v-icon>
+                            </div>
+                        </template>
+
+                        <template
+                            v-slot:[`item.district`]="{ item }: { item: any }"
+                        >
+                            {{ item.club?.district?.code }}
+                        </template>
+
+                        <template
+                            v-slot:[`item.club_name`]="{ item }: { item: any }"
+                        >
+                            {{ item.club?.club_name }}
+                        </template>
+
+                        <template v-slot:no-data>
+                            <div class="d-flex justify-center pa-4">
+                                <span v-if="reloading"
+                                    >Deferred data is being loaded ...</span
+                                >
+                                <v-btn
+                                    v-else
+                                    prepend-icon="mdi-backup-restore"
+                                    rounded="lg"
+                                    text="Reset filters"
+                                    variant="text"
+                                    @click="clearSearch"
+                                ></v-btn>
+                            </div>
+                        </template> </v-data-table-server
+                ></template>
+            </Deferred>
         </v-sheet>
 
         <v-dialog v-model="dialog" max-width="800">
@@ -366,8 +395,10 @@ function cancelRemove() {
                 @success="onFormSuccess"
             >
                 <v-card
+                    border
+                    elevation="2"
                     :title="`${isEditing ? 'Update' : 'Create'}`"
-                    :subtitle="`${isEditing ? 'Edit the existing' : 'Add a new'} CYEO `"
+                    :subtitle="`${isEditing ? 'Edit the existing' : 'Add a new'} club youth exchange officer `"
                 >
                     <template v-slot:append>
                         <v-btn
