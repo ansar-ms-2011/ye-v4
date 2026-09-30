@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CyeoStoreFormRequest;
-use App\Models\District;
 use App\Models\RibiClub;
 use App\Models\RibiCyeo;
 use App\Models\User;
@@ -19,20 +18,12 @@ class CyeoController extends Controller
 {
     public function index(Request $request)
     {
-        $districts = District::when($request->user()
-            ->hasAnyRole(['dyeo']), function ($query) use ($request) {
-            $query->where('code', $request->user()->district);
-        })->select(['id', 'code'])->get()->toArray();
-
-        $clubs = RibiClub::select(['id', 'club_name', 'district_id'])
-            ->get()->toArray();
-
         $searchText = $request->input('searchText');
 
         return Inertia::render('cyeos/Index', [
-            'cyeoPaginator' => Inertia::defer(fn() => $this->prepareDeferredData($request), rescue: true),
-            'districts' => Inertia::once(fn() => $districts),
-            'clubs' => Inertia::once(fn() => $clubs),
+            'cyeoPaginator' => Inertia::defer(fn () => $this->prepareDeferredData($request), rescue: true),
+            'districts' => Inertia::once(fn () => getOnceDistricts($request)),
+            'clubs' => Inertia::once(fn () => getOnceClubs($request)),
             'filters' => [
                 'searchText' => $searchText ?? '',
             ],
@@ -54,6 +45,7 @@ class CyeoController extends Controller
     public function store(CyeoStoreFormRequest $request)
     {
         try {
+            DB::beginTransaction();
             $cyeo = RibiCyeo::create($request->all());
 
             $user = User::create([
@@ -66,12 +58,14 @@ class CyeoController extends Controller
             $user->assignRole('cyeo');
             $cyeo->update(['user_id' => $user->id]);
 
+            DB::commit();
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Club youth exchange officer created successfully.']);
 
             return redirect()->back();
         } catch (Exception $e) {
-            Log::error('Error creating user account: ' . $e->getMessage());
-            Inertia::flash('toast', ['type' => 'error', 'message' => 'An error occurred while creating the club youth exchange officer.']);
+            DB::rollBack();
+            Log::error('Error creating user account: '.$e->getMessage());
+            Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
 
             return redirect()->back();
         }
@@ -80,19 +74,22 @@ class CyeoController extends Controller
     public function update(RibiCyeo $cyeo, Request $request)
     {
         try {
+            DB::beginTransaction();
             $data = $request->all();
             $cyeo->update($data);
             $cyeo->user()?->update([
                 'full_name' => $request->cyeo_name,
                 'email' => $request->cyeo_email,
             ]);
+            DB::commit();
 
             Inertia::flash('toast', ['type' => 'success', 'message' => 'CYEO updated successfully.']);
 
             return redirect()->back();
-        } catch (Exception $exception) {
-            Log::error('Error updating CYEO: ' . $exception->getMessage());
-            Inertia::flash('toast', ['type' => 'error', 'message' => 'An error occurred while updating the CYEO.']);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating CYEO: '.$e->getMessage());
+            Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
 
             return redirect()->back();
         }
@@ -101,15 +98,18 @@ class CyeoController extends Controller
     public function destroy(RibiCyeo $cyeo)
     {
         try {
+            DB::beginTransaction();
             $cyeo->user()?->delete();
             $cyeo->delete();
 
+            DB::commit();
             Inertia::flash('toast', ['type' => 'success', 'message' => 'CYEO removed successfully.']);
 
             return redirect()->back();
-        } catch (Exception $exception) {
-            Log::error('Error deleting club youth exchange officer: ' . $exception->getMessage());
-            Inertia::flash('toast', ['type' => 'error', 'message' => 'An error occurred while deleting the club youth exchange officer.']);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Error deleting club youth exchange officer: '.$e->getMessage());
+            Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
 
             return redirect()->back();
         }

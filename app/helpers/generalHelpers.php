@@ -1,24 +1,27 @@
 <?php
 
-use App\Mail\SendEmailGuidePart1;
 use App\Mail\SendEmailGuideConfirm;
+use App\Mail\SendEmailGuidePart1;
 use App\Mail\SendEmailGuidePart2;
 use App\Models\Application;
+use App\Models\District;
+use App\Models\RibiClub;
 use App\Models\RibiCyeo;
 use App\Models\RibiDyeo;
 use App\Models\SentEmail;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use setasign\Fpdi\Fpdi;
 
 function createDirectory($path, $clear = true): void
 {
-    if (!file_exists($path)) {
+    if (! file_exists($path)) {
         mkdir($path, 0777, true);
     }
     // Clear all files when clear flag is true
     if ($clear) {
-        $files = glob($path . '/*'); // get all file names
+        $files = glob($path.'/*'); // get all file names
         foreach ($files as $file) { // iterate files
             if (is_file($file)) {
                 unlink($file); // delete file
@@ -32,12 +35,12 @@ function SaveApplicationMediaFiles(Application $application)
     $application->load('media_library');
     $media_library = $application->media_library;
     if ($media_library) {
-        //if not already exists, create folder to store images with helper function.
-        $path = storage_path('app/media-library/' . $application->id);
+        // if not already exists, create folder to store images with helper function.
+        $path = storage_path('app/media-library/'.$application->id);
         createDirectory($path);
         foreach ($media_library as $media) {
             $image = Image::make($media->media);
-            $image->save(storage_path('app/media-library/' . $application->id . '/' . $media->media_category_label . '.png'));
+            $image->save(storage_path('app/media-library/'.$application->id.'/'.$media->media_category_label.'.png'));
         }
     }
 }
@@ -50,14 +53,14 @@ function checkApplicationAccess($application, $user)
 
     if ($user->hasRole('dyeo')) {
         $dyeo = RibiDyeo::where('user_id', $user->id)->first();
-        if (!$dyeo || $dyeo->id !== $application->dyeo_id) {
+        if (! $dyeo || $dyeo->id !== $application->dyeo_id) {
             abort(403, 'Un-Authorized Access by District YEO');
         }
     }
     if ($user->hasRole('cyeo')) {
         $cyeo = RibiCyeo::where('user_id', $user->id)->first();
         Log::info('cyeo: ', [$cyeo, $application->rotary_club_id]);
-        if (!$cyeo || !$application->rotary_club_id || $cyeo->ribi_club_id !== $application->rotary_club_id) {
+        if (! $cyeo || ! $application->rotary_club_id || $cyeo->ribi_club_id !== $application->rotary_club_id) {
             abort(403, 'Un-Authorized Access by Club YEO');
         }
     }
@@ -87,11 +90,11 @@ function getAppClass($app_date): string
 
 function generateGuideFileCamps($application): string
 {
-    $pdf = new FPDI();
-    $iconv_name = iconv('UTF-8', "ISO-8859-1", $application->guide_name);
+    $pdf = new Fpdi;
+    $iconv_name = iconv('UTF-8', 'ISO-8859-1', $application->guide_name);
     $templateGuide = storage_path('app/pdf-templates/guide_camps_part_1v2.pdf');    // Updated on 02-Nov-2024
     $pageCount = $pdf->setSourceFile($templateGuide);
-    $fileName = $application->application_no . "-guide-part-1.pdf";
+    $fileName = $application->application_no.'-guide-part-1.pdf';
 
     $pdf->SetFont('Arial', 'B', 25);
 
@@ -122,27 +125,28 @@ function generateGuideFileCamps($application): string
         $tplIdx = $pdf->importPage($i);
         $pdf->addPage();
         $pdf->useTemplate($tplIdx, 0, 0);
-        //Applicant Name
+        // Applicant Name
         $pdf->SetXY(140, 14);
         $pdf->Write(0, $iconv_name);
-        //District Number
+        // District Number
         if ($application->dyeo != null) {
             $pdf->SetXY(140, 21);
             $pdf->Write(0, $application->dyeo->district_code);
         }
     }
 
-    $pdf->Output('F', storage_path('app/' . $fileName));
+    $pdf->Output('F', storage_path('app/'.$fileName));
+
     return $fileName;
 }
 
 function generateGuideFileStep($application): string
 {
-    $pdf = new FPDI();
-    $iconv_name = iconv('UTF-8', "ISO-8859-1", $application->guide_name);
+    $pdf = new Fpdi;
+    $iconv_name = iconv('UTF-8', 'ISO-8859-1', $application->guide_name);
     $templateGuide = storage_path('app/pdf-templates/guide_step_part_1v2.pdf');    // Updated on 02-Nov-2024
     $pageCount = $pdf->setSourceFile($templateGuide);
-    $fileName = $application->application_no . "-guide-part-1.pdf";
+    $fileName = $application->application_no.'-guide-part-1.pdf';
 
     $pdf->SetFont('Arial', 'B', 25);
 
@@ -152,13 +156,13 @@ function generateGuideFileStep($application): string
 
     $pdf->SetXY(64, 153);
     $pdf->MultiCell(82, 10, $iconv_name, 0, 'C');
-    //District Number
+    // District Number
     if ($application->dyeo != null) {
         $pdf->SetFont('Arial', 'B', 18);
         $pdf->SetXY(110, 176);
         $pdf->Write(0, $application->dyeo->district_code);
     }
-    //Application Number
+    // Application Number
     $pdf->SetXY(120, 190);
     $pdf->Write(0, $application->application_no);
     // Import pages from 2-6 as is, no personalization is required
@@ -173,27 +177,28 @@ function generateGuideFileStep($application): string
         $tplIdx = $pdf->importPage($i);
         $pdf->addPage();
         $pdf->useTemplate($tplIdx, 0, 0);
-        //Applicant Name
+        // Applicant Name
         $pdf->SetXY(140, 14);
         $pdf->Write(0, $iconv_name);
-        //District Number
+        // District Number
         if ($application->dyeo != null) {
             $pdf->SetXY(140, 21);
             $pdf->Write(0, $application->dyeo->district_code);
         }
     }
 
-    $pdf->Output('F', storage_path('app/' . $fileName));
+    $pdf->Output('F', storage_path('app/'.$fileName));
+
     return $fileName;
 }
 
 function generateGuidePart2FileCamps(Application $application): string
 {
-    $pdf = new FPDI();
-    $iconv_name = iconv('UTF-8', "ISO-8859-1", $application->guide_name);
+    $pdf = new Fpdi;
+    $iconv_name = iconv('UTF-8', 'ISO-8859-1', $application->guide_name);
     $templateGuide = storage_path('app/pdf-templates/guide_camps_part_2.pdf');
     $pageCount = $pdf->setSourceFile($templateGuide);
-    $fileName = $application->application_no . "-guide-part-2.pdf";
+    $fileName = $application->application_no.'-guide-part-2.pdf';
 
     $pdf->SetFont('Arial', 'B', 25);
 
@@ -225,27 +230,28 @@ function generateGuidePart2FileCamps(Application $application): string
         $tplIdx = $pdf->importPage($i);
         $pdf->addPage();
         $pdf->useTemplate($tplIdx, 0, 0);
-        //Applicant Name
+        // Applicant Name
         $pdf->SetXY(140, 14);
         $pdf->Write(0, $iconv_name);
-        //District Number
+        // District Number
         if ($application->dyeo != null) {
             $pdf->SetXY(140, 21);
             $pdf->Write(0, $application->dyeo->district_code);
         }
     }
 
-    $pdf->Output('F', storage_path('app/' . $fileName));
+    $pdf->Output('F', storage_path('app/'.$fileName));
+
     return $fileName;
 }
 
 function generateGuidePart2FileStep(Application $application): string
 {
-    $pdf = new FPDI();
-    $iconv_name = iconv('UTF-8', "ISO-8859-1", $application->guide_name);
+    $pdf = new Fpdi;
+    $iconv_name = iconv('UTF-8', 'ISO-8859-1', $application->guide_name);
     $templateGuide = storage_path('app/pdf-templates/guide_step_part_2.pdf');
     $pageCount = $pdf->setSourceFile($templateGuide);
-    $fileName = $application->application_no . "-guide-part-2.pdf";
+    $fileName = $application->application_no.'-guide-part-2.pdf';
 
     $pdf->SetFont('Arial', 'B', 25);
 
@@ -277,28 +283,29 @@ function generateGuidePart2FileStep(Application $application): string
         $tplIdx = $pdf->importPage($i);
         $pdf->addPage();
         $pdf->useTemplate($tplIdx, 0, 0);
-        //Applicant Name
+        // Applicant Name
         $pdf->SetXY(140, 14);
         $pdf->Write(0, $iconv_name);
-        //District Number
+        // District Number
         if ($application->dyeo != null) {
             $pdf->SetXY(140, 21);
             $pdf->Write(0, $application->dyeo->district_code);
         }
     }
 
-    $pdf->Output('F', storage_path('app/' . $fileName));
+    $pdf->Output('F', storage_path('app/'.$fileName));
+
     return $fileName;
 }
 
 function sendGuidePart1ThroughEmail($application)
 {
     if ($application->exchange_type === 'CAMPS & TOURS') {
-        $type = "CAMPS";
+        $type = 'CAMPS';
         generateGuideFileCamps($application);
         Mail::send(new SendEmailGuidePart1($application, $type));
     } else {
-        $type = "STEP";
+        $type = 'STEP';
         generateGuideFileStep($application);
         Mail::send(new SendEmailGuidePart1($application, $type));
     }
@@ -312,8 +319,8 @@ function sendGuidePart1ThroughEmail($application)
     SentEmail::create([
         'email_type_id' => $type === 'CAMPS' ? 1 : 2,
         'application_id' => $application->id,
-        'message_title' => 'Guide (Part 1) to International CAMPS - ' . $application->full_name,
-        'email_address' => $application->email_address
+        'message_title' => 'Guide (Part 1) to International CAMPS - '.$application->full_name,
+        'email_address' => $application->email_address,
     ]);
 
     return SentEmail::where('application_id', $application->id)->with('email_type')->get();
@@ -322,11 +329,11 @@ function sendGuidePart1ThroughEmail($application)
 function sendGuidePart2ThroughEmail($application)
 {
     if ($application->exchange_type === 'CAMPS & TOURS') {
-        $type = "CAMPS";
+        $type = 'CAMPS';
         generateGuidePart2FileCamps($application);
         Mail::send(new SendEmailGuidePart2($application, $type));
     } else {
-        $type = "STEP";
+        $type = 'STEP';
         generateGuidePart2FileStep($application);
         Mail::send(new SendEmailGuidePart2($application, $type));
     }
@@ -338,35 +345,36 @@ function sendGuidePart2ThroughEmail($application)
 
     // Create entry in Database table for Sent Email
     SentEmail::create([
-        'email_type_id' => $type === "CAMPS" ? 1 : 2,
+        'email_type_id' => $type === 'CAMPS' ? 1 : 2,
         'application_id' => $application->id,
-        'message_title' => 'Guide (Part 2) to International ' . $type . ' - ' . $application->full_name,
-        'email_address' => $application->email_address
+        'message_title' => 'Guide (Part 2) to International '.$type.' - '.$application->full_name,
+        'email_address' => $application->email_address,
     ]);
+
     return SentEmail::where('application_id', $application->id)->with('email_type')->get();
 }
 
 function printTelNos($pdf, $x, $y, $tel, $mobile, $btel)
 {
-    if (!empty($tel) && empty($mobile) && empty($btel)) {
+    if (! empty($tel) && empty($mobile) && empty($btel)) {
         $pdf->SetFont('Arial', '', 9);
         $pdf->SetXY($x, $y + 1);
         $pdf->Write(0, $tel);
     }
 
-    if (empty($tel) && !empty($mobile) && empty($btel)) {
+    if (empty($tel) && ! empty($mobile) && empty($btel)) {
         $pdf->SetFont('Arial', '', 9);
         $pdf->SetXY($x, $y + 1);
         $pdf->Write(0, $mobile);
     }
 
-    if (empty($tel) && empty($mobile) && !empty($btel)) {
+    if (empty($tel) && empty($mobile) && ! empty($btel)) {
         $pdf->SetFont('Arial', '', 9);
         $pdf->SetXY($x, $y + 1);
         $pdf->Write(0, $btel);
     }
     $line_inc = 3;
-    if (!empty($tel) && !empty($mobile) && empty($btel)) {
+    if (! empty($tel) && ! empty($mobile) && empty($btel)) {
         $pdf->SetFont('Arial', '', 8);
         $pdf->SetXY($x, $y);
         $pdf->Write(0, $tel);
@@ -374,7 +382,7 @@ function printTelNos($pdf, $x, $y, $tel, $mobile, $btel)
         $pdf->Write(0, $mobile);
     }
 
-    if (!empty($tel) && empty($mobile) && !empty($btel)) {
+    if (! empty($tel) && empty($mobile) && ! empty($btel)) {
         $pdf->SetFont('Arial', '', 8);
         $pdf->SetXY($x, $y);
         $pdf->Write(0, $tel);
@@ -382,7 +390,7 @@ function printTelNos($pdf, $x, $y, $tel, $mobile, $btel)
         $pdf->Write(0, $btel);
     }
 
-    if (empty($tel) && !empty($mobile) && !empty($btel)) {
+    if (empty($tel) && ! empty($mobile) && ! empty($btel)) {
         $pdf->SetFont('Arial', '', 8);
         $pdf->SetXY($x, $y);
         $pdf->Write(0, $mobile);
@@ -390,7 +398,7 @@ function printTelNos($pdf, $x, $y, $tel, $mobile, $btel)
         $pdf->Write(0, $btel);
     }
     $line_inc = 2;
-    if (!empty($tel) && !empty($mobile) && !empty($btel)) {
+    if (! empty($tel) && ! empty($mobile) && ! empty($btel)) {
         $pdf->SetFont('Arial', '', 7);
         $pdf->SetXY($x, $y);
         $pdf->Write(0, $tel);
@@ -400,9 +408,20 @@ function printTelNos($pdf, $x, $y, $tel, $mobile, $btel)
         $pdf->Write(0, $btel);
     }
     $pdf->SetFont('Arial', '', 10);
+
     return $pdf;
 }
 
+function getOnceDistricts(Request $request)
+{
+    return District::when($request->user()
+        ->hasAnyRole(['dyeo']), function ($query) use ($request) {
+            $query->where('code', $request->user()->district);
+        })->select(['id', 'code'])->get()->toArray();
+}
 
-
-
+function getOnceClubs(Request $request)
+{
+    return RibiClub::select(['id', 'club_name', 'district_id'])
+        ->get()->toArray();
+}

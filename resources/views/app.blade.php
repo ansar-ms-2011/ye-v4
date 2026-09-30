@@ -13,6 +13,7 @@
     @vite([
             'resources/css/app.css',
             'resources/css/animation.css',
+            'resources/css/custom.css',
             'resources/js/app.ts',
             "resources/js/pages/{$page['component']}.vue"
         ])

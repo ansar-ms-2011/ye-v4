@@ -10,7 +10,7 @@ class RibiDyeo extends Model
     use HasFactory;
     protected $table='ribi_dyeo';
 
-    protected $fillable=[
+    protected $fillable= [
         'district_code',
         'dyeo_name',
         'dyeo_email',
@@ -24,7 +24,10 @@ class RibiDyeo extends Model
         'dyeo_wtel',
         'dyeo_mobile',
         'dyeo_fax',
-        'user_id'
+        'user_id',
+        'full_name',
+        'email',
+        'password'
     ];
 
     public function user()

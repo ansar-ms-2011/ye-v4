@@ -42,6 +42,13 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 const isSearching = ref(false);
 
 const headers = [
+    {
+        title: 'Actions',
+        key: 'actions',
+        align: 'center' as const,
+        sortable: false,
+        fixed: true,
+    },
     { title: 'District', key: 'district_code', align: 'start' as const },
     { title: 'Club Name', key: 'club_name', align: 'start' as const },
     {
@@ -60,12 +67,6 @@ const headers = [
         align: 'start' as const,
     },
     { title: 'Other Name', key: 'club_other_name', align: 'start' as const },
-    {
-        title: 'Actions',
-        key: 'actions',
-        align: 'center' as const,
-        sortable: false,
-    },
 ];
 
 // Debounced search watcher
@@ -78,7 +79,6 @@ watch(searchText, (newValue) => {
         performSearch(newValue);
     }, 400);
 });
-
 
 function performSearch(search: string) {
     isSearching.value = true;
@@ -221,12 +221,12 @@ function cancelRemove() {
 <template>
     <Head title="Users" />
     <div class="app-page">
-        <v-sheet border rounded>
+        <v-sheet border rounded :elevation="2">
             <v-data-table-server
                 density="compact"
                 :headers="headers"
                 hover
-                class="elevation-1"
+                class="overflow-hidden"
                 :items="clubs?.data"
                 :items-length="clubsPage.total"
                 :items-per-page="clubsPage.per_page"
@@ -254,7 +254,7 @@ function cancelRemove() {
                             prepend-inner-icon="mdi-magnify"
                             rounded="lg"
                             placeholder="Search the Rotary Clubs"
-                            class="me-2"
+                            class="me-2 bg-white"
                             density="compact"
                         ></VTextField>
 
@@ -274,7 +274,7 @@ function cancelRemove() {
                     <div class="d-flex ga-2 justify-end">
                         <v-icon
                             color="success"
-                            icon="mdi-pencil"
+                            icon="mdi-square-edit-outline"
                             size="small"
                             @click="edit(item as Club)"
                         ></v-icon>

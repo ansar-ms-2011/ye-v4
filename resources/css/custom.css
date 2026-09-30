@@ -1,0 +1,64 @@
+.app-sidebar-link-active {
+    outline: 1px solid #848a90;
+}
+
+.v-data-table__th--fixed{
+    background-color: #005E96 !important;
+}
+
+.v-data-table-column--fixed:not(:first-child){
+    background-color: #fff !important;
+}
+
+/*@layer app {*/
+/*    .app-sidebar-link {*/
+/*        position: relative;*/
+/*        display: inline-block;*/
+/*        padding: 8px 16px;*/
+/*        border-radius: 8px;*/
+/*        text-decoration: none;*/
+/*        color: #d2d0d0 !important;*/
+/*        transition: all 0.3s ease;*/
+/*        isolation: isolate;*/
+/*    }*/
+
+/*    .app-sidebar-link-active {*/
+/*        animation: pulse-glow 2s ease-in-out infinite;*/
+/*        background: rgba(var(--v-theme-on-background), 0.2);*/
+/*    }*/
+
+/*    .app-sidebar-link-active::before {*/
+/*        content: '';*/
+/*        position: absolute;*/
+/*        inset: -2px;*/
+/*        background: linear-gradient(*/
+/*            90deg,*/
+/*            #00ffd5,*/
+/*            #002bff,*/
+/*            #7a00ff,*/
+/*            #00ffd5*/
+/*        );*/
+/*        background-size: 300% 100%;*/
+/*        border-radius: 10px;*/
+/*        animation: moving-gradient 3s linear infinite;*/
+/*        filter: blur(4px);*/
+/*        opacity: 0.8;*/
+/*        z-index: 0; !* Behind content *!*/
+/*    }*/
+
+/*    !* This creates the "inner" background so the glow only shows as border *!*/
+/*    .app-sidebar-link-active::after {*/
+/*        content: '';*/
+/*        position: absolute;*/
+/*        inset: 0;*/
+/*        background: rgba(var(--v-theme-on-background), 0.95);*/
+/*        border-radius: 8px;*/
+/*        z-index: 1; !* Above glow, below text *!*/
+/*    }*/
+
+/*    !* Wrap your link text in a span to ensure it sits on top *!*/
+/*    .app-sidebar-link-active > * {*/
+/*        position: relative;*/
+/*        z-index: 2;*/
+/*    }*/
+/*}*/

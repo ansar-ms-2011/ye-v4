@@ -39,18 +39,19 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 const isSearching = ref(false);
 
 const headers = [
+    {
+        title: 'Actions',
+        key: 'actions',
+        align: 'center' as const,
+        sortable: false,
+        fixed: true,
+    },
     { title: 'Full name', key: 'full_name', align: 'start' as const },
     { title: 'Email Address', key: 'email', align: 'start' as const },
     { title: 'Role Name', key: 'role_id', align: 'start' as const },
     { title: 'District', key: 'district', align: 'center' as const },
     { title: 'Club Name', key: 'club', align: 'center' as const },
     { title: 'Active', key: 'active', align: 'center' as const },
-    {
-        title: 'Actions',
-        key: 'actions',
-        align: 'center' as const,
-        sortable: false,
-    },
 ];
 
 // Initialize searchText from URL query params
@@ -215,10 +216,13 @@ function cancelRemove() {
 <template>
     <Head title="Users" />
     <div class="app-page">
-        <v-sheet border rounded class="overflow-hidden">
+        <v-sheet border rounded :elevation="2">
             <Deferred data="users">
                 <template #fallback>
-                    <div class="d-flex align-center justify-center" style="min-height: 500px">
+                    <div
+                        class="d-flex align-center justify-center"
+                        style="min-height: 500px"
+                    >
                         <span>Loading users' data...</span>
                     </div>
                 </template>
@@ -228,7 +232,7 @@ function cancelRemove() {
                     :headers="headers"
                     hover
                     rounded
-                    class="elevation-1"
+                    class="overflow-hidden"
                     :items="users"
                     :items-length="usersPage.total"
                     :items-per-page="usersPage.per_page"
@@ -256,8 +260,8 @@ function cancelRemove() {
                                 v-model="searchText"
                                 prepend-inner-icon="mdi-magnify"
                                 rounded="lg"
-                                placeholder="Search"
-                                class="me-2"
+                                placeholder="Search the users"
+                                class="me-2 bg-white"
                                 density="compact"
                             ></VTextField>
 
@@ -289,7 +293,7 @@ function cancelRemove() {
                         <div class="d-flex ga-2 justify-end">
                             <v-icon
                                 color="success"
-                                icon="mdi-pencil"
+                                icon="mdi-square-edit-outline"
                                 size="small"
                                 @click="edit(item)"
                             ></v-icon>

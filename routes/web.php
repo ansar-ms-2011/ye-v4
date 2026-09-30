@@ -39,8 +39,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::resource('cyeos', CyeoController::class)->except(['create', 'show', 'edit']);
 
-        Route::get('cyeo-json', [CyeoController::class, 'cyeoJson']);
-        Route::get('cyeo-json-data', [CyeoController::class, 'cyeoJsonData']);
+//        Route::get('cyeo-json', [CyeoController::class, 'cyeoJson']);
+//        Route::get('cyeo-json-data', [CyeoController::class, 'cyeoJsonData']);
     });
 
     Route::group(['middleware' => ['role:admin|dyeo']], function () {
