@@ -52,9 +52,9 @@ class ProfileController extends Controller
     {
         if ($request->user()->isAdmin()) {
             $request->user()->fill($request->validated());
-            //if ($request->user()->isDirty('email')) {
+            // if ($request->user()->isDirty('email')) {
             //    $request->user()->email_verified_at = null;
-            //}
+            // }
         }
 
         if ($request->user()->isCyeo()) {

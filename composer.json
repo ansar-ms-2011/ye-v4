@@ -18,6 +18,8 @@
         "laravel/framework": "^13.33",
         "laravel/tinker": "^3.0.2",
         "laravel/wayfinder": "^0.1.21",
+        "setasign/fpdf": "^1.9",
+        "setasign/fpdi": "^2.6",
         "spatie/laravel-permission": "^8.3"
     },
     "require-dev": {

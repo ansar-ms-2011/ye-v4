@@ -14,7 +14,7 @@ class EmailTypeSeeder extends Seeder
      */
     public function run()
     {
-        EmailType::create(['email_type_label'=>'Guide-Camps']);
-        EmailType::create(['email_type_label'=>'Guide-STEP']);
+        EmailType::create(['email_type_label' => 'Guide-Camps']);
+        EmailType::create(['email_type_label' => 'Guide-STEP']);
     }
 }

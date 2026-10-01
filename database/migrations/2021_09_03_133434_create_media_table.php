@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -14,7 +13,11 @@ class CreateMediaTable extends Migration
      */
     public function up()
     {
-        DB::statement("CREATE TABLE media (id INTEGER PRIMARY KEY AUTO_INCREMENT, media MEDIUMBLOB, created_at TIMESTAMP)");
+        if (DB::getDriverName() === 'sqlite') {
+            DB::statement('CREATE TABLE media (id INTEGER PRIMARY KEY AUTOINCREMENT, media BLOB, created_at TIMESTAMP)');
+        } else {
+            DB::statement('CREATE TABLE media (id INTEGER PRIMARY KEY AUTO_INCREMENT, media MEDIUMBLOB, created_at TIMESTAMP)');
+        }
     }
 
     /**

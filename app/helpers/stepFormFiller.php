@@ -14,15 +14,16 @@ ini_set('memory_limit', '250M');
 /**
  * @throws PdfParserException
  */
-function prepare_STEP_template($application, $prefix = ""): Fpdi
+function prepare_STEP_template($application, $prefix = ''): Fpdi
 {
-    //$templateCampsV2 = storage_path('app/pdf-templates/step-v2.pdf');
+    // $templateCampsV2 = storage_path('app/pdf-templates/step-v2.pdf');
     $templateCampsV2 = storage_path('app/pdf-templates/v13-step-260613.pdf');
-    $pdf = new FPDI();
-    $iconv_name = iconv('UTF-8', "ISO-8859-1", $application->full_name);
-    $pdf->SetTitle($prefix . "Application No: $application->application_no, $iconv_name");
+    $pdf = new Fpdi;
+    $iconv_name = iconv('UTF-8', 'ISO-8859-1', $application->full_name);
+    $pdf->SetTitle($prefix."Application No: $application->application_no, $iconv_name");
     $pdf->setSourceFile($templateCampsV2);
     $pdf->SetFont('Arial', 'B', 7);
+
     return $pdf;
 }
 
@@ -37,17 +38,17 @@ function get_STEP_Pdf_v2($application): Fpdi
 {
     $pdf = prepare_STEP_template($application);
     $image = null;
-    $image_name = 'app/app-' . $application->id . '.png';
-    $iconv_name = iconv('UTF-8', "ISO-8859-1", $application->full_name);
+    $image_name = 'app/app-'.$application->id.'.png';
+    $iconv_name = iconv('UTF-8', 'ISO-8859-1', $application->full_name);
 
     if ($application->media_id && $application->image_data) {
         $image = Image::make($application->image_data);
         $image->save(storage_path($image_name));
     }
-    //Fetch and store uploaded media files to storage for further use in template
+    // Fetch and store uploaded media files to storage for further use in template
     SaveApplicationMediaFiles($application);
 
-//---Page 1---------------------------------------------------
+    // ---Page 1---------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(1);
     $pdf->useTemplate($templateId);
@@ -64,8 +65,7 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->MultiCell(80, 4, $application->dyeo->dyeo_email, 0, 'L');
     }
 
-
-//---Page 2 -------------------------------------------------
+    // ---Page 2 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(2);
     $pdf->useTemplate($templateId);
@@ -76,7 +76,7 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-    $photo_self_path = storage_path('app/media-library/' . $application->id . '/Photo-Self.png');
+    $photo_self_path = storage_path('app/media-library/'.$application->id.'/Photo-Self.png');
     if (file_exists($photo_self_path)) {
         $pdf->Image($photo_self_path, 152, 22, 40, 48);
 
@@ -100,22 +100,21 @@ function get_STEP_Pdf_v2($application): Fpdi
 
     $pdf->SetFont('Arial', '', 10);
     $pdf->SetXY(17, 102);
-    $dob = Carbon::createFromFormat('Y-m-d', $application->dob);
+    $dob = Carbon::parse($application->dob);
     $pdf->Write(0, $dob->format('Y-m-d'));
 
     $pdf->SetXY(72, 102);
-//    $pdf->Write(0, $application->citizen_of); this field is not being used while saving data.
+    //    $pdf->Write(0, $application->citizen_of); this field is not being used while saving data.
     $pdf->Write(0, $application->country_citizenship);
 
     $pdf->SetXY(122, 102);
     $pdf->Write(0, $application->place_of_birth);
 
-
-// Fetch all addressed data and fill in
+    // Fetch all addressed data and fill in
     $add_home = $application->address_home;
 
     $y = 108;
-    //Fill-in Home Address
+    // Fill-in Home Address
     if ($application->address_home) {
         $pdf->SetXY(17, $y);
         $pdf->MultiCell(70, 3, $add_home->street, 0, 'L');
@@ -136,33 +135,33 @@ function get_STEP_Pdf_v2($application): Fpdi
     $pdf->SetXY(152, 122);
     $pdf->Write(0, $application->alt_contact_no);
 
-    //Parent 1 Name
+    // Parent 1 Name
     $pdf->SetXY(17, 142);
-    $address_parent1_name = iconv('UTF-8', "ISO-8859-1", $application->parent_1);
+    $address_parent1_name = iconv('UTF-8', 'ISO-8859-1', $application->parent_1);
     $pdf->Write(0, $address_parent1_name);
-    //Parent 2 Name
+    // Parent 2 Name
     $pdf->SetXY(107, 142);
-    $address_parent2_name = iconv('UTF-8', "ISO-8859-1", $application->parent_2);
+    $address_parent2_name = iconv('UTF-8', 'ISO-8859-1', $application->parent_2);
     $pdf->Write(0, $address_parent2_name);
 
-    //Parent 1 Email
+    // Parent 1 Email
     $pdf->SetXY(17, 152);
     $pdf->Write(0, $application->parent1_email);
-    //Parent 2 Email
+    // Parent 2 Email
     $pdf->SetXY(107, 152);
     $pdf->Write(0, $application->parent2_email);
 
-    //Parent 1 Phone
+    // Parent 1 Phone
     $pdf->SetXY(17, 162);
     $pdf->Write(0, $application->parent1_tel);
-    //Parent 1 Occupation
+    // Parent 1 Occupation
     $pdf->SetXY(62, 162);
     $pdf->Write(0, $application->parent1_occupation);
 
-    //Parent 2 Phone
+    // Parent 2 Phone
     $pdf->SetXY(107, 162);
     $pdf->Write(0, $application->parent2_tel);
-    //Parent 2 Occupation
+    // Parent 2 Occupation
     $pdf->SetXY(152, 162);
     $pdf->Write(0, $application->parent2_occupation);
 
@@ -184,7 +183,7 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->Image(storage_path('app/box-crossed-3.png'), 123, 168, 5, 6);
     }
 
-    //Fill in Parent 1 Address
+    // Fill in Parent 1 Address
     $y = 180;
     $address_parent1 = $application->address_parent1;
     if ($application->address_parent1) {
@@ -200,9 +199,9 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->MultiCell(20, 3, $address_parent1->country, 0, 'L');
     }
 
-    //Emergency Contact Parent 1 or Parent 2
+    // Emergency Contact Parent 1 or Parent 2
     $pdf->SetXY(155, 190);
-    if (!$application->emergency_contact) {
+    if (! $application->emergency_contact) {
         $pdf->Image(storage_path('app/box-crossed.png'), 136, 188.5, 5, 5);
     } else {
         $pdf->Image(storage_path('app/box-crossed.png'), 167, 188.5, 5, 5);
@@ -220,7 +219,7 @@ function get_STEP_Pdf_v2($application): Fpdi
     $pdf->Write(0, $application->em_htel);
     $pdf->SetXY(152, 218);
     $pdf->Write(0, $application->em_mobile);
-//    $pdf->Cell();
+    //    $pdf->Cell();
     $sibling_y_axis = 242;
     foreach ($application->siblings as $sibling) {
         $pdf->SetXY(17, $sibling_y_axis);
@@ -242,11 +241,10 @@ function get_STEP_Pdf_v2($application): Fpdi
         $sibling_y_axis += 7;
     }
 
-//---Page 3 -------------------------------------------------
+    // ---Page 3 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(3);
     $pdf->useTemplate($templateId);
-
 
     $pdf->SetFont('Arial', 'B', 10);
     $pdf->SetXY(136, 11);
@@ -262,7 +260,7 @@ function get_STEP_Pdf_v2($application): Fpdi
     $pdf->SetXY(64, 40);
     $pdf->Write(0, $application->religion_detail);
 
-    //Smoke
+    // Smoke
     if ($application->smoke) {
         $pdf->Image(storage_path('app/box-crossed-2.png'), 20, 46, 5, 5);
 
@@ -271,7 +269,7 @@ function get_STEP_Pdf_v2($application): Fpdi
     } else {
         $pdf->Image(storage_path('app/box-crossed-2.png'), 35, 46, 5, 5);
     }
-    //Drink
+    // Drink
     if ($application->drink) {
         $pdf->Image(storage_path('app/box-crossed-2.png'), 20, 54, 5, 5);
 
@@ -290,10 +288,10 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->Image(storage_path('app/box-crossed-2.png'), 35, 63, 5, 4);
     }
 
-    //Native Language
+    // Native Language
     $pdf->SetXY(17, 90);
     $pdf->Write(0, $application->native_language);
-    //Non-Native Languages
+    // Non-Native Languages
     foreach ($application->languages as $index => $language) {
         if ($index > 2) {
             break;
@@ -344,7 +342,7 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->Image(storage_path('app/box-crossed-2.png'), $x_no, $y, 5, 5);
     }
 
-    //If any of above question is answered Yes then print medical info detail
+    // If any of above question is answered Yes then print medical info detail
     $pdf->SetFont('Arial', '', 8);
     $pdf->SetXY(16, 164);
     $pdf->MultiCell(175, 3, $application->medical_info);
@@ -379,10 +377,10 @@ function get_STEP_Pdf_v2($application): Fpdi
     $pdf->SetXY(136, $y);
     $pdf->Write(0, $application->club && $application->club->cyeo ? $application->club->cyeo->cyeo_mobile : '');
 
-    //---Page 4 to 6 -------------------------------------------------
+    // ---Page 4 to 6 -------------------------------------------------
     $pdf = addSimplePage($pdf, $application, $iconv_name, 4, 6);
 
-    //---Page 7 -------------------------------------------------
+    // ---Page 7 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(7);
     $pdf->useTemplate($templateId);
@@ -418,14 +416,14 @@ function get_STEP_Pdf_v2($application): Fpdi
 
     $pdf->SetFont('Arial', '', 10);
     $pdf->SetXY(152, 78);
-    $dob = Carbon::createFromFormat('Y-m-d', $application->dob);
+    $dob = Carbon::parse($application->dob);
     $pdf->Write(0, $dob->format('Y-m-d'));
 
     // Fetch all addressed data and fill in
     $add_home = $application->address_home;
 
     $y = 85;
-    //Fill-in Home Address
+    // Fill-in Home Address
     if ($application->address_home) {
         $pdf->SetXY(17, $y);
         $pdf->MultiCell(70, 3, $add_home->street, 0, 'L');
@@ -462,7 +460,7 @@ function get_STEP_Pdf_v2($application): Fpdi
 
     $pdf->SetFont('Arial', '', 9);
 
-    $photo_self_path = storage_path('app/media-library/' . $application->id . '/Photo-Family.png');
+    $photo_self_path = storage_path('app/media-library/'.$application->id.'/Photo-Family.png');
     if (file_exists($photo_self_path)) {
         $pdf->Image($photo_self_path, 16, 73, 90, 87);
     }
@@ -473,7 +471,7 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->MultiCell(90, 3, $media->brief_caption, 0, 'C');
     }
 
-    $photo_self_path = storage_path('app/media-library/' . $application->id . '/Photo-Home.png');
+    $photo_self_path = storage_path('app/media-library/'.$application->id.'/Photo-Home.png');
     if (file_exists($photo_self_path)) {
         $pdf->Image($photo_self_path, 110, 73, 88, 87);
     }
@@ -484,7 +482,7 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->MultiCell(90, 3, $media->brief_caption, 0, 'C');
     }
 
-    $photo_self_path = storage_path('app/media-library/' . $application->id . '/Photo-Interest.png');
+    $photo_self_path = storage_path('app/media-library/'.$application->id.'/Photo-Interest.png');
     if (file_exists($photo_self_path)) {
         $pdf->Image($photo_self_path, 16, 173, 90, 87);
     }
@@ -495,7 +493,7 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->MultiCell(90, 3, $media->brief_caption, 0, 'C');
     }
 
-    $photo_self_path = storage_path('app/media-library/' . $application->id . '/Photo-Important.png');
+    $photo_self_path = storage_path('app/media-library/'.$application->id.'/Photo-Important.png');
     if (file_exists($photo_self_path)) {
         $pdf->Image($photo_self_path, 110, 173, 90, 87);
     }
@@ -519,11 +517,10 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-    $photo_self_path = storage_path('app/media-library/' . $application->id . '/Passport-Scan.png');
+    $photo_self_path = storage_path('app/media-library/'.$application->id.'/Passport-Scan.png');
     if (file_exists($photo_self_path)) {
         $pdf->Image($photo_self_path, 23, 90, 175, 0);
     }
-
 
     // Page 10
     $pdf->addPage();
@@ -553,7 +550,7 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-    $photo_self_path = storage_path('app/media-library/' . $application->id . '/Applicant-Letter-Page-1.png');
+    $photo_self_path = storage_path('app/media-library/'.$application->id.'/Applicant-Letter-Page-1.png');
     if (file_exists($photo_self_path)) {
         $pdf->Image($photo_self_path, 23, 38, 176, 0);
     }
@@ -572,7 +569,7 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-    $photo_self_path = storage_path('app/media-library/' . $application->id . '/Applicant-Letter-Page-2.png');
+    $photo_self_path = storage_path('app/media-library/'.$application->id.'/Applicant-Letter-Page-2.png');
     if (file_exists($photo_self_path)) {
         $pdf->Image($photo_self_path, 23, 38, 176, 0);
     }
@@ -591,7 +588,7 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-    $photo_self_path = storage_path('app/media-library/' . $application->id . '/Applicant-Letter-Page-3.png');
+    $photo_self_path = storage_path('app/media-library/'.$application->id.'/Applicant-Letter-Page-3.png');
     if (file_exists($photo_self_path)) {
         $pdf->Image($photo_self_path, 23, 38, 176, 0);
     }
@@ -610,7 +607,7 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-    $photo_self_path = storage_path('app/media-library/' . $application->id . '/Parent-Letter-Page-1.png');
+    $photo_self_path = storage_path('app/media-library/'.$application->id.'/Parent-Letter-Page-1.png');
     if (file_exists($photo_self_path)) {
         $pdf->Image($photo_self_path, 23, 38, 176, 0);
     }
@@ -629,12 +626,12 @@ function get_STEP_Pdf_v2($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-    $photo_self_path = storage_path('app/media-library/' . $application->id . '/Parent-Letter-Page-2.png');
+    $photo_self_path = storage_path('app/media-library/'.$application->id.'/Parent-Letter-Page-2.png');
     if (file_exists($photo_self_path)) {
         $pdf->Image($photo_self_path, 23, 38, 176, 0);
     }
 
-    //----------Finally Return PDF -----
+    // ----------Finally Return PDF -----
     return $pdf;
 }
 
@@ -654,22 +651,23 @@ function addSimplePage($pdf, $application, $iconv_name, $from_page, $to_page)
             $pdf->Write(0, $application->dyeo->district_code);
         }
     }
+
     return $pdf;
 }
 
 function get_STEP_Signing_Page_3_5_6($application): Fpdi
 {
-    $pdf = prepare_STEP_template($application, "Singing Page of ");
+    $pdf = prepare_STEP_template($application, 'Singing Page of ');
     $image = null;
-    $image_name = 'app/app-' . $application->id . '.png';
-    $iconv_name = iconv('UTF-8', "ISO-8859-1", $application->full_name);
+    $image_name = 'app/app-'.$application->id.'.png';
+    $iconv_name = iconv('UTF-8', 'ISO-8859-1', $application->full_name);
 
     if ($application->media_id && $application->image_data) {
         $image = Image::make($application->image_data);
         $image->save(storage_path($image_name));
     }
 
-//---Page 3 -------------------------------------------------
+    // ---Page 3 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(3);
     $pdf->useTemplate($templateId);
@@ -688,7 +686,7 @@ function get_STEP_Signing_Page_3_5_6($application): Fpdi
     $pdf->SetXY(64, 40);
     $pdf->Write(0, $application->religion_detail);
 
-    //Smoke
+    // Smoke
     if ($application->smoke) {
         $pdf->Image(storage_path('app/box-crossed-2.png'), 20, 46, 5, 5);
 
@@ -697,7 +695,7 @@ function get_STEP_Signing_Page_3_5_6($application): Fpdi
     } else {
         $pdf->Image(storage_path('app/box-crossed-2.png'), 35, 46, 5, 5);
     }
-    //Drink
+    // Drink
     if ($application->drink) {
         $pdf->Image(storage_path('app/box-crossed-2.png'), 20, 54, 5, 5);
 
@@ -716,10 +714,10 @@ function get_STEP_Signing_Page_3_5_6($application): Fpdi
         $pdf->Image(storage_path('app/box-crossed-2.png'), 35, 63, 5, 4);
     }
 
-    //Native Language
+    // Native Language
     $pdf->SetXY(20, 90);
     $pdf->Write(0, $application->native_language);
-    //Non-Native Languages
+    // Non-Native Languages
     foreach ($application->languages as $index => $language) {
         if ($index > 2) {
             break;
@@ -770,7 +768,7 @@ function get_STEP_Signing_Page_3_5_6($application): Fpdi
         $pdf->Image(storage_path('app/box-crossed-2.png'), $x_no, $y, 5, 5);
     }
 
-    //If any of above question is answered Yes then print medical info detail
+    // If any of above question is answered Yes then print medical info detail
     $pdf->SetFont('Arial', '', 8);
     $pdf->SetXY(16, 164);
     $pdf->MultiCell(175, 3, $application->medical_info);
@@ -805,8 +803,7 @@ function get_STEP_Signing_Page_3_5_6($application): Fpdi
     $pdf->SetXY(136, $y);
     $pdf->Write(0, $application->club && $application->club->cyeo ? $application->club->cyeo->cyeo_mobile : '');
 
-
-//---Page 5-6 -------------------------------------------------
+    // ---Page 5-6 -------------------------------------------------
     for ($page = 5; $page <= 6; $page++) {
         $pdf->addPage();
         $templateId = $pdf->importPage($page);
@@ -821,9 +818,7 @@ function get_STEP_Signing_Page_3_5_6($application): Fpdi
             $pdf->Write(0, $application->dyeo->district_code);
         }
     }
-    //----------Finally Return PDF -----
+
+    // ----------Finally Return PDF -----
     return $pdf;
 }
-
-
-

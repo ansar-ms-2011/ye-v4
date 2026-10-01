@@ -42,8 +42,8 @@ class DistrictSeeder extends Seeder
             '1270',
             '1285',
         ];
-        foreach ($list as $item){
-            DB::table('districts')->insert(['code'=> $item]);
+        foreach ($list as $item) {
+            DB::table('districts')->insert(['code' => $item]);
         }
     }
 }

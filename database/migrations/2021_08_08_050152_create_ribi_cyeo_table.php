@@ -16,7 +16,7 @@ class CreateRibiCyeoTable extends Migration
         Schema::create('ribi_cyeo', function (Blueprint $table) {
             $table->id();
             $table->string('cyeo_name', 100)->nullable();
-            $table->string('cyeo_sig')->nullable();             //Blob
+            $table->string('cyeo_sig')->nullable();             // Blob
             $table->string('cyeo_address', 200)->nullable();
             $table->string('cyeo_city', 100)->nullable();
             $table->string('cyeo_state', 100)->nullable();

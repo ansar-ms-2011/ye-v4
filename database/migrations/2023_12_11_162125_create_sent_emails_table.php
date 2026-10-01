@@ -17,7 +17,7 @@ class CreateSentEmailsTable extends Migration
             $table->id();
             $table->string('email_address', 128);
             $table->string('message_title');
-            $table->unsignedBigInteger('application_id')->comment('Application Id');     //User ID
+            $table->unsignedBigInteger('application_id')->comment('Application Id');     // User ID
             $table->unsignedBigInteger('email_type_id');
             $table->timestamps();
 

@@ -8,15 +8,9 @@ use App\Models\ApplicationLanguage;
 use App\Models\ApplicationSibling;
 use App\Models\Media;
 use App\Models\RibiClub;
-use App\Models\RibiCyeo;
 use App\Models\RibiDyeo;
 use Exception;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Contracts\View\View;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -55,17 +49,17 @@ class ApplicationController extends Controller
             });
         }
 
-        //Role-Based Filtering of Applications
+        // Role-Based Filtering of Applications
         if ($user->hasRole('dyeo')) {
             $dyeo = RibiDyeo::where('user_id', $user->id)->first();
-            if (!$dyeo) {
+            if (! $dyeo) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No DYEO associated with User Id ' . $user->id,
+                    'message' => 'No DYEO associated with User Id '.$user->id,
                 ]);
             }
             $applications = $applications->where('dyeo_id', $dyeo->id);
-        } else if ($user->hasRole('cyeo')) {
+        } elseif ($user->hasRole('cyeo')) {
             $user->load('cyeo');
             if ($user->cyeo && $user->cyeo->ribi_club_id) {
                 $applications->where('rotary_club_id', $user->cyeo->ribi_club_id);
@@ -75,10 +69,9 @@ class ApplicationController extends Controller
                     'message' => "No applications found associated with your club {$user->cyeo?->club?->club_name} or you don't have associated to any club",
                 ]);
             }
-        } else if ($user->hasRole('applicant')) {
-            $applications->whereNull('id'); //Just a workaround to hide applications
+        } elseif ($user->hasRole('applicant')) {
+            $applications->whereNull('id'); // Just a workaround to hide applications
         }
-
 
         $applications = $applications->with(['languages', 'dyeo', 'siblings'])
             ->orderBy($orderBy, $sortDir)
@@ -89,7 +82,6 @@ class ApplicationController extends Controller
         ]);
     }
 
-
     public function create()
     {
         $dyeos = RibiDyeo::all(['id', 'id as value', 'dyeo_name as text', 'district_code'])->toArray();
@@ -97,7 +89,7 @@ class ApplicationController extends Controller
         $clubs = $clubs->groupBy('district_code');
 
         return Inertia::render('applications/Create', [
-            'dyeos' => $dyeos, 'clubs' => $clubs
+            'dyeos' => $dyeos, 'clubs' => $clubs,
         ]);
     }
 
@@ -123,8 +115,9 @@ class ApplicationController extends Controller
             'address_parent1',
             'address_parent2',
             'dyeo',
-            'media_library'
+            'media_library',
         ]);
+
         return Inertia::render('applications/Edit', [
             'application' => $application,
             'dyeos' => $dyeos,
@@ -143,11 +136,11 @@ class ApplicationController extends Controller
             'media_library.*.size' => 'max:5120',
         ]);
 
-        //Truncate Medical Info if > 650
+        // Truncate Medical Info if > 650
         $info = $formData['medical_info'];
         $info = (strlen($info) > 650) ? substr($info, 0, 650) : $info;
         $formData['medical_info'] = $info;
-        //---------------------------------
+        // ---------------------------------
         $application->update($formData);
 
         $formData['address_home']['application_id'] = $application->id;
@@ -179,7 +172,7 @@ class ApplicationController extends Controller
                 ApplicationSibling::destroy($sibling['id']);
             } else {
                 $sibling['application_id'] = $application->id;
-                //$sibling['application_no'] = $application->application_no;
+                // $sibling['application_no'] = $application->application_no;
                 ApplicationSibling::updateOrCreate(['id' => $sibling['id']], $sibling);
             }
         }
@@ -187,7 +180,7 @@ class ApplicationController extends Controller
         // Handle Profile Image Upload / Change
         if ($formData['image_changed']) {
             if ($formData['media_id'] > 0) {
-                //Delete previous linked media row
+                // Delete previous linked media row
                 Media::find($formData['media_id'])->delete();
             }
             $obj = Media::create(['media' => $formData['image_data'], 'created_at' => now()]);
@@ -215,12 +208,14 @@ class ApplicationController extends Controller
     public function removeUploadedMedia(Media $media)
     {
         $media->delete();
+
         return redirect()->back()->with('message', 'Media File Removed Successfully');
     }
 
     public function ViewUploadedFiles($id)
     {
         $media_library = Media::where('application_id', $id)->get();
+
         return Inertia::render('applications/UploadedFiles', ['files' => $media_library, 'application_id' => $id]);
     }
 
@@ -231,6 +226,7 @@ class ApplicationController extends Controller
     {
         try {
             Application::destroy($id);
+
             return redirect()->back()->with('message', 'Application Removed Successfully');
         } catch (Exception $exception) {
             throw new Exception($exception->getMessage());

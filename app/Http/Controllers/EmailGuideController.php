@@ -11,14 +11,13 @@ use Illuminate\Support\Facades\Mail;
 
 class EmailGuideController extends Controller
 {
-
     public function GetEmailGuideView(Application $application)
     {
         $emailSent = SentEmail::where('application_id', $application->id)->with('email_type')->get();
         $fileName = null;
         if ($application->exchange_type == 'CAMPS & TOURS') {
             $fileName = generateGuideFileCamps($application);
-        } else if ($application->exchange_type == 'STEP') {
+        } elseif ($application->exchange_type == 'STEP') {
             $fileName = generateGuideFileStep($application);
         }
 
@@ -42,6 +41,7 @@ class EmailGuideController extends Controller
 
         return response()->json(['message' => 'Guide (Part 2) has been emailed to applicant', 'emailSentList' => $emailSentList]);
     }
+
     public function SendPaymentEmailToApplicant(Application $application): JsonResponse
     {
         // Send Email to Applicant regarding payment of Administration Fee
@@ -51,7 +51,7 @@ class EmailGuideController extends Controller
                 'email_type_id' => 3,
                 'application_id' => $application->id,
                 'message_title' => 'Camps - Payment Email',
-                'email_address' => $application->email_address
+                'email_address' => $application->email_address,
             ]);
         } else {
             Mail::send(new PaymentEmailStep($application));
@@ -59,7 +59,7 @@ class EmailGuideController extends Controller
                 'email_type_id' => 4,
                 'application_id' => $application->id,
                 'message_title' => 'STEP - Payment Email',
-                'email_address' => $application->email_address
+                'email_address' => $application->email_address,
             ]);
         }
 

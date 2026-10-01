@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\ApplicationAddress;
 use App\Models\Application;
+use App\Models\ApplicationAddress;
 use App\Models\ApplicationLanguage;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Seeder;
 
 class UpdateApplicationData extends Seeder
 {
@@ -18,16 +17,16 @@ class UpdateApplicationData extends Seeder
     public function run()
     {
         $applications = Application::all();
-        foreach ($applications as $application){
+        foreach ($applications as $application) {
 
             $addresses = ApplicationAddress::where('application_no', $application->application_no)->get();
-            foreach ($addresses as $address){
+            foreach ($addresses as $address) {
                 $address->application_id = $application->id;
                 $address->save();
             }
 
             $languages = ApplicationLanguage::where('application_no', $application->application_no)->get();
-            foreach ($languages as $language){
+            foreach ($languages as $language) {
                 $language->application_id = $application->id;
                 $language->save();
             }

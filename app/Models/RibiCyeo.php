@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class RibiCyeo extends Model
 {
     protected $table = 'ribi_cyeo';
+
     protected $appends = ['district_id'];
 
     protected $fillable = [

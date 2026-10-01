@@ -4,13 +4,11 @@ namespace App\Models;
 
 use App\Casts\BooleanToYesNo;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Application extends Model
 {
-
     protected $casts = [
         'parent_div_sep' => 'boolean',
         'parent1_rotarian' => BooleanToYesNo::class,

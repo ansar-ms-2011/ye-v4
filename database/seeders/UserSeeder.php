@@ -16,12 +16,12 @@ class UserSeeder extends Seeder
     public function run()
     {
         $data = [
-            'full_name'=>'Ansar Mehmood',
-            'email'=>'ansar.mcs2009@gmail.com',
-            'password'=>Hash::make('12345678'),
-            'district'=>null,
-            'rotary_club_id'=>null,
-            'active'=>1
+            'full_name' => 'Ansar Mehmood',
+            'email' => 'ansar.mcs2009@gmail.com',
+            'password' => Hash::make('12345678'),
+            'district' => null,
+            'rotary_club_id' => null,
+            'active' => 1,
         ];
         $user = User::create($data);
         $user->assignRole('admin');

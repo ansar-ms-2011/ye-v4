@@ -9,7 +9,6 @@ use setasign\Fpdi\PdfParser\PdfParserException;
 use setasign\Fpdi\PdfParser\Type\PdfTypeException;
 use setasign\Fpdi\PdfReader\PdfReaderException;
 
-
 // Set Memory limit to be used by PHP
 ini_set('memory_limit', '250M');
 
@@ -18,13 +17,14 @@ ini_set('memory_limit', '250M');
  */
 function prepare_template($application): Fpdi
 {
-    //$templateCampsV2 = storage_path('app/pdf-templates/camps-v2.pdf');
+    // $templateCampsV2 = storage_path('app/pdf-templates/camps-v2.pdf');
     $templateCampsV2 = storage_path('app/pdf-templates/v13-camps-260613.pdf');
-    $pdf = new FPDI();
-    $iconv_name = iconv('UTF-8', "ISO-8859-1", $application->full_name);
+    $pdf = new Fpdi;
+    $iconv_name = iconv('UTF-8', 'ISO-8859-1', $application->full_name);
     $pdf->SetTitle("Application No: $application->application_no, $iconv_name");
     $pdf->setSourceFile($templateCampsV2);
     $pdf->SetFont('Arial', 'B', 7);
+
     return $pdf;
 }
 
@@ -39,13 +39,12 @@ function get_CAMPS_Pdf_v2($application): Fpdi
 {
     $pdf = prepare_template($application);
     $image = null;
-    $image_name = 'app/app-' . $application->id . '.png';
-    $iconv_name = iconv('UTF-8', "ISO-8859-1", $application->full_name);
+    $image_name = 'app/app-'.$application->id.'.png';
+    $iconv_name = iconv('UTF-8', 'ISO-8859-1', $application->full_name);
 
     SaveApplicationMediaFiles($application);
 
-
-//---Page 1---------------------------------------------------
+    // ---Page 1---------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(1);
     $pdf->useTemplate($templateId);
@@ -62,8 +61,7 @@ function get_CAMPS_Pdf_v2($application): Fpdi
         $pdf->MultiCell(80, 6, $application->dyeo->dyeo_email, 0, 'L');
     }
 
-
-//---Page 2 -------------------------------------------------
+    // ---Page 2 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(2);
     $pdf->useTemplate($templateId);
@@ -74,7 +72,7 @@ function get_CAMPS_Pdf_v2($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-    $photo_self_path = storage_path('app/media-library/' . $application->id . '/Photo-Self.png');
+    $photo_self_path = storage_path('app/media-library/'.$application->id.'/Photo-Self.png');
     if (file_exists($photo_self_path)) {
         $pdf->Image($photo_self_path, 152, 22, 40, 48);
         // Draw a border (rectangle) around the image
@@ -96,7 +94,7 @@ function get_CAMPS_Pdf_v2($application): Fpdi
 
     $pdf->SetFont('Arial', '', 10);
     $pdf->SetXY(17, 92);
-    $dob = Carbon::createFromFormat('Y-m-d', $application->dob);
+    $dob = Carbon::parse($application->dob);
     $pdf->Write(0, $dob->format('Y-m-d'));
 
     $pdf->SetXY(73, 92);
@@ -105,11 +103,10 @@ function get_CAMPS_Pdf_v2($application): Fpdi
     $pdf->SetXY(123, 92);
     $pdf->Write(0, $application->place_of_birth);
 
-
     // Fetch all addressed data and fill in
     $add_home = $application->address_home;
 
-    //Fill-in Home Address
+    // Fill-in Home Address
     if ($application->address_home) {
         $pdf->SetXY(17, 102);
         $pdf->Write(0, $add_home->street);
@@ -130,34 +127,34 @@ function get_CAMPS_Pdf_v2($application): Fpdi
     $pdf->SetXY(158, 112);
     $pdf->Write(0, $application->alt_contact_no);
 
-    //Parent 1 Name
+    // Parent 1 Name
     $pdf->SetXY(20, 132);
-    $address_parent1_name = iconv('UTF-8', "ISO-8859-1", $application->parent_1);
+    $address_parent1_name = iconv('UTF-8', 'ISO-8859-1', $application->parent_1);
     $pdf->Write(0, $address_parent1_name);
-    //Parent 2 Name
+    // Parent 2 Name
     $pdf->SetXY(110, 132);
-    $address_parent2_name = iconv('UTF-8', "ISO-8859-1", $application->parent_2);
+    $address_parent2_name = iconv('UTF-8', 'ISO-8859-1', $application->parent_2);
     $pdf->Write(0, $address_parent2_name);
-    //Parent 1 Email
+    // Parent 1 Email
     $pdf->SetXY(20, 142);
     $pdf->Write(0, $application->parent1_email);
 
-    //Parent 2 Email
+    // Parent 2 Email
     $pdf->SetXY(110, 142);
     $pdf->Write(0, $application->parent2_email);
 
-    //Parent 1 Phone
+    // Parent 1 Phone
     $pdf = printTelNos($pdf, 20, 150, $application->parent1_tel, $application->parent1_mobile, $application->parent1_btel);
 
-    //Parent 1 Occupation
+    // Parent 1 Occupation
     $pdf->SetFont('Arial', '', 10);
     $pdf->SetXY(65, 152);
     $pdf->Write(0, $application->parent1_occupation);
 
-    //Parent 2 Phone
+    // Parent 2 Phone
     $pdf = printTelNos($pdf, 110, 150, $application->parent2_tel, $application->parent2_mobile, $application->parent2_btel);
 
-    //Parent 2 Occupation
+    // Parent 2 Occupation
     $pdf->SetFont('Arial', '', 10);
     $pdf->SetXY(155, 152);
     $pdf->Write(0, $application->parent2_occupation);
@@ -180,7 +177,7 @@ function get_CAMPS_Pdf_v2($application): Fpdi
         $pdf->Image(storage_path('app/box-crossed-3.png'), 122, 159, 6, 6);
     }
 
-    //Fill-in Parent 1 Address
+    // Fill-in Parent 1 Address
     $address_parent1 = $application->address_parent1;
     if ($application->address_parent1) {
         $pdf->SetXY(20, 173);
@@ -195,9 +192,9 @@ function get_CAMPS_Pdf_v2($application): Fpdi
         $pdf->MultiCell(20, 3, $address_parent1->country, 0, 'L');
     }
 
-    //Emergency Contact Parent 1 or Parent 2
+    // Emergency Contact Parent 1 or Parent 2
     $pdf->SetXY(155, 181);
-    if (!$application->emergency_contact) {
+    if (! $application->emergency_contact) {
         $pdf->Image(storage_path('app/box-crossed-3.png'), 136.5, 178, 6, 6);
     } else {
         $pdf->Image(storage_path('app/box-crossed-3.png'), 165, 178, 6, 6);
@@ -221,7 +218,7 @@ function get_CAMPS_Pdf_v2($application): Fpdi
     $pdf->SetXY(67, 228);
     $pdf->Write(0, $application->religion_detail);
 
-    //Smoke
+    // Smoke
     if ($application->smoke) {
         $pdf->Image(storage_path('app/box-crossed-2.png'), 21, 233.5, 5, 5);
 
@@ -230,7 +227,7 @@ function get_CAMPS_Pdf_v2($application): Fpdi
     } else {
         $pdf->Image(storage_path('app/box-crossed-2.png'), 36.5, 233.5, 5, 5);
     }
-    //Drink
+    // Drink
     if ($application->drink) {
         $pdf->Image(storage_path('app/box-crossed-2.png'), 21, 241.5, 5, 5);
 
@@ -249,12 +246,10 @@ function get_CAMPS_Pdf_v2($application): Fpdi
         $pdf->Image(storage_path('app/box-crossed-2.png'), 36.5, 250.5, 5, 4);
     }
 
-
-//---Page 3 -------------------------------------------------
+    // ---Page 3 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(3);
     $pdf->useTemplate($templateId);
-
 
     $pdf->SetFont('Arial', 'B', 10);
     $pdf->SetXY(136, 11);
@@ -264,10 +259,10 @@ function get_CAMPS_Pdf_v2($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-    //Native Language
+    // Native Language
     $pdf->SetXY(17, 47);
     $pdf->Write(0, $application->native_language);
-    //Non-Native Languages
+    // Non-Native Languages
     foreach ($application->languages as $index => $language) {
         if ($index > 2) {
             break;
@@ -315,11 +310,10 @@ function get_CAMPS_Pdf_v2($application): Fpdi
         $pdf->Image(storage_path('app/box-crossed-2.png'), 181.5, 109, 5, 5);
     }
 
-    //If any of above question is answered Yes then print medical info detail
+    // If any of above question is answered Yes then print medical info detail
     $pdf->SetFont('Arial', '', 10);
     $pdf->SetXY(17, 126);
     $pdf->MultiCell(175, 4, $application->medical_info);
-
 
     $pdf->SetXY(17, 210);
     $pdf->Write(0, $application->club ? $application->club->district_code : '');
@@ -349,8 +343,7 @@ function get_CAMPS_Pdf_v2($application): Fpdi
     $pdf->SetXY(138, 237);
     $pdf->Write(0, $application->club && $application->club->cyeo ? $application->club->cyeo->cyeo_mobile : '');
 
-
-//---Page 4 -------------------------------------------------
+    // ---Page 4 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(4);
     $pdf->useTemplate($templateId);
@@ -364,7 +357,7 @@ function get_CAMPS_Pdf_v2($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-//---Page 5 -------------------------------------------------
+    // ---Page 5 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(5);
     $pdf->useTemplate($templateId);
@@ -378,7 +371,7 @@ function get_CAMPS_Pdf_v2($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-//---Page 6 -------------------------------------------------
+    // ---Page 6 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(6);
     $pdf->useTemplate($templateId);
@@ -392,8 +385,7 @@ function get_CAMPS_Pdf_v2($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-
-//---Page 7 -------------------------------------------------
+    // ---Page 7 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(7);
     $pdf->useTemplate($templateId);
@@ -414,31 +406,31 @@ function get_CAMPS_Pdf_v2($application): Fpdi
     $pdf->SetXY($left, 70);
     $pdf->MultiCell(172, $h, $application->free_activities);
 
-    //Vocation
+    // Vocation
     $pdf->SetXY($left, 102);
     $pdf->MultiCell(172, $h, $application->attainment_vocation);
 
-    //Special Interests
+    // Special Interests
     $pdf->SetXY($left, 135);
     $pdf->MultiCell(172, $h, $application->special_interests);
 
-//    //Special Skills
-//    $pdf->SetXY(20, 166);
-//    $pdf->MultiCell(150, $h, $application->special_skills);
+    //    //Special Skills
+    //    $pdf->SetXY(20, 166);
+    //    $pdf->MultiCell(150, $h, $application->special_skills);
 
-    //Contribute to Entertainment
+    // Contribute to Entertainment
     $pdf->SetXY($left, 167);
     $pdf->MultiCell(172, $h, $application->contrib_entertainment);
 
-    //Reason for Camp
+    // Reason for Camp
     $pdf->SetXY($left, 201);
     $pdf->MultiCell(172, $h, $application->reason_for_camp);
 
-    //Personal Remarks
+    // Personal Remarks
     $pdf->SetXY($left, 233);
     $pdf->MultiCell(172, $h, $application->personal_remarks);
 
-//---Page 8 -------------------------------------------------
+    // ---Page 8 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(8);
     $pdf->useTemplate($templateId);
@@ -473,16 +465,15 @@ function get_CAMPS_Pdf_v2($application): Fpdi
     $pdf->Write(0, $application->country_citizenship);
 
     $pdf->SetXY(155, 60.5);
-    $dob = Carbon::createFromFormat('Y-m-d', $application->dob);
+    $dob = Carbon::parse($application->dob);
     $pdf->Write(0, $dob->format('Y-m-d'));
-
 
     // Fetch all addressed data and fill in
     //    $add_home = $application->address_home;
     //    $add_postal = $application->address_postal;
     //    $address_parent2 = $application->address_parent2;
 
-    //Fill in Home Address
+    // Fill in Home Address
     if ($application->address_home) {
         $pdf->SetXY(19, 70);
         $pdf->Write(0, $add_home->street);
@@ -503,8 +494,7 @@ function get_CAMPS_Pdf_v2($application): Fpdi
     $pdf->SetXY(156, 80);
     $pdf->Write(0, $application->alt_contact_no);
 
-
-//---Page 9 -------------------------------------------------
+    // ---Page 9 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(9);
     $pdf->useTemplate($templateId);
@@ -518,12 +508,12 @@ function get_CAMPS_Pdf_v2($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-    $photo_self_path = storage_path('app/media-library/' . $application->id . '/Passport-Scan.png');
+    $photo_self_path = storage_path('app/media-library/'.$application->id.'/Passport-Scan.png');
     if (file_exists($photo_self_path)) {
         $pdf->Image($photo_self_path, 30, 42, 160, 0);
     }
 
-    //---------------
+    // ---------------
     return $pdf;
 }
 
@@ -531,16 +521,16 @@ function get_CAMPS_Signing_Page($application): Fpdi
 {
     $pdf = prepare_template($application);
 
-    $image_name = 'app/app-' . $application->id . '.png';
-    $iconv_name = iconv('UTF-8', "ISO-8859-1", $application->full_name);
+    $image_name = 'app/app-'.$application->id.'.png';
+    $iconv_name = iconv('UTF-8', 'ISO-8859-1', $application->full_name);
 
     if ($application->media_id && $application->image_data) {
         $image = Image::make($application->image_data);
         $image->save(storage_path($image_name));
     }
 
-// View Signing Pages ---------------------------------------
-//---Page 3 -------------------------------------------------
+    // View Signing Pages ---------------------------------------
+    // ---Page 3 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(3);
     $pdf->useTemplate($templateId);
@@ -553,10 +543,10 @@ function get_CAMPS_Signing_Page($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-    //Native Language
+    // Native Language
     $pdf->SetXY(20, 47);
     $pdf->Write(0, $application->native_language);
-    //Non-Native Languages
+    // Non-Native Languages
     foreach ($application->languages as $index => $language) {
         if ($index > 2) {
             break;
@@ -604,7 +594,7 @@ function get_CAMPS_Signing_Page($application): Fpdi
         $pdf->Image(storage_path('app/box-crossed-2.png'), 181, 109.5, 5, 5);
     }
 
-    //If any of above question is answered Yes then print medical info detail
+    // If any of above question is answered Yes then print medical info detail
     $pdf->SetFont('Arial', '', 10);
     $pdf->SetXY(20, 126);
     $pdf->MultiCell(175, 4, $application->medical_info);
@@ -625,14 +615,14 @@ function get_CAMPS_Signing_Page($application): Fpdi
 
     $pdf->SetXY(17, 228);
     $pdf->Write(0, $application->dyeo ? $application->dyeo->dyeo_email : '');
-    $pdf->SetXY(79, 228);         //Newly added this field
+    $pdf->SetXY(79, 228);         // Newly added this field
     $pdf->Write(0, $application->club ? $application->club->club_president_email : '');
     $pdf->SetXY(140, 228);
     $pdf->Write(0, $application->club && $application->club->cyeo ? $application->club->cyeo->cyeo_email : '');
 
     $pdf->SetXY(17, 237);
     $pdf->Write(0, $application->dyeo ? $application->dyeo->dyeo_mobile : '');
-    $pdf->SetXY(79, 237);          //Newly added this field
+    $pdf->SetXY(79, 237);          // Newly added this field
     $pdf->Write(0, $application->club ? $application->club->club_president_mobile : '');
     $pdf->SetXY(140, 237);
     $pdf->Write(0, $application->club && $application->club->cyeo ? $application->club->cyeo->cyeo_mobile : '');
@@ -640,8 +630,7 @@ function get_CAMPS_Signing_Page($application): Fpdi
     return $pdf;
 }
 
-
-//------------Signing Page 5-6 CAMPS ---------------------------------------------------------------------------------
+// ------------Signing Page 5-6 CAMPS ---------------------------------------------------------------------------------
 /**
  * @throws PdfTypeException
  * @throws CrossReferenceException
@@ -653,16 +642,16 @@ function get_CAMPS_Signing_Page_5_6($application): Fpdi
 {
     $pdf = prepare_template($application);
 
-    $image_name = 'app/app-' . $application->id . '.png';
-    $iconv_name = iconv('UTF-8', "ISO-8859-1", $application->full_name);
+    $image_name = 'app/app-'.$application->id.'.png';
+    $iconv_name = iconv('UTF-8', 'ISO-8859-1', $application->full_name);
 
     if ($application->media_id && $application->image_data) {
         $image = Image::make($application->image_data);
         $image->save(storage_path($image_name));
     }
 
-//---Prepare Signing Pages ----------------------------------
-//---Page 5 -------------------------------------------------
+    // ---Prepare Signing Pages ----------------------------------
+    // ---Page 5 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(5);
     $pdf->useTemplate($templateId);
@@ -676,7 +665,7 @@ function get_CAMPS_Signing_Page_5_6($application): Fpdi
         $pdf->Write(0, $application->dyeo->district_code);
     }
 
-//---Page 6 -------------------------------------------------
+    // ---Page 6 -------------------------------------------------
     $pdf->addPage();
     $templateId = $pdf->importPage(6);
     $pdf->useTemplate($templateId);

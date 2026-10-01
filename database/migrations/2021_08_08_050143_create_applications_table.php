@@ -43,7 +43,7 @@ class CreateApplicationsTable extends Migration
             $table->string('pref_name', 35)->nullable();
             $table->string('parent_support', 35)->nullable();
             $table->unsignedInteger('dyeo_id')->nullable();      // Review foreign key
-            $table->string('realm', 35)->nullable();                            //Review User Role
+            $table->string('realm', 35)->nullable();                            // Review User Role
             $table->string('application_status', 35)->nullable();
             $table->string('application_status_note', 255)->nullable();
             $table->boolean('dyeo_assigned')->nullable();
@@ -78,7 +78,7 @@ class CreateApplicationsTable extends Migration
             $table->boolean('prescribed_meds')->nullable();
             $table->boolean('special_req')->nullable();
             $table->string('medical_info', 650)->nullable();
-            $table->unsignedInteger('rotary_club_id')->nullable() ;    //Review Foreign Key
+            $table->unsignedInteger('rotary_club_id')->nullable();    // Review Foreign Key
             $table->string('free_activities', 650)->nullable();
             $table->string('attainment_vocation', 650)->nullable();
             $table->string('special_interests', 650)->nullable();

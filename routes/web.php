@@ -4,6 +4,7 @@ use App\Http\Controllers\ApplicantAuthController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ClubController;
 use App\Http\Controllers\CyeoController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DyeoController;
 use App\Http\Controllers\EmailGuideController;
 use App\Http\Controllers\UsersController;
@@ -16,15 +17,13 @@ Route::inertia('/', 'Welcome')->name('home');
 Route::resource('applicant', ApplicantAuthController::class)->only(['index', 'store']);
 
 Route::middleware(['auth'])->group(function () {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('users', UsersController::class)->only(['index', 'store', 'update', 'destroy']);
 });
 
 require __DIR__.'/settings.php';
 
 Route::middleware(['auth'])->group(function () {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
-
     Route::group(['middleware' => ['role:admin']], function () {
         Route::resource('users', UsersController::class)->only(['index', 'store', 'update', 'destroy'])->names('users');
 
@@ -39,15 +38,15 @@ Route::middleware(['auth'])->group(function () {
 
         Route::resource('cyeos', CyeoController::class)->except(['create', 'show', 'edit']);
 
-//        Route::get('cyeo-json', [CyeoController::class, 'cyeoJson']);
-//        Route::get('cyeo-json-data', [CyeoController::class, 'cyeoJsonData']);
+        //        Route::get('cyeo-json', [CyeoController::class, 'cyeoJson']);
+        //        Route::get('cyeo-json-data', [CyeoController::class, 'cyeoJsonData']);
     });
 
     Route::group(['middleware' => ['role:admin|dyeo']], function () {
         Route::resource('dyeos', DyeoController::class)->except(['create', 'show', 'edit']);
 
-//        Route::get('dyeo-json', [DyeoController::class, 'dyeoJson']);
-//        Route::get('dyeo-json-data', [DyeoController::class, 'dyeoJsonData']);
+        //        Route::get('dyeo-json', [DyeoController::class, 'dyeoJson']);
+        //        Route::get('dyeo-json-data', [DyeoController::class, 'dyeoJsonData']);
 
         Route::get('email-guide/{application}', [EmailGuideController::class, 'GetEmailGuide']);
         Route::post('send-email-guide/{application}', [EmailGuideController::class, 'SendEmailGuidePart1']);

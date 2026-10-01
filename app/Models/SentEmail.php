@@ -14,15 +14,16 @@ class SentEmail extends Model
         'email_type_id',
         'application_id',
         'message_title',
-        'email_address'
+        'email_address',
     ];
 
-
-    public function email_type() : BelongsTo {
+    public function email_type(): BelongsTo
+    {
         return $this->belongsTo(EmailType::class);
     }
 
-    public function application() : BelongsTo {
+    public function application(): BelongsTo
+    {
         return $this->belongsTo(Application::class, 'application_id');
     }
 }

@@ -10,20 +10,23 @@ class ApplicationSibling extends Model
 {
     use HasFactory;
 
-    protected $casts=[
-        'living_at_home'=>BooleanToYesNo::class,
+    protected $casts = [
+        'living_at_home' => BooleanToYesNo::class,
     ];
-protected $appends=['remove'];
-    protected $fillable=[
+
+    protected $appends = ['remove'];
+
+    protected $fillable = [
         'application_id',
         'full_name',
         'gender',
         'age',
         'occupation',
-        'living_at_home'
+        'living_at_home',
     ];
 
-    public function application(){
+    public function application()
+    {
         return $this->belongsTo(Application::class);
     }
 

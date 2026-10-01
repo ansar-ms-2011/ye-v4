@@ -394,13 +394,7 @@
         width: 100%;
     }
 
-    .v-data-table__thead{
-        background-color: #005E96;
-        color: white;
-        font-weight: bolder;
-        font-size: 1rem;
-        font-family: 'Roboto', sans-serif;
-    }
+
 }
 
 

@@ -8,11 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class EmailType extends Model
 {
     use HasFactory;
+
     public $timestamps = false;
-    protected $fillable=['email_type_label'];
 
+    protected $fillable = ['email_type_label'];
 
-    public function sent_emails() {
+    public function sent_emails()
+    {
         return $this->hasMany(SentEmail::class, 'email_type_id');
     }
 }

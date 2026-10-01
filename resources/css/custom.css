@@ -6,8 +6,32 @@
     background-color: #005E96 !important;
 }
 
+.v-theme--dark .v-data-table__th--fixed{
+    background-color: unset !important;
+}
+
 .v-data-table-column--fixed:not(:first-child){
     background-color: #fff !important;
+}
+
+.v-data-table__thead{
+    background-color: #005E96;
+    color: white;
+    font-weight: bolder;
+    font-size: 1rem;
+    font-family: 'Roboto', sans-serif;
+}
+
+.v-theme--dark .v-data-table__thead{
+    background-color: unset !important;
+}
+
+.v-data-table__th--sortable:hover{
+    color: rgb(var(--v-theme-on-primary-hover)) !important;
+}
+
+.v-theme--dark .v-data-table__th--sortable:hover{
+    color: unset !important;
 }
 
 /*@layer app {*/
