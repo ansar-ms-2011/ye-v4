@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppLogoWhite from '@/assets/images/app-logo-white.png';
+import AppLogoWhite from '@/assets/images/sidebar-logo.png';
 </script>
 
 <template>
@@ -9,7 +9,7 @@ import AppLogoWhite from '@/assets/images/app-logo-white.png';
 <style scoped>
 .app-white-logo-icon {
     color: white;
-    height: 65px;
+    max-height: 60px;
     width: 100%;
 }
 </style>
