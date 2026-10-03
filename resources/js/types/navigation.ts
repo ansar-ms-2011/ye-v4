@@ -10,4 +10,5 @@ export type NavItem = {
     href: NonNullable<InertiaLinkProps['href']>;
     icon?: string;
     isActive?: boolean;
+    roles?: string[];
 };

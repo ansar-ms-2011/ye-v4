@@ -53,31 +53,37 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: 'mdi-view-dashboard-outline',
+        roles: ['admin', 'dyeo', 'cyeo'],
     },
     {
         title: 'Users',
         href: users(),
         icon: 'mdi-account-group-outline',
+        roles: ['admin'],
     },
     {
         title: 'Clubs',
         href: clubs(),
         icon: 'mdi-cards-outline',
+        roles: ['admin', 'dyeo'],
     },
     {
         title: 'CYEOs',
         href: cyeos(),
         icon: 'mdi-account-group',
+        roles: ['admin', 'dyeo'],
     },
     {
         title: 'DYEOs',
         href: dyeos(),
         icon: 'mdi-account-multiple',
+        roles: ['admin'],
     },
     {
         title: 'Applications',
         href: applications(),
         icon: 'mdi-folder-open',
+        roles: ['admin', 'dyeo', 'cyeo'],
     },
 ];
 
@@ -124,7 +130,6 @@ const isRail = computed(() => !isMobile.value && rail.value);
 // const isCollapsed = computed(
 //     () => isRail.value || (isMobile.value && !drawer.value),
 // );
-
 </script>
 
 <template>
@@ -150,21 +155,22 @@ const isRail = computed(() => !isMobile.value && rail.value);
             <div class="app-sidebar-section-label">Platform</div>
 
             <nav class="app-sidebar-nav" aria-label="Platform">
-                <Link
-                    v-for="item in mainNavItems"
-                    :key="item.title"
-                    :href="item.href"
-                    class="app-sidebar-link"
-                    :class="{
-                        'app-sidebar-link-active': isCurrentUrl(item.href),
-                    }"
-                    view-transition
-                >
-                    <VIcon :icon="item.icon" size="20" />
-                    <span class="app-sidebar-link-label">
-                        {{ item.title }}
-                    </span>
-                </Link>
+                <template v-for="item in mainNavItems" :key="item.title">
+                    <Link
+                        v-if="item.roles?.includes(auth.user.role?.name)"
+                        :href="item.href"
+                        class="app-sidebar-link"
+                        :class="{
+                            'app-sidebar-link-active': isCurrentUrl(item.href),
+                        }"
+                        view-transition
+                    >
+                        <VIcon :icon="item.icon" size="20" />
+                        <span class="app-sidebar-link-label">
+                            {{ item.title }}
+                        </span>
+                    </Link>
+                </template>
             </nav>
 
             <template #append>

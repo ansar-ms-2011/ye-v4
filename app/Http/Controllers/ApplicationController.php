@@ -42,10 +42,7 @@ class ApplicationController extends Controller
         if ($user->hasRole('dyeo')) {
             $dyeo = RibiDyeo::where('user_id', $user->id)->first();
             if (! $dyeo) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No DYEO associated with User Id '.$user->id,
-                ]);
+                Inertia::flash('toast', ['type' => 'warning', 'message' => 'You dont have any associated DYEO record']);
             }
             $applications = $applications->where('dyeo_id', $dyeo->id);
         } elseif ($user->hasRole('cyeo')) {
@@ -53,10 +50,8 @@ class ApplicationController extends Controller
             if ($user->cyeo && $user->cyeo->ribi_club_id) {
                 $applications->where('rotary_club_id', $user->cyeo->ribi_club_id);
             } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => "No applications found associated with your club {$user->cyeo?->club?->club_name} or you don't have associated to any club",
-                ]);
+                $applications->whereNull('id');
+                Inertia::flash('toast', ['type' => 'warning', 'message' => 'No applications found associated with your club.']);
             }
         } elseif ($user->hasRole('applicant')) {
             $applications->whereNull('id'); // Just a workaround to hide applications
