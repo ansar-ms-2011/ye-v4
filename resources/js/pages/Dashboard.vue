@@ -333,6 +333,7 @@ const recentApplicationsHeaders = [
 
                                 <div class="d-flex ga-2 mt-15 flex-wrap">
                                     <VBtn
+                                        style="color: white;"
                                         color="primary"
                                         class="bg-primary"
                                         prepend-icon="mdi-pencil-outline"
