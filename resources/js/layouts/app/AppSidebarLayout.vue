@@ -53,7 +53,7 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: 'mdi-view-dashboard-outline',
-        roles: ['admin', 'dyeo', 'cyeo'],
+        roles: ['admin', 'dyeo', 'cyeo', 'applicant'],
     },
     {
         title: 'Users',

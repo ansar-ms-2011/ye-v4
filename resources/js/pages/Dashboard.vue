@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { dashboard } from '@/routes';
+import { format } from 'date-fns';
 
 interface Stats {
     total_applications: number;
@@ -136,7 +137,7 @@ const recentApplicationsHeaders = [
                 >
                     <div>
                         <div
-                            class="text-caption text-uppercase font-weight-bold opacity-80 mb-1"
+                            class="text-caption text-uppercase font-weight-bold opacity-90 mb-1"
                         >
                             Rotary Youth Exchange &bull; RIBI
                         </div>
@@ -147,7 +148,7 @@ const recentApplicationsHeaders = [
                         </h1>
                         <p class="text-body-2 text-white opacity-90 mb-0">
                             <span class="text-capitalize">{{ role }}</span>
-                            portal
+                            Portal
                             <template v-if="userContext.district">
                                 &bull; District
                                 {{ userContext.district }}</template
@@ -221,8 +222,7 @@ const recentApplicationsHeaders = [
                                             }}
                                             &bull; Applied:
                                             {{
-                                                applicantApplication.date_of_app ||
-                                                'N/A'
+                                                applicantApplication.date_of_app? format(applicantApplication.date_of_app, 'dd-MM-yyyy') : 'N/A'
                                             }}
                                         </div>
                                     </div>
@@ -331,9 +331,10 @@ const recentApplicationsHeaders = [
                                     </VCol>
                                 </VRow>
 
-                                <div class="d-flex ga-2 mt-6 flex-wrap">
+                                <div class="d-flex ga-2 mt-15 flex-wrap">
                                     <VBtn
                                         color="primary"
+                                        class="bg-primary"
                                         prepend-icon="mdi-pencil-outline"
                                         :href="`/applications/${applicantApplication.id}/edit`"
                                     >

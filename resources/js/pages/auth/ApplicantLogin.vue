@@ -7,7 +7,7 @@ import { store } from '@/routes/applicant';
 defineOptions({
     layout: {
         title: 'Log in to your account',
-        description: 'Enter your application number and dob log in',
+        description: 'Enter your application number and dob.',
     },
 });
 
@@ -46,7 +46,7 @@ defineProps<{
         </div>
 
         <div class="starter-field mb-2">
-            <label for="email">Application's DOB</label>
+            <label for="email">Applicant's DOB</label>
             <VDateInput
                 id="applicant_dob"
                 name="applicant_dob"
