@@ -1058,9 +1058,8 @@ const recentApplicationsHeaders = [
     padding: 0;
 }
 
-.welcome-banner {
-    background: linear-gradient(135deg, #005e96 0%, #00385b 100%) !important;
-}
+
+
 
 .kpi-card {
     transition:

@@ -80,8 +80,9 @@ class DyeoController extends Controller
             $dyeo->update($request->all());
             $dyeo->user()->update([
                 'full_name' => $request->dyeo_name,
-                'email' => $request->email,
-                'password' => Hash::make('12345678'),
+                'email' => $request->dyeo_email,
+                'active' => true,
+                'district' => $dyeo->district_code,
             ]);
 
             DB::commit();

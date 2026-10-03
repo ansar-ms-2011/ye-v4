@@ -14,6 +14,7 @@ class Application extends Model
         'parent1_rotarian' => BooleanToYesNo::class,
         'parent2_rotarian' => BooleanToYesNo::class,
         'dob' => 'date:d-m-Y',
+        'date_of_app' => 'date:d-m-Y',
     ];
 
     protected $fillable = [
@@ -100,7 +101,7 @@ class Application extends Model
         'date_of_app',
     ];
 
-    protected $appends = ['image_data', 'full_name', 'row_class'];
+    protected $appends = ['image_data', 'full_name', 'application_season_class'];
 
     public function user()
     {
@@ -199,13 +200,13 @@ class Application extends Model
         return strtoupper($this->firstname.' '.$this->surname);
     }
 
-    public function getRowClassAttribute()
+    public function getApplicationSeasonClassAttribute()
     {
-        return getAppClass(new Carbon($this->date_of_app));
+        return getApplicationClass(Carbon::parse($this->date_of_app));
     }
 
-    public function getDateOfAppAttribute($value)
-    {
-        return date('Y-m-d', strtotime($value));
-    }
+//    public function getDateOfAppAttribute($value)
+//    {
+//        return date('Y-m-d', strtotime($value));
+//    }
 }

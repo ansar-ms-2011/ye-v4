@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class DyeoStoreFormRequest extends FormRequest
 {
@@ -24,7 +25,13 @@ class DyeoStoreFormRequest extends FormRequest
     {
         return [
             'dyeo_name' => ['required', 'string', 'max:255'],
-            'dyeo_email' => ['required', 'string', 'email', 'max:255', 'unique:ribi_dyeo'],
+            'dyeo_email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('ribi_dyeo', 'dyeo_email')->ignore($this->route('dyeo')),
+            ],
             'district_code' => ['required', 'integer'],
         ];
     }

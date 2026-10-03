@@ -29,6 +29,8 @@ class RibiDyeo extends Model
         'full_name',
         'email',
         'password',
+        'active',
+        'district',
     ];
 
     public function user()

@@ -8,12 +8,12 @@ import RotaryIcon from '@/components/RotaryIcon.vue';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { getInitials } from '@/composables/useInitials';
 import { dashboard, logout } from '@/routes';
+import { index as applications } from '@/routes/applications';
 import { index as clubs } from '@/routes/clubs';
 import { index as cyeos } from '@/routes/cyeos';
 import { index as dyeos } from '@/routes/dyeos';
 import { edit as editProfile } from '@/routes/profile';
 import { index as users } from '@/routes/users';
-import { index as applications } from '@/routes/applications';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
@@ -121,10 +121,10 @@ watch(
     { immediate: true },
 );
 const isRail = computed(() => !isMobile.value && rail.value);
-const isCollapsed = computed(
-    () => isRail.value || (isMobile.value && !drawer.value),
-);
-console.log(isCollapsed.value);
+// const isCollapsed = computed(
+//     () => isRail.value || (isMobile.value && !drawer.value),
+// );
+
 </script>
 
 <template>

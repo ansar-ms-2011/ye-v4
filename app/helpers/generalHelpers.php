@@ -67,25 +67,41 @@ function checkApplicationAccess($application, $user)
     // allowed all for system admin role
 }
 
-function getAppClass($app_date): string
+//function getAppClass($app_date): string
+//{
+//    $app_date->setHour(0);
+//    $app_date->setMinute(0);
+//    $app_date->setSecond(0);
+//
+//    $current_month = now()->month;
+//    $current_year = now()->year;
+//
+//    if ($current_month >= 9) {
+//        $current_season_start = Carbon::create($current_year, 9);
+//    } else {
+//        $current_season_start = Carbon::create($current_year - 1, 9);
+//    }
+//    if ($app_date < $current_season_start) {
+//        return 'previous_season';
+//    } else {
+//        return 'current_season';
+//    }
+//}
+function getApplicationClass(Carbon $app_date): string
 {
-    $app_date->setHour(0);
-    $app_date->setMinute(0);
-    $app_date->setSecond(0);
+    $app_date = $app_date->copy()->startOfDay();
 
-    $current_month = now()->month;
-    $current_year = now()->year;
+    $now = now();
+    $current_month = $now->month;
+    $current_year  = $now->year;
 
-    if ($current_month >= 9) {
-        $current_season_start = Carbon::create($current_year, 9);
-    } else {
-        $current_season_start = Carbon::create($current_year - 1, 9);
-    }
-    if ($app_date < $current_season_start) {
-        return 'previous_season';
-    } else {
-        return 'current_season';
-    }
+    $current_season_start = $current_month >= 9
+        ? Carbon::create($current_year, 9, 1)
+        : Carbon::create($current_year - 1, 9, 1);
+
+    return $app_date->lt($current_season_start)
+        ? 'previous_season'
+        : 'current_season';
 }
 
 function generateGuideFileCamps($application): string

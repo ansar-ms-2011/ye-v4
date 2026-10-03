@@ -10,6 +10,7 @@ use App\Models\Media;
 use App\Models\RibiClub;
 use App\Models\RibiDyeo;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -20,34 +21,22 @@ class ApplicationController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $role = $user->roles[0]->name;
-        $orderBy = $request->get('sortBy');
-        $orderBy = $orderBy ? $orderBy[0] : 'id';
-        $sortDir = $request->get('sortDesc');
-        $sortDir = ($sortDir && $sortDir[0] == 'true') ? 'desc' : 'asc';
-        $searchText = $request->get('searchText');
-        $searchDistrict = $request->get('searchDistrict');
-
-        $perPage = $request->get('itemsPerPage');
+        $searchText = $request->input('searchText');
+        $sortBy = $request->input('sortBy') ?? 'application_no';
+        $sortOrder = $request->input('sortOrder') ?? 'desc';
+        $perPage = $request->input('itemsPerPage');
         $applications = Application::query();
 
-        if ($searchText) {
-            $applications->where(function ($q) use ($searchText) {
-                $q->where('firstname', 'like', "%$searchText%")
+        $applications->when($searchText, function ($q) use ($searchText) {
+            $q->where(function (Builder $query) use ($searchText) {
+                $query->where('firstname', 'like', "%$searchText%")
                     ->orWhere('surname', 'like', "%$searchText%")
                     ->orWhere('application_status', 'like', "%$searchText%")
-                    ->orWhere('application_no', 'like', "%$searchText%")
-                    ->orWhere(function ($q) use ($searchText) {
-                        $q->whereDate('dob', $searchText);
-                    });
+                    ->orWhere('application_no', 'like', "%$searchText%");
+            })->orWhereHas('dyeo', function ($q) use ($searchText) {
+                $q->where('district_code', 'LIKE', "%$searchText%");
             });
-        }
-
-        if ($searchDistrict) {
-            $applications->whereHas('dyeo', function ($q) use ($searchDistrict) {
-                $q->where('district_code', 'like', "%$searchDistrict%");
-            });
-        }
+        });
 
         // Role-Based Filtering of Applications
         if ($user->hasRole('dyeo')) {
@@ -73,12 +62,14 @@ class ApplicationController extends Controller
             $applications->whereNull('id'); // Just a workaround to hide applications
         }
 
-        $applications = $applications->with(['languages', 'dyeo', 'siblings'])
-            ->orderBy($orderBy, $sortDir)
-            ->paginate($perPage > 0 ? $perPage : 30);
+        $applicationsPaginator = $applications->with([
+            'dyeo:id,dyeo_name,district_code',
+        ])
+            ->orderBy($sortBy, $sortOrder)
+            ->paginate($perPage ?? 15);
 
         return Inertia::render('applications/Index', [
-            'applications' => $applications,
+            'applicationsPaginator' => $applicationsPaginator,
         ]);
     }
 
