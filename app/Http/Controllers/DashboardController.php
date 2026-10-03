@@ -68,7 +68,7 @@ class DashboardController extends Controller
                 ->orderByDesc('id')
                 ->take(8)
                 ->get()
-                ->map(fn ($app) => [
+                ->map(fn($app) => [
                     'id' => $app->id,
                     'application_no' => $app->application_no,
                     'full_name' => $app->full_name,
@@ -83,7 +83,7 @@ class DashboardController extends Controller
             $recentEmails = SentEmail::orderByDesc('id')
                 ->take(5)
                 ->get()
-                ->map(fn ($email) => [
+                ->map(fn($email) => [
                     'id' => $email->id,
                     'recipient' => $email->recipient ?? $email->to ?? '-',
                     'subject' => $email->subject ?? 'Email Notification',
@@ -94,6 +94,8 @@ class DashboardController extends Controller
             $query = Application::query();
             if ($dyeo) {
                 $query->where('dyeo_id', $dyeo->id);
+            } else {
+                $query->whereNull('id');    //Hide all applications
             }
 
             $stats['total_applications'] = (clone $query)->count();
@@ -127,7 +129,7 @@ class DashboardController extends Controller
                 ->orderByDesc('id')
                 ->take(8)
                 ->get()
-                ->map(fn ($app) => [
+                ->map(fn($app) => [
                     'id' => $app->id,
                     'application_no' => $app->application_no,
                     'full_name' => $app->full_name,
@@ -143,6 +145,8 @@ class DashboardController extends Controller
             $query = Application::query();
             if ($user->cyeo && $user->cyeo->ribi_club_id) {
                 $query->where('rotary_club_id', $user->cyeo->ribi_club_id);
+            }else{
+                $query->whereNull('id');    //Hide all applications
             }
 
             $stats['total_applications'] = (clone $query)->count();
@@ -171,7 +175,7 @@ class DashboardController extends Controller
                 ->orderByDesc('id')
                 ->take(8)
                 ->get()
-                ->map(fn ($app) => [
+                ->map(fn($app) => [
                     'id' => $app->id,
                     'application_no' => $app->application_no,
                     'full_name' => $app->full_name,
@@ -199,7 +203,7 @@ class DashboardController extends Controller
                     'exchange_type' => $app->exchange_type,
                     'application_status' => $app->application_status,
                     'application_status_note' => $app->application_status_note,
-                    'application_fee_paid' => (bool) $app->application_fee_paid,
+                    'application_fee_paid' => (bool)$app->application_fee_paid,
                     'date_of_app' => $app->date_of_app,
                     'club_name' => $app->club?->club_name ?? 'Not Assigned',
                     'dyeo_name' => $app->dyeo?->dyeo_name ?? 'Not Assigned',

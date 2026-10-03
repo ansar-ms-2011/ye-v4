@@ -22,7 +22,7 @@ class ClubController extends Controller
         $perPage = $request->perPage;
 
         $searchText = $request->input('searchText');
-        Log::info('searchText: '.$searchText);
+
         $clubs = RibiClub::query()
             ->when($request->user()->hasRole('dyeo'), function ($q) use ($request) {
                 $q->where('district_code', $request->user()->district);

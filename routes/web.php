@@ -26,28 +26,19 @@ require __DIR__.'/settings.php';
 Route::middleware(['auth'])->group(function () {
     Route::group(['middleware' => ['role:admin']], function () {
         Route::resource('users', UsersController::class)->only(['index', 'store', 'update', 'destroy'])->names('users');
-
+        Route::resource('dyeos', DyeoController::class)->except(['create', 'show', 'edit']);
         Route::get('get-users-table-clubs/{district_code?}', [UsersController::class, 'usersTableClubsJson']);
         Route::get('check-email-exists/{email}/{id}', [UsersController::class, 'EmailExists']);
         Route::post('re-establish-dyeo-users', [UsersController::class, 'reEstablishDyeoUsers']);
         Route::post('re-establish-cyeo-users', [UsersController::class, 'reEstablishCyeoUsers']);
     });
 
-    Route::group(['middleware' => ['role:admin|dyeo|cyeo']], function () {
+    Route::group(['middleware' => ['role:admin|dyeo']], function () {
         Route::resource('clubs', ClubController::class)->except(['create', 'show', 'edit']);
-
         Route::resource('cyeos', CyeoController::class)->except(['create', 'show', 'edit']);
-
-        //        Route::get('cyeo-json', [CyeoController::class, 'cyeoJson']);
-        //        Route::get('cyeo-json-data', [CyeoController::class, 'cyeoJsonData']);
     });
 
     Route::group(['middleware' => ['role:admin|dyeo']], function () {
-        Route::resource('dyeos', DyeoController::class)->except(['create', 'show', 'edit']);
-
-        //        Route::get('dyeo-json', [DyeoController::class, 'dyeoJson']);
-        //        Route::get('dyeo-json-data', [DyeoController::class, 'dyeoJsonData']);
-
         Route::get('email-guide/{application}', [EmailGuideController::class, 'GetEmailGuide']);
         Route::post('send-email-guide/{application}', [EmailGuideController::class, 'SendEmailGuidePart1']);
     });

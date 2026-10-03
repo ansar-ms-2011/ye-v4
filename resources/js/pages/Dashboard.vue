@@ -875,7 +875,7 @@ const recentApplicationsHeaders = [
                                     Create New Application
                                 </VBtn>
 
-                                <template v-if="isAdmin || isDyeo || isCyeo">
+                                <template v-if="isAdmin || isDyeo">
                                     <VBtn
                                         block
                                         variant="tonal"
@@ -888,7 +888,7 @@ const recentApplicationsHeaders = [
                                     </VBtn>
                                 </template>
 
-                                <template v-if="isAdmin || isDyeo">
+                                <template v-if="isAdmin">
                                     <VBtn
                                         block
                                         variant="tonal"
