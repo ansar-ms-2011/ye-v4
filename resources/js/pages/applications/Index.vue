@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { Head, router, Deferred } from '@inertiajs/vue3';
-import { computed, ref, shallowRef, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import ConfirmDialog from '@/components/ConfirmDialog.vue';
-import { getNewDyeo } from '@/helpers';
-import { index, destroy } from '@/routes/applications';
-import type { Application, Dyeo } from '@/types';
+import { index, destroy, create, edit } from '@/routes/application';
+import type { Application } from '@/types';
+import { format, parseISO } from 'date-fns';
 
 const props = defineProps<{
     applicationsPaginator?: any;
@@ -16,8 +16,6 @@ const props = defineProps<{
 const deleteDialog = ref(false);
 const deleteTarget = ref<any>(null);
 const deleting = ref(false);
-const formModel = ref<Dyeo>(getNewDyeo());
-const dialog = shallowRef(false);
 const searchText = ref(props.filters?.searchText ?? '');
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 const isSearching = ref(false);
@@ -135,9 +133,8 @@ function performSearch(search: string) {
     );
 }
 
-function add() {
-    formModel.value = getNewDyeo();
-    dialog.value = true;
+function addNewApplication() {
+    router.get(create().url);
 }
 function clearSearch() {
     searchText.value = '';
@@ -155,22 +152,6 @@ function clearSearch() {
         },
     );
 }
-
-// function onPageChange(newPage: number) {
-//     router.get(
-//         index().url,
-//         {
-//             page: newPage,
-//             perPage: props.applicationsPaginator.perPage,
-//             ...(searchText.value && { searchText: searchText.value }),
-//         },
-//         {
-//             preserveState: true,
-//             preserveScroll: true,
-//             only: ['applicationsPaginator'],
-//         },
-//     );
-// }
 
 function onOptionsChange({ page, itemsPerPage, sortBy }: any) {
     router.get(
@@ -317,6 +298,16 @@ async function show(evt: any, application: Application) {
     );
 }
 
+function handleMenuItemClick({ id, value, code }: any) {
+    if (id === 'edit' && contextMenuTargetedApplication.value?.id) {
+        router.visit(edit({ id: contextMenuTargetedApplication.value?.id }));
+    }
+
+    console.log('Clicked item value:', value); // value = item.code
+    console.log('Clicked item id:', id);
+    console.log('Clicked item code:', code);
+}
+
 function hide() {
     document
         .querySelector('.icon-btn-applications-active')
@@ -398,7 +389,7 @@ function getRowProps(row: any) {
                                     rounded="lg"
                                     text="Add New Application"
                                     variant="outlined"
-                                    @click="add"
+                                    @click="addNewApplication"
                                 ></v-btn>
                             </v-toolbar>
                         </template>
@@ -482,6 +473,18 @@ function getRowProps(row: any) {
                             {{ item.dyeo?.dyeo_name }}
                         </template>
 
+                        <template
+                            v-slot:[`item.date_of_app`]="{
+                                item,
+                            }: {
+                                item: any;
+                            }"
+                        >
+                            {{
+                                format(parseISO(item.date_of_app), 'dd-MM-yyyy')
+                            }}
+                        </template>
+
                         <template v-slot:no-data>
                             <div class="d-flex justify-center pa-4">
                                 <span v-if="reloading"
@@ -516,6 +519,7 @@ function getRowProps(row: any) {
                     density="compact"
                     item-value="code"
                     item-props
+                    @click:select="handleMenuItemClick"
                     slim
                 >
                     <template v-slot:prepend="{ item }">
@@ -563,5 +567,4 @@ function getRowProps(row: any) {
     background-color: rgb(var(--v-theme-surface-variant)) !important;
     transition: opacity 0.3s ease-in-out;
 }
-
 </style>

@@ -21,8 +21,6 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('users', UsersController::class)->only(['index', 'store', 'update', 'destroy']);
 });
 
-require __DIR__.'/settings.php';
-
 Route::middleware(['auth'])->group(function () {
     Route::group(['middleware' => ['role:admin']], function () {
         Route::resource('users', UsersController::class)->only(['index', 'store', 'update', 'destroy'])->names('users');
@@ -38,11 +36,6 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('cyeos', CyeoController::class)->except(['create', 'show', 'edit']);
     });
 
-    Route::group(['middleware' => ['role:admin|dyeo']], function () {
-        Route::get('email-guide/{application}', [EmailGuideController::class, 'GetEmailGuide']);
-        Route::post('send-email-guide/{application}', [EmailGuideController::class, 'SendEmailGuidePart1']);
-    });
-
     Route::group(['middleware' => ['role:admin|dyeo|applicant']], function () {
         Route::get('email-guide/{application}', [EmailGuideController::class, 'GetEmailGuideView']);
         Route::post('send-email-guide-part-1/{application}', [EmailGuideController::class, 'SendPart1GuideThroughEmail']);
@@ -56,32 +49,23 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
-    Route::group(['middleware' => ['role:cyeo|dyeo']], function () {
-        Route::get('profile', [UsersController::class, 'GetProfile']);
-        Route::get('get-profile-data', [UsersController::class, 'GetProfileData']);
-        Route::post('save-profile-data', [UsersController::class, 'SaveProfileData']);
-    });
-
     // Separated Application Edit route for applicant
-    Route::group(['middleware' => ['role:admin|cyeo|dyeo|application|applicant']], function () {
-        Route::resource('applications', ApplicationController::class)->only(['edit', 'update']);
-        Route::get('application/{id}/uploaded-files', [ApplicationController::class, 'ViewUploadedFiles']);
+    Route::group(['middleware' => ['role:admin|dyeo|cyeo|applicant']], function () {
+        Route::resource('application', ApplicationController::class)->only(['index', 'edit', 'store', 'update', 'destroy']);
+        Route::get('application/{id}/uploaded-files', [ApplicationController::class, 'ViewUploadedFiles'])->name('application.uploadedFiles');
+
+        Route::post('remove-uploaded-media/{media}', [ApplicationController::class, 'removeUploadedMedia'])->name('application.removeMedia');
     });
 
-    Route::group(['middleware' => ['role:admin|dyeo|applicant']], function () {
-        Route::post('/remove-uploaded-media/{media}', [ApplicationController::class, 'removeUploadedMedia']);
-    });
 
-    Route::group(['middleware' => ['role:admin|cyeo|dyeo|application']], function () {
-        Route::resource('applications', ApplicationController::class)->except(['store']);
-
+    Route::group(['middleware' => ['role:admin|cyeo|dyeo|applicant']], function () {
         Route::get('applications-pdf-view/{id}', function ($id) {
             $application = Application::find($id);
             // Check Access By the Right User
             $user = auth()->user();
             //  Check Access By the Right User otherwise abort request
             checkApplicationAccess($application, $user);
-            // If Access is valid then prepare PDF documents and show to user
+            // If Access is valid, then prepare PDF documents and show to user
             $application->load([
                 'club',
                 'dyeo',
@@ -145,10 +129,7 @@ Route::middleware(['auth'])->group(function () {
             return get_CAMPS_Signing_Page_5_6($application)->Output();
         });
     });
-
 });
-
-require __DIR__.'/settings.php';
 
 Route::get('application/create', [ApplicationController::class, 'create'])->name('application.create');
 
@@ -182,6 +163,8 @@ Route::get('/update-media', function () {
 
     return 'All media files updated successfully';
 });
+
+require __DIR__.'/settings.php';
 
 Route::get('/clear-cache', function () {
     Artisan::call('cache:clear');

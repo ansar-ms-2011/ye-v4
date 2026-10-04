@@ -14,7 +14,7 @@ class Application extends Model
         'parent1_rotarian' => BooleanToYesNo::class,
         'parent2_rotarian' => BooleanToYesNo::class,
         'dob' => 'date:d-m-Y',
-        'date_of_app' => 'date:d-m-Y',
+        'date_of_app' => 'date',
     ];
 
     protected $fillable = [

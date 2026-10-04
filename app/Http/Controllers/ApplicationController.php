@@ -41,7 +41,7 @@ class ApplicationController extends Controller
         // Role-Based Filtering of Applications
         if ($user->hasRole('dyeo')) {
             $dyeo = RibiDyeo::where('user_id', $user->id)->first();
-            if (! $dyeo) {
+            if (!$dyeo) {
                 Inertia::flash('toast', ['type' => 'warning', 'message' => 'You dont have any associated DYEO record']);
             }
             $applications = $applications->where('dyeo_id', $dyeo->id);
@@ -75,8 +75,16 @@ class ApplicationController extends Controller
         $clubs = $clubs->groupBy('district_code');
 
         return Inertia::render('applications/Create', [
-            'dyeos' => $dyeos, 'clubs' => $clubs,
+            'dyeos' => $dyeos,
+            'clubs' => $clubs,
+            'mode' => 'edit',
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        // Currently, create option is not implemented
+        return Inertia::flash('toast', ['message' => 'Currently we are not creating applications'])->back();
     }
 
     public function show(Application $application)
@@ -105,7 +113,7 @@ class ApplicationController extends Controller
         ]);
 
         return Inertia::render('applications/Edit', [
-            'application' => $application,
+            'ApplicationObj' => $application,
             'dyeos' => $dyeos,
             'clubs' => $clubs,
         ]);
@@ -117,10 +125,6 @@ class ApplicationController extends Controller
         checkApplicationAccess($application, $user);
 
         $formData = $request->all();
-        $validated = $request->validate([
-            'media_library.*.brief_caption' => 'required_with:media_library.*.media|max:150',
-            'media_library.*.size' => 'max:5120',
-        ]);
 
         // Truncate Medical Info if > 650
         $info = $formData['medical_info'];
@@ -188,7 +192,8 @@ class ApplicationController extends Controller
         }
         $application->load('media_library');
 
-        return redirect()->back()->with('message', 'Application Updated Successfully');
+        return Inertia::flash('toast', ['message' => 'Application Updated Successfully'])
+            ->back();
     }
 
     public function removeUploadedMedia(Media $media)

@@ -8,7 +8,7 @@ import RotaryIcon from '@/components/RotaryIcon.vue';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { getInitials } from '@/composables/useInitials';
 import { dashboard, logout } from '@/routes';
-import { index as applications } from '@/routes/applications';
+import { index as applications } from '@/routes/application';
 import { index as clubs } from '@/routes/clubs';
 import { index as cyeos } from '@/routes/cyeos';
 import { index as dyeos } from '@/routes/dyeos';
