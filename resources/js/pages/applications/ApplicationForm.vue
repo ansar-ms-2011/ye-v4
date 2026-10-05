@@ -11,14 +11,16 @@ const props = defineProps({
 const dyeos = usePage().props.dyeos;
 const clubs = usePage().props.clubs;
 const role = usePage().props.auth?.user?.role?.name;
-console.log(dyeos, clubs);
+
+// console.log(dyeos, clubs);
+
 const formRef = ref(null);
 const langFormRef = ref(null);
 const siblingFormRef = ref(null);
 const uploadFormRef = ref(null);
 
 const valid = ref(false);
-const langValid = ref(false);
+const langFormValid = ref(false);
 const uploadFormValid = ref(false);
 const siblingValid = ref(false);
 
@@ -29,16 +31,20 @@ const edited_sibling_index = ref(null);
 
 const yearsStudiedOptions = Array.from({ length: 25 }, (_, i) => i + 1);
 const language_options = ['Poor', 'Fair', 'Good', 'Fluent'];
-const form = reactive(props.ApplicationObj);
+
 const defaultLanguage = reactive(getEmptyLanguage());
 const defaultSibling = reactive(getEmptySibling());
 const d_clubs = ref([]);
 const alert = reactive({ show: false, type: 'info', message: '' });
+
+const form = reactive(props.ApplicationObj);
+
 const snackbar = reactive({
     show: false,
     message: '',
     color: 'success',
     timeout: 3000,
+    location: '',
 });
 const list_categories = [
     'Photo-Self',
@@ -105,10 +111,11 @@ form.media_library = buildMediaLibrary();
 //
 // selectClubs();
 
-function showSnackbar(msg, color = 'success') {
+function showSnackbar(msg, color = 'success', location = '') {
     snackbar.message = msg;
     snackbar.color = color;
     snackbar.show = true;
+    snackbar.location = location;
 }
 
 const loading = reactive({
@@ -188,7 +195,7 @@ const filledMediaFiles = computed(
 );
 
 function validateMedicalInfo(v) {
-    console.log('validateMedicalInfo', v);
+    // console.log('validateMedicalInfo', v);
     const answeredYes = !!(
         form.medical_condition ||
         form.treated_condition ||
@@ -218,12 +225,15 @@ async function submitForm() {
     const { valid: mainFormValidity } = await formRef.value?.validate();
     const { valid: uploadFormValidity } = await uploadFormRef.value?.validate();
 
-    console.log('mainFormValidity', mainFormValidity);
-    console.log('uploadFormValidity', uploadFormValidity);
+    console.log(mainFormValidity, uploadFormValidity);
 
-    nextTick(() => {
-        if (!(valid.value && uploadFormValid.value)) {
-            showSnackbar('Check validation Errors', 'red');
+    await nextTick(() => {
+        if (!(mainFormValidity && uploadFormValidity)) {
+            showSnackbar(
+                'Please fill out all required fields',
+                'error',
+                'top end',
+            );
             scrollToFirstError();
 
             return;
@@ -231,19 +241,23 @@ async function submitForm() {
 
         saving.value = true;
 
+        const options = {
+            preserveScroll: true,
+            preserveState: false, // <-- re-mounts component
+            onSuccess: (page) => {
+                // Re-sync local reactive form from fresh props
+                Object.assign(form, page.props.ApplicationObj);
+                form.media_library = buildMediaLibrary();
+            },
+            onFinish: () => {
+                saving.value = false;
+            },
+        };
+
         if (form.id > 0) {
-            router.put(update({ id: form.id }), form, {
-                preserveScroll: true,
-                onFinish: () => {
-                    saving.value = false;
-                },
-            });
+            router.put(update({ id: form.id }), form, options);
         } else {
-            router.post(store(), form, {
-                onFinish: () => {
-                    saving.value = false;
-                },
-            });
+            router.post(store(), form, options);
         }
     });
 }
@@ -280,31 +294,46 @@ function sendEmail(type, loadingKey) {
     );
 }
 
-function addLanguage() {
-    langFormRef.value?.validate();
 
-    if (filteredLanguages.value.length < 3 && langValid.value) {
-        form.languages.push({ ...defaultLanguage });
-        Object.assign(defaultLanguage, getEmptyLanguage());
-        langFormRef.value?.resetValidation();
-    } else {
-        showSnackbar('Maximum 03 Languages can be added', 'red');
+async function addLanguage() {
+    if (filteredLanguages.value.length >= 3) {
+        showSnackbar('Maximum 03 Languages can be added', 'error');
+
+        return false;
     }
+
+    if (!langFormValid.value) {
+        langFormRef.value?.validate();
+        showSnackbar('Please complete the language fields', 'error');
+
+        return false;
+    }
+
+    form.languages.push({ ...defaultLanguage });
+    Object.assign(defaultLanguage, getEmptyLanguage());
+
+    await nextTick();
+    langFormRef.value?.resetValidation();
 }
+
 function removeLanguage(item, index) {
     form.languages[index].remove = true;
 }
 
-function addSibling() {
+async function addSibling() {
     siblingFormRef.value?.validate();
 
-    if (siblingValid.value && form.siblings.length < 4) {
-        form.siblings.push({ ...defaultSibling });
-        Object.assign(defaultSibling, getEmptySibling());
-        siblingFormRef.value?.resetValidation();
-    } else {
+    if (siblingValid.value && form.siblings.length >= 4) {
         showSnackbar('Maximum 04 Siblings can be added', 'red');
+
+        return false;
     }
+
+    form.siblings.push({ ...defaultSibling });
+    Object.assign(defaultSibling, getEmptySibling());
+
+    await nextTick();
+    siblingFormRef.value?.resetValidation();
 }
 function editSibling(item, index) {
     Object.assign(defaultSibling, item);
@@ -375,6 +404,7 @@ function removedUploadedMedia(media) {
             :timeout="snackbar.timeout"
             :color="snackbar.color"
             elevation="24"
+            :location="snackbar.location"
         >
             {{ snackbar.message }}
             <template v-slot:actions>
@@ -683,7 +713,11 @@ function removedUploadedMedia(media) {
                         </VCol>
                     </VRow>
 
-                    <VForm ref="langFormRef" v-model="langValid">
+                    <VForm
+                        ref="langFormRef"
+                        v-model="langFormValid"
+                        lazy-validation
+                    >
                         <VRow class="mb-2">
                             <VCol cols="12" sm="2" md="2">
                                 <VTextField

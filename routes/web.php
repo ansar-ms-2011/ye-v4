@@ -133,6 +133,10 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('application/create', [ApplicationController::class, 'create'])->name('application.create');
 
+Route::get('get-media-file/{media}', function (Media $media) {
+    return response()->file(storage_path('app/'.$media->media_path));
+});
+
 Route::get('/update-app', function () {
     Artisan::call('dump-autoload');
     echo 'dump-autoload complete';

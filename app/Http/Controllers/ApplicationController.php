@@ -13,8 +13,9 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Storage;
 
 class ApplicationController extends Controller
 {
@@ -41,7 +42,7 @@ class ApplicationController extends Controller
         // Role-Based Filtering of Applications
         if ($user->hasRole('dyeo')) {
             $dyeo = RibiDyeo::where('user_id', $user->id)->first();
-            if (!$dyeo) {
+            if (! $dyeo) {
                 Inertia::flash('toast', ['type' => 'warning', 'message' => 'You dont have any associated DYEO record']);
             }
             $applications = $applications->where('dyeo_id', $dyeo->id);
@@ -192,15 +193,14 @@ class ApplicationController extends Controller
         }
         $application->load('media_library');
 
-        return Inertia::flash('toast', ['message' => 'Application Updated Successfully'])
-            ->back();
+        return Inertia::flash('toast', ['message' => 'Application Updated Successfully'])->back();
     }
 
     public function removeUploadedMedia(Media $media)
     {
         $media->delete();
 
-        return redirect()->back()->with('message', 'Media File Removed Successfully');
+        return Inertia::flash('toast', ['message' => 'Media File Removed Successfully'])->back();
     }
 
     public function ViewUploadedFiles($id)
