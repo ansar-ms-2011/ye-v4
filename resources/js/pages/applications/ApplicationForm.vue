@@ -2,17 +2,15 @@
 import { router, usePage } from '@inertiajs/vue3';
 import { ref, reactive, computed, nextTick } from 'vue';
 import { getEmptyLanguage, getEmptySibling, validateEmail } from '@/helpers';
+import ActionModal from '@/pages/applications/ActionModal.vue';
 import { store, update, removeMedia } from '@/routes/application';
+
 const props = defineProps({
     ApplicationObj: { type: Object, required: true },
     mode: { type: String, default: 'edit' },
 });
 
-const dyeos = usePage().props.dyeos;
-const clubs = usePage().props.clubs;
 const role = usePage().props.auth?.user?.role?.name;
-
-// console.log(dyeos, clubs);
 
 const formRef = ref(null);
 const langFormRef = ref(null);
@@ -24,7 +22,6 @@ const langFormValid = ref(false);
 const uploadFormValid = ref(false);
 const siblingValid = ref(false);
 
-const show_actions = ref(false);
 const saving = ref(false);
 const edited_sibling = ref(null);
 const edited_sibling_index = ref(null);
@@ -34,7 +31,6 @@ const language_options = ['Poor', 'Fair', 'Good', 'Fluent'];
 
 const defaultLanguage = reactive(getEmptyLanguage());
 const defaultSibling = reactive(getEmptySibling());
-const d_clubs = ref([]);
 const alert = reactive({ show: false, type: 'info', message: '' });
 
 const form = reactive(props.ApplicationObj);
@@ -100,16 +96,6 @@ function buildMediaLibrary() {
 }
 
 form.media_library = buildMediaLibrary();
-
-//TODO : Need to move to separate component along with action Modal
-// function selectClubs() {
-//     const district_code = dyeos?.find(
-//         (d) => d.id === form.dyeo_id,
-//     )?.district_code;
-//     d_clubs.value = district_code ? clubs.value[district_code] || [] : [];
-// }
-//
-// selectClubs();
 
 function showSnackbar(msg, color = 'success', location = '') {
     snackbar.message = msg;
@@ -217,9 +203,6 @@ function viewFiles() {
 function goToEmailGuide() {
     router.visit(props.routes.emailGuide.replace(':id', form.id));
 }
-function formatText(o) {
-    return o.district_code + ' - ' + o.text;
-}
 
 async function submitForm() {
     const { valid: mainFormValidity } = await formRef.value?.validate();
@@ -293,7 +276,6 @@ function sendEmail(type, loadingKey) {
         },
     );
 }
-
 
 async function addLanguage() {
     if (filteredLanguages.value.length >= 3) {
@@ -490,13 +472,15 @@ function removedUploadedMedia(media) {
             </VCol>
 
             <VCol cols="3" sm="3" md="3">
-                <VBtn
-                    color="primary darken-5"
-                    style="float: right"
-                    @click="goToEmailGuide"
-                >
-                    Emails Sent History
-                </VBtn>
+                <div class="d-flex justify-end">
+                    <VBtn
+                        color="primary darken-5"
+                        @click="goToEmailGuide"
+                    >
+                        EMAILS SENT HISTORY
+                    </VBtn>
+                    <ActionModal />
+                </div>
             </VCol>
         </VRow>
 
@@ -1429,106 +1413,23 @@ function removedUploadedMedia(media) {
 
         <VRow>
             <VCol sm="12" md="12">
-                <v-btn
+                <v-fab
+                    app
+                    extended
+                    border
                     :loading="saving"
                     :disabled="saving"
-                    class="mt-1 float-right"
-                    color="primary"
+                    color="success"
+                    location="bottom center"
+                    min-width="250"
+                    hover-elevation="5"
+                    size="large"
+                    text="Save Application"
+                    prepend-icon="mdi-content-save"
                     @click="submitForm"
-                >
-                    Save Application
-                </v-btn>
+                />
             </VCol>
         </VRow>
-
-        <VDialog v-model="show_actions" max-width="700px" id="actionDialog">
-            <VCard>
-                <VCardTitle class="text-h5 bg-primary-lighten-5 mb-3">
-                    Application Actions
-                </VCardTitle>
-                <VCardText>
-                    <VRow v-if="['admin', 'dyeo', 'cyeo'].includes(role)">
-                        <VCol cols="12" sm="6" md="6">
-                            <VAutocomplete
-                                required
-                                label="Choose DYEO"
-                                v-model="form.dyeo_id"
-                                variant="outlined"
-                                density="compact"
-                                :items="dyeos"
-                                :item-text="formatText"
-                                :readonly="role === 'dyeo' || role === 'cyeo'"
-                                @change="selectClubs"
-                            ></VAutocomplete>
-                        </VCol>
-                        <VCol cols="12" sm="6" md="6">
-                            <VAutocomplete
-                                variant="outlined"
-                                density="compact"
-                                required
-                                label="Club"
-                                v-model="form.rotary_club_id"
-                                :items="d_clubs"
-                                :item-text="formatText"
-                                :readonly="role === 'cyeo'"
-                            ></VAutocomplete>
-                        </VCol>
-                        <VCol cols="12" sm="6" md="6">
-                            <VAutocomplete
-                                variant="outlined"
-                                density="compact"
-                                v-model="form.exchange_type"
-                                :items="['CAMPS & TOURS', 'STEP']"
-                                label="Application Type"
-                                required
-                            ></VAutocomplete>
-                        </VCol>
-                        <VCol cols="12" sm="6" md="6">
-                            <VAutocomplete
-                                variant="outlined"
-                                density="compact"
-                                v-model="form.application_status"
-                                :items="[
-                                    'Accepted',
-                                    'Paid',
-                                    'Rejected',
-                                    'Withdrawn',
-                                    'Placed',
-                                ]"
-                                label="Status"
-                                required
-                            ></VAutocomplete>
-                        </VCol>
-                        <VCol cols="12" sm="12" md="12">
-                            <VTextField
-                                dense
-                                label="Status Notes"
-                                v-model="form.application_status_note"
-                                required
-                            ></VTextField>
-                        </VCol>
-                    </VRow>
-                </VCardText>
-                <VCardActions>
-                    <v-btn
-                        color="blue darken-1"
-                        text
-                        @click="show_actions = false"
-                    >
-                        Close
-                    </v-btn>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                        color="primary darken-3"
-                        @click="submitForm"
-                        :loading="saving"
-                        :disabled="saving"
-                    >
-                        Save Application
-                    </v-btn>
-                </VCardActions>
-            </VCard>
-        </VDialog>
     </div>
 </template>
 
@@ -1547,6 +1448,10 @@ function removedUploadedMedia(media) {
 #personal-info-box .v-input--radio-group {
     padding-top: 0 !important;
     margin-top: 0 !important;
+}
+
+.v-fab {
+    bottom: 2px !important;
 }
 
 .pic-box {

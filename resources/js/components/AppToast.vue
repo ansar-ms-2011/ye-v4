@@ -22,7 +22,7 @@ const color = computed(() => {
         :color="color"
         location="top end"
         timer="bottom"
-        timer-color="info"
+        timer-color="white"
     >
         {{ flashToastState.toast?.message }}
 
