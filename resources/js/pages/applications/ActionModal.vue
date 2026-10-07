@@ -5,11 +5,11 @@ import { nextTick, onMounted, ref, watch } from 'vue';
 const props = defineProps({
     ApplicationObj: {
         type: Object,
-        required: true
+        required: true,
     },
 });
 
-defineEmits(['close', 'actionUpdated']);
+const emits = defineEmits(['close', 'actionUpdated']);
 
 const dyeos = usePage().props.dyeos as any[];
 const clubs = usePage().props.clubs as any[];
@@ -24,16 +24,28 @@ const form = ref({
     exchange_type: null,
     application_status: null,
     application_status_note: '',
+    application_fee_paid: false,
+    dyeo_assigned: false,
 });
 
-watch(()=>props.ApplicationObj, async () => {
-    await selectClubs();
-    await nextTick();
-    form.value.dyeo_id = props.ApplicationObj.dyeo_id;
-    form.value.rotary_club_id = props.ApplicationObj.rotary_club_id;
-    form.value.exchange_type = props.ApplicationObj.exchange_type;
-    form.value.application_status = props.ApplicationObj.application_status;
-});
+watch(
+    () => props.ApplicationObj,
+    async () => {
+        await nextTick();
+        form.value.dyeo_id = props.ApplicationObj.dyeo_id;
+        form.value.rotary_club_id = props.ApplicationObj.rotary_club_id;
+        form.value.exchange_type = props.ApplicationObj.exchange_type;
+        form.value.application_status = props.ApplicationObj.application_status;
+        form.value.application_status_note =
+            props.ApplicationObj.application_status_note;
+        form.value.application_fee_paid =
+            props.ApplicationObj.application_fee_paid;
+        form.value.dyeo_assigned = props.ApplicationObj.dyeo_assigned;
+
+        await selectClubs();
+    },
+    { immediate: true, deep: true },
+);
 
 function formatText(o: { district_code: string; text: string }) {
     return o.district_code + ' - ' + o.text;
@@ -46,15 +58,24 @@ async function selectClubs() {
     )?.district_code;
 
     selectedClubs.value = district_code ? clubs[district_code] || [] : [];
+    // console.log('selectedClubs', selectedClubs.value);
 }
 
 async function submitActions() {
-    //
-}
+    saving.value = true;
 
-onMounted(async () => {
-    await selectClubs();
-});
+    try {
+        if (form.value.application_status === 'Paid') {
+            form.value.application_fee_paid = true;
+        }
+
+        form.value.dyeo_assigned = !!form.value.dyeo_id;
+
+        emits('actionUpdated', { ...form.value });
+    } finally {
+        saving.value = false;
+    }
+}
 </script>
 
 <template>
@@ -95,7 +116,7 @@ onMounted(async () => {
                             label="Club"
                             v-model="form.rotary_club_id"
                             :items="selectedClubs"
-                            itemValue="id"
+                            itemValue="value"
                             :itemTitle="formatText"
                             :readonly="role === 'cyeo'"
                             hide-details

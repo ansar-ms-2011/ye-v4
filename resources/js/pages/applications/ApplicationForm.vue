@@ -371,6 +371,19 @@ function removedUploadedMedia(media) {
         },
     );
 }
+
+function handleActionUpdated(updatedForm) {
+    // form.value = updatedForm;
+    form.dyeo_id = updatedForm.dyeo_id;
+    form.rotary_club_id = updatedForm.rotary_club_id;
+    form.exchange_type = updatedForm.exchange_type;
+    form.application_status = updatedForm.application_status;
+    form.application_status_note = updatedForm.application_status_note;
+    form.application_fee_paid = updatedForm.application_fee_paid;
+    form.dyeo_assigned = updatedForm.dyeo_assigned || null;
+    console.log(updatedForm, form);
+    submitForm();
+}
 </script>
 
 <template>
@@ -473,13 +486,13 @@ function removedUploadedMedia(media) {
 
             <VCol cols="3" sm="3" md="3">
                 <div class="d-flex justify-end">
-                    <VBtn
-                        color="primary darken-5"
-                        @click="goToEmailGuide"
-                    >
+                    <VBtn color="primary darken-5" @click="goToEmailGuide">
                         EMAILS SENT HISTORY
                     </VBtn>
-                    <ActionModal />
+                    <ActionModal
+                        :ApplicationObj="form"
+                        @actionUpdated="handleActionUpdated"
+                    />
                 </div>
             </VCol>
         </VRow>
