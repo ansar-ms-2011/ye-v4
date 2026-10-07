@@ -57,6 +57,9 @@ export default createVuetify({
                     'on-primary-hover': '#ede4e4',
 
                     secondary: '#5a5a5f',
+                    'secondary-lighten-1': '#808086',
+                    'secondary-lighten-2': '#a1a1a8',
+                    'secondary-lighten-3': '#d9d9dd',
                     'secondary-darken-1': '#3a3a3c',
                     'on-secondary': '#ffffff',
 

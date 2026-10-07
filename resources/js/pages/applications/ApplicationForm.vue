@@ -155,21 +155,107 @@ const uploadCaptionRules = [
 
 /* ---------------- TABLE HEADERS ---------------- */
 const languagesTableHeaders = [
-    { title: 'Non Native Language', key: 'language' },
-    { title: 'Years Studied', key: 'years_studied' },
-    { title: 'Speaking', key: 'speaking' },
-    { title: 'Reading', key: 'reading' },
-    { title: 'Writing', key: 'writing' },
-    { title: 'Actions', key: 'actions', sortable: false, width: '150px' },
+    {
+        title: 'Non Native Language',
+        key: 'language',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Years Studied',
+        key: 'years_studied',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Speaking',
+        key: 'speaking',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Reading',
+        key: 'reading',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Writing',
+        key: 'writing',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Actions',
+        key: 'actions',
+        sortable: false,
+        width: '150px',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+    },
 ];
 
 const siblingsTableHeaders = [
-    { title: 'Full Name', key: 'full_name' },
-    { title: 'Gender', key: 'gender' },
-    { title: 'Age', key: 'age' },
-    { title: 'Occupation', key: 'occupation' },
-    { title: 'Living At Home', key: 'living_at_home' },
-    { title: 'Actions', key: 'actions', sortable: false, width: '150px' },
+    {
+        title: 'Full Name',
+        key: 'full_name',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Gender',
+        key: 'gender',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Age',
+        key: 'age',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Occupation',
+        key: 'occupation',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Living At Home',
+        key: 'living_at_home',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Actions',
+        key: 'actions',
+        sortable: false,
+        width: '150px',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+    },
 ];
 
 const filteredLanguages = computed(
@@ -427,6 +513,7 @@ function handleActionUpdated(updatedForm) {
                     :disabled="filledMediaFiles.length === 0"
                     class="ml-2"
                     color="primary"
+                    variant="outlined"
                     @click="viewFiles"
                 >
                     View Files
@@ -450,6 +537,7 @@ function handleActionUpdated(updatedForm) {
                             <VBtn
                                 color="primary darken-1"
                                 class="mr-2"
+                                variant="outlined"
                                 @click="
                                     sendEmail('guide-part-1', 'guideEmail1')
                                 "
@@ -460,6 +548,7 @@ function handleActionUpdated(updatedForm) {
                             <VBtn
                                 color="primary darken-1"
                                 class="mr-2"
+                                variant="outlined"
                                 @click="sendEmail('payment', 'paymentEmail')"
                                 :loading="loading.paymentEmail"
                                 :disabled="
@@ -472,6 +561,7 @@ function handleActionUpdated(updatedForm) {
                             <VBtn
                                 color="primary darken-1"
                                 class="mr-2"
+                                variant="outlined"
                                 @click="
                                     sendEmail('guide-part-2', 'guideEmail2')
                                 "
@@ -486,7 +576,11 @@ function handleActionUpdated(updatedForm) {
 
             <VCol cols="3" sm="3" md="3">
                 <div class="d-flex justify-end">
-                    <VBtn color="primary darken-5" @click="goToEmailGuide">
+                    <VBtn
+                        color="primary darken-5"
+                        variant="outlined"
+                        @click="goToEmailGuide"
+                    >
                         EMAILS SENT HISTORY
                     </VBtn>
                     <ActionModal
@@ -715,7 +809,7 @@ function handleActionUpdated(updatedForm) {
                         v-model="langFormValid"
                         lazy-validation
                     >
-                        <VRow class="mb-2">
+                        <VRow class="mb-0">
                             <VCol cols="12" sm="2" md="2">
                                 <VTextField
                                     label="Language"
@@ -768,11 +862,16 @@ function handleActionUpdated(updatedForm) {
                                     variant="outlined"
                                 ></VAutocomplete>
                             </VCol>
-                            <VCol cols="12" sm="2" md="2">
+                            <VCol
+                                cols="12"
+                                sm="2"
+                                md="2"
+                                class="d-flex justify-end"
+                            >
                                 <v-btn
-                                    small
+                                    variant="outlined"
                                     color="primary"
-                                    class="w-100"
+                                    min-width="70"
                                     @click="addLanguage"
                                 >
                                     Add
@@ -788,6 +887,7 @@ function handleActionUpdated(updatedForm) {
                                 class="elevation-1"
                                 :headers="languagesTableHeaders"
                                 :items="filteredLanguages"
+                                density="compact"
                             >
                                 <template
                                     v-slot:[`item.actions`]="{ item, index }"
@@ -880,21 +980,21 @@ function handleActionUpdated(updatedForm) {
                                     variant="outlined"
                                 ></VAutocomplete>
                             </VCol>
-                            <VCol cols="12" sm="1" md="1">
+                            <VCol cols="12" sm="1" md="1" class="d-flex justify-end">
                                 <v-btn
                                     v-if="edited_sibling !== null"
-                                    small
+                                    variant="outlined"
                                     color="primary"
-                                    class="w-100"
+                                    min-width="70"
                                     @click="saveSibling"
                                 >
                                     Save
                                 </v-btn>
                                 <v-btn
                                     v-else
-                                    small
+                                    variant="outlined"
                                     color="primary"
-                                    class="w-100"
+                                    min-width="70"
                                     @click="addSibling"
                                 >
                                     Add
@@ -906,9 +1006,11 @@ function handleActionUpdated(updatedForm) {
                     <VRow>
                         <VCol cols="12" sm="12" md="12">
                             <VDataTable
+                                headerProps=""
                                 :headers="siblingsTableHeaders"
                                 :items="siblings"
                                 hide-default-footer
+                                density="compact"
                                 class="elevation-1"
                             >
                                 <template
@@ -1432,7 +1534,7 @@ function handleActionUpdated(updatedForm) {
                     border
                     :loading="saving"
                     :disabled="saving"
-                    color="success"
+                    color="primary"
                     location="bottom center"
                     min-width="250"
                     hover-elevation="5"
