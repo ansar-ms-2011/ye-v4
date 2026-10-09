@@ -1,508 +1,3 @@
-<script setup>
-import { router, usePage } from '@inertiajs/vue3';
-import { ref, reactive, computed, nextTick } from 'vue';
-import { getEmptyLanguage, getEmptySibling, validateEmail } from '@/helpers';
-import ActionModal from '@/pages/applications/ActionModal.vue';
-import {
-    store,
-    update,
-    removeMedia,
-    uploadedFiles,
-} from '@/routes/application';
-import {
-    emailHistory,
-    sendPart1,
-    sendPart2,
-    sendPayment,
-} from '@/routes/email';
-
-const props = defineProps({
-    ApplicationObj: { type: Object, required: true },
-    mode: { type: String, default: 'edit' },
-});
-
-const role = usePage().props.auth?.user?.role?.name;
-
-const formRef = ref(null);
-const langFormRef = ref(null);
-const siblingFormRef = ref(null);
-const uploadFormRef = ref(null);
-const confirmFileDeleteDialog = ref(false);
-const valid = ref(false);
-const langFormValid = ref(false);
-const uploadFormValid = ref(false);
-const siblingValid = ref(false);
-
-const saving = ref(false);
-const edited_sibling = ref(null);
-const edited_sibling_index = ref(null);
-
-const yearsStudiedOptions = Array.from({ length: 25 }, (_, i) => i + 1);
-const language_options = ['Poor', 'Fair', 'Good', 'Fluent'];
-
-const defaultLanguage = reactive(getEmptyLanguage());
-const defaultSibling = reactive(getEmptySibling());
-const alert = reactive({ show: false, type: 'info', message: '' });
-
-const form = reactive(props.ApplicationObj);
-
-const snackbar = reactive({
-    show: false,
-    message: '',
-    color: 'success',
-    timeout: 3000,
-    location: '',
-});
-const list_categories = [
-    'Photo-Self',
-    'Passport-Scan',
-    'Photo-Family',
-    'Photo-Home',
-    'Photo-Interest',
-    'Photo-Important',
-    'Applicant-Letter-Page-1',
-    'Applicant-Letter-Page-2',
-    'Applicant-Letter-Page-3',
-    'Parent-Letter-Page-1',
-    'Parent-Letter-Page-2',
-];
-
-function buildMediaLibrary() {
-    const initial_list = props.ApplicationObj?.media_library || [];
-    const media_library = [];
-
-    const addCategory = (category_label) => {
-        const found = initial_list.find(
-            (i) => i.media_category_label === category_label,
-        );
-        media_library.push(
-            found ?? {
-                id: null,
-                media: null,
-                application_id: null,
-                media_category_label: category_label,
-                brief_caption: '',
-                file_name: '',
-                size: null,
-                media_category_id: '',
-                changed: false,
-                remove: false,
-                selected: false,
-            },
-        );
-    };
-
-    list_categories.forEach((label) => {
-        if (
-            form.exchange_type === 'CAMPS & TOURS' &&
-            (label === 'Photo-Self' || label === 'Passport-Scan')
-        ) {
-            addCategory(label);
-        } else if (form.exchange_type !== 'CAMPS & TOURS') {
-            addCategory(label);
-        }
-    });
-
-    return media_library;
-}
-
-form.media_library = buildMediaLibrary();
-
-function showSnackbar(msg, color = 'success', location = '') {
-    snackbar.message = msg;
-    snackbar.color = color;
-    snackbar.show = true;
-    snackbar.location = location;
-}
-
-const loading = reactive({
-    paymentEmail: false,
-    guideEmail1: false,
-    guideEmail2: false,
-});
-
-const formRules = {
-    nameRules: [
-        (v) => !!v || 'Required Field',
-        (v) => (v && v.length <= 100) || 'Name must be < 100 characters',
-    ],
-    emailRules: [(v) => !v || validateEmail(v) || 'Email format is not valid'],
-    districtRules: [(v) => !!v || 'Required Field'],
-};
-
-const langFormRules = {
-    nameRules: [(v) => !!v || 'Required Field'],
-    yearsRules: [(v) => !!v || 'Required Field'],
-    speakingRules: [(v) => !!v || 'Required Field'],
-    readingRules: [(v) => !!v || 'Required Field'],
-    writingRules: [(v) => !!v || 'Required Field'],
-};
-
-const siblingsFormRules = {
-    fullNameRules: [(v) => !!v || 'Required Field'],
-    ageRules: [(v) => !!v || 'Required Field'],
-    genderRules: [(v) => !!v || 'Required Field'],
-    occupationRules: [],
-    livingAtHomeRules: [(v) => !!v || 'Required Field'],
-};
-
-const uploadFileRules = [
-    (value) =>
-        !value ||
-        value.size < 5120000 ||
-        'Upload size should be less than 5 MB!',
-    (value) =>
-        !value ||
-        ['png', 'gif', 'jpg', 'jpeg', 'bmp'].some((ext) =>
-            value.name.toLowerCase().endsWith(ext),
-        ) ||
-        'Only PNG, JPG, JPEG, GIF and BMP files are allowed',
-];
-
-const uploadCaptionRules = [
-    (v) => !!v || 'Caption Required For File Upload',
-    (v) => v === null || v.length < 151 || 'Maximum 150 Characters Are Allowed',
-];
-
-/* ---------------- TABLE HEADERS ---------------- */
-const languagesTableHeaders = [
-    {
-        title: 'Non Native Language',
-        key: 'language',
-        headerProps: {
-            class: 'bg-secondary-lighten-3 text-black',
-        },
-        sortable: false,
-    },
-    {
-        title: 'Years Studied',
-        key: 'years_studied',
-        headerProps: {
-            class: 'bg-secondary-lighten-3 text-black',
-        },
-        sortable: false,
-    },
-    {
-        title: 'Speaking',
-        key: 'speaking',
-        headerProps: {
-            class: 'bg-secondary-lighten-3 text-black',
-        },
-        sortable: false,
-    },
-    {
-        title: 'Reading',
-        key: 'reading',
-        headerProps: {
-            class: 'bg-secondary-lighten-3 text-black',
-        },
-        sortable: false,
-    },
-    {
-        title: 'Writing',
-        key: 'writing',
-        headerProps: {
-            class: 'bg-secondary-lighten-3 text-black',
-        },
-        sortable: false,
-    },
-    {
-        title: 'Actions',
-        key: 'actions',
-        sortable: false,
-        width: '150px',
-        headerProps: {
-            class: 'bg-secondary-lighten-3 text-black',
-        },
-    },
-];
-
-const siblingsTableHeaders = [
-    {
-        title: 'Full Name',
-        key: 'full_name',
-        headerProps: {
-            class: 'bg-secondary-lighten-3 text-black',
-        },
-        sortable: false,
-    },
-    {
-        title: 'Gender',
-        key: 'gender',
-        headerProps: {
-            class: 'bg-secondary-lighten-3 text-black',
-        },
-        sortable: false,
-    },
-    {
-        title: 'Age',
-        key: 'age',
-        headerProps: {
-            class: 'bg-secondary-lighten-3 text-black',
-        },
-        sortable: false,
-    },
-    {
-        title: 'Occupation',
-        key: 'occupation',
-        headerProps: {
-            class: 'bg-secondary-lighten-3 text-black',
-        },
-        sortable: false,
-    },
-    {
-        title: 'Living At Home',
-        key: 'living_at_home',
-        headerProps: {
-            class: 'bg-secondary-lighten-3 text-black',
-        },
-        sortable: false,
-    },
-    {
-        title: 'Actions',
-        key: 'actions',
-        sortable: false,
-        width: '150px',
-        headerProps: {
-            class: 'bg-secondary-lighten-3 text-black',
-        },
-    },
-];
-
-const filteredLanguages = computed(
-    () => form.languages?.filter((l) => !l.remove) || [],
-);
-const siblings = computed(() => form.siblings?.filter((s) => !s.remove) || []);
-const filledMediaFiles = computed(
-    () => form.media_library?.filter((m) => m.media !== null) || [],
-);
-
-function validateMedicalInfo(v) {
-    // console.log('validateMedicalInfo', v);
-    const answeredYes = !!(
-        form.medical_condition ||
-        form.treated_condition ||
-        form.prescribed_meds ||
-        form.special_req
-    );
-
-    return answeredYes && !v
-        ? 'Medication and the Reason Prescribed is required if any of above question is answered as Yes.'
-        : true;
-}
-
-function goBack() {
-    window.history.back();
-}
-function viewFiles() {
-    if (form?.id) {
-        router.visit(uploadedFiles(form.id));
-    }
-}
-
-async function submitForm() {
-    const { valid: mainFormValidity } = await formRef.value?.validate();
-    const { valid: uploadFormValidity } = await uploadFormRef.value?.validate();
-
-    //console.log(mainFormValidity, uploadFormValidity);
-
-    await nextTick(() => {
-        if (!(mainFormValidity && uploadFormValidity)) {
-            showSnackbar(
-                'Please fill out all required fields',
-                'error',
-                'top end',
-            );
-            scrollToFirstError();
-
-            return;
-        }
-
-        saving.value = true;
-
-        const options = {
-            preserveScroll: true,
-            preserveState: false, // <-- re-mounts component
-            onSuccess: (page) => {
-                // Re-sync local reactive form from fresh props
-                Object.assign(form, page.props.ApplicationObj);
-                form.media_library = buildMediaLibrary();
-            },
-            onFinish: () => {
-                saving.value = false;
-            },
-        };
-
-        if (form.id > 0) {
-            router.put(update({ id: form.id }), form, options);
-        } else {
-            router.post(store(), form, options);
-        }
-    });
-}
-
-function scrollToFirstError() {
-    const elements = Array.from(
-        document.getElementsByClassName('v-messages__message'),
-    ).filter((el) => el.id !== 'sibling-note' && el.id !== 'language-note');
-
-    if (elements.length > 0) {
-        elements[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-}
-
-function viewEmailHistory() {
-    if (!form?.id) {
-        return;
-    }
-
-    router.get(emailHistory({ application: form.id }));
-}
-
-function sendEmail(type, loadingKey) {
-    if (!form?.id) {
-        return;
-    }
-
-    loading[loadingKey] = true;
-    const routeMap = {
-        payment: sendPayment({ application: form.id }),
-        'guide-part-1': sendPart1({ application: form.id }),
-        'guide-part-2': sendPart2({ application: form.id }),
-    };
-    router.post(
-        routeMap[type],
-        {},
-        {
-            preserveScroll: true,
-            onFinish: () => {
-                loading[loadingKey] = false;
-            },
-        },
-    );
-}
-
-async function addLanguage() {
-    if (filteredLanguages.value.length >= 3) {
-        showSnackbar('Maximum 03 Languages can be added', 'error');
-
-        return false;
-    }
-
-    if (!langFormValid.value) {
-        langFormRef.value?.validate();
-        showSnackbar('Please complete the language fields', 'error');
-
-        return false;
-    }
-
-    form.languages.push({ ...defaultLanguage });
-    Object.assign(defaultLanguage, getEmptyLanguage());
-
-    await nextTick();
-    langFormRef.value?.resetValidation();
-}
-
-function removeLanguage(item, index) {
-    form.languages[index].remove = true;
-}
-
-async function addSibling() {
-    siblingFormRef.value?.validate();
-
-    if (siblingValid.value && form.siblings.length >= 4) {
-        showSnackbar('Maximum 04 Siblings can be added', 'red');
-
-        return false;
-    }
-
-    form.siblings.push({ ...defaultSibling });
-    Object.assign(defaultSibling, getEmptySibling());
-
-    await nextTick();
-    siblingFormRef.value?.resetValidation();
-}
-function editSibling(item, index) {
-    Object.assign(defaultSibling, item);
-    edited_sibling.value = item;
-    edited_sibling_index.value = index;
-}
-function saveSibling() {
-    Object.assign(form.siblings[edited_sibling_index.value], defaultSibling);
-    Object.assign(defaultSibling, getEmptySibling());
-    siblingFormRef.value?.resetValidation();
-    edited_sibling.value = null;
-    edited_sibling_index.value = null;
-}
-function removeSibling(item, index) {
-    form.siblings[index].remove = true;
-}
-
-function handleFileSelection(event, mediaObj) {
-    const file = event.target.files[0];
-
-    if (file) {
-        const reader = new FileReader();
-        reader.addEventListener(
-            'load',
-            () => {
-                mediaObj.media = reader.result;
-                mediaObj.selected = true;
-                mediaObj.file_name = file.name;
-                mediaObj.size = file.size;
-            },
-            false,
-        );
-        reader.readAsDataURL(file);
-    } else {
-        mediaObj.media = null;
-        mediaObj.selected = false;
-        mediaObj.file_name = '';
-        mediaObj.size = 0;
-    }
-}
-
-const selectedMedia = ref(null);
-function confirmMediaDelete(media) {
-    selectedMedia.value = media;
-    confirmFileDeleteDialog.value = true;
-}
-
-function removeUploadedMedia() {
-    if (!selectedMedia.value) {
-        return false;
-    }
-
-    router.post(
-        removeMedia({ id: selectedMedia.value.id }),
-        {},
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                selectedMedia.value.id = null;
-                selectedMedia.value.media = null;
-                selectedMedia.value.brief_caption = null;
-                selectedMedia.value.file_name = '';
-                confirmFileDeleteDialog.value = false;
-            },
-        },
-    );
-}
-
-function handleActionUpdated(updatedForm) {
-    // form.value = updatedForm;
-    form.dyeo_id = updatedForm.dyeo_id;
-    form.rotary_club_id = updatedForm.rotary_club_id;
-    form.exchange_type = updatedForm.exchange_type;
-    form.application_status = updatedForm.application_status;
-    form.application_status_note = updatedForm.application_status_note;
-    form.application_fee_paid = updatedForm.application_fee_paid;
-    form.dyeo_assigned = updatedForm.dyeo_assigned || null;
-    console.log(updatedForm, form);
-    submitForm();
-}
-</script>
-
 <template>
     <div id="appForm">
         <VCard v-show="alert.show">
@@ -530,7 +25,10 @@ function handleActionUpdated(updatedForm) {
             </template>
         </VSnackbar>
 
-        <VRow class="mb-4" v-if="['admin', 'applicant'].includes(role)">
+        <VRow
+            class="mb-4"
+            v-if="['admin', 'applicant'].includes(role)"
+        >
             <!-- LEFT: navigation buttons -->
             <VCol
                 cols="12"
@@ -550,6 +48,7 @@ function handleActionUpdated(updatedForm) {
                 </VBtn>
 
                 <VBtn
+                    v-if="form.id > 0"
                     :disabled="filledMediaFiles?.length === 0"
                     color="primary"
                     variant="outlined"
@@ -571,69 +70,72 @@ function handleActionUpdated(updatedForm) {
                 lg="6"
                 class="d-flex flex-wrap justify-start ga-1 ga-md-2 ga-lg-3 mb-2 mb-md-0 order-3 order-md-2"
             >
-                <VBtn
-                    title="Send Email for Guide Part 1"
-                    color="primary darken-1"
-                    variant="outlined"
-                    class="flex-grow-1 flex-sm-grow-0"
-                    :loading="loading.guideEmail1"
-                    prepend-icon="mdi-email"
-                    @click="sendEmail('guide-part-1', 'guideEmail1')"
-                >
-                    EMAIL PART 1
-                </VBtn>
+                <template v-if="form.id > 0">
+                    <VBtn
+                        title="Send Email for Guide Part 1"
+                        color="primary darken-1"
+                        variant="outlined"
+                        class="flex-grow-1 flex-sm-grow-0"
+                        :loading="loading.guideEmail1"
+                        prepend-icon="mdi-email"
+                        @click="sendEmail('guide-part-1', 'guideEmail1')"
+                    >
+                        EMAIL PART 1
+                    </VBtn>
 
-                <VBtn
-                    title="Send Email for Payment"
-                    color="primary darken-1"
-                    variant="outlined"
-                    class="flex-grow-1 flex-sm-grow-0"
-                    :loading="loading.paymentEmail"
-                    :disabled="
+                    <VBtn
+                        title="Send Email for Payment"
+                        color="primary darken-1"
+                        variant="outlined"
+                        class="flex-grow-1 flex-sm-grow-0"
+                        :loading="loading.paymentEmail"
+                        :disabled="
                         loading.paymentEmail ||
                         form.application_status === 'Paid'
                     "
-                    prepend-icon="mdi-email"
-                    @click="sendEmail('payment', 'paymentEmail')"
-                >
-                    EMAIL PAYMENT
-                </VBtn>
+                        prepend-icon="mdi-email"
+                        @click="sendEmail('payment', 'paymentEmail')"
+                    >
+                        EMAIL PAYMENT
+                    </VBtn>
 
-                <VBtn
-                    title="Send Email for Guide Part 2"
-                    color="primary darken-1"
-                    variant="outlined"
-                    class="flex-grow-1 flex-sm-grow-0"
-                    :loading="loading.guideEmail2"
-                    prepend-icon="mdi-email"
-                    @click="sendEmail('guide-part-2', 'guideEmail2')"
-                >
-                    EMAIL PART 2
-                </VBtn>
+                    <VBtn
+                        title="Send Email for Guide Part 2"
+                        color="primary darken-1"
+                        variant="outlined"
+                        class="flex-grow-1 flex-sm-grow-0"
+                        :loading="loading.guideEmail2"
+                        prepend-icon="mdi-email"
+                        @click="sendEmail('guide-part-2', 'guideEmail2')"
+                    >
+                        EMAIL PART 2
+                    </VBtn>
+                </template>
             </VCol>
 
-            <!-- RIGHT: history + action modal -->
             <VCol
                 cols="12"
                 sm="6"
                 md="3"
                 class="d-flex flex-wrap justify-end align-center ga-2 order-2 order-md-3"
             >
-                <VBtn
-                    title="View Email History"
-                    color="primary darken-5"
-                    variant="outlined"
-                    class="flex-grow-1 flex-sm-grow-0"
-                    @click="viewEmailHistory"
-                    prepend-icon="mdi-email-multiple-outline"
-                >
-                    EMAILS HISTORY
-                </VBtn>
+                <template v-if="form.id > 0">
+                    <VBtn
+                        title="View Email History"
+                        color="primary darken-5"
+                        variant="outlined"
+                        class="flex-grow-1 flex-sm-grow-0"
+                        @click="viewEmailHistory"
+                        prepend-icon="mdi-email-multiple-outline"
+                    >
+                        EMAILS HISTORY
+                    </VBtn>
 
-                <ActionModal
-                    :ApplicationObj="form"
-                    @actionUpdated="handleActionUpdated"
-                />
+                    <ActionModal
+                        :ApplicationObj="form"
+                        @actionUpdated="handleActionUpdated"
+                    />
+                </template>
             </VCol>
         </VRow>
 
@@ -1513,6 +1015,7 @@ function handleActionUpdated(updatedForm) {
                         <VRow
                             v-for="(media, index) in form.media_library"
                             :key="index"
+                            class="align-center"
                         >
                             <VCol cols="12" sm="3" md="3">
                                 <VTextField
@@ -1634,6 +1137,511 @@ function handleActionUpdated(updatedForm) {
         </VDialog>
     </div>
 </template>
+
+<script setup>
+import { router, usePage } from '@inertiajs/vue3';
+import { ref, reactive, computed, nextTick } from 'vue';
+import { getEmptyLanguage, getEmptySibling, validateEmail } from '@/helpers';
+import ActionModal from '@/pages/applications/ActionModal.vue';
+import {
+    store,
+    update,
+    removeMedia,
+    uploadedFiles,
+} from '@/routes/application';
+import {
+    emailHistory,
+    sendPart1,
+    sendPart2,
+    sendPayment,
+} from '@/routes/email';
+
+const props = defineProps({
+    ApplicationObj: { type: Object, required: true },
+    mode: { type: String, default: 'edit' },
+});
+
+const role = usePage().props.auth?.user?.role?.name;
+
+const formRef = ref(null);
+const langFormRef = ref(null);
+const siblingFormRef = ref(null);
+const uploadFormRef = ref(null);
+const confirmFileDeleteDialog = ref(false);
+const valid = ref(false);
+const langFormValid = ref(false);
+const uploadFormValid = ref(false);
+const siblingValid = ref(false);
+
+const saving = ref(false);
+const edited_sibling = ref(null);
+const edited_sibling_index = ref(null);
+
+const yearsStudiedOptions = Array.from({ length: 25 }, (_, i) => i + 1);
+const language_options = ['Poor', 'Fair', 'Good', 'Fluent'];
+
+const defaultLanguage = reactive(getEmptyLanguage());
+const defaultSibling = reactive(getEmptySibling());
+const alert = reactive({ show: false, type: 'info', message: '' });
+
+const form = reactive(props.ApplicationObj);
+
+const snackbar = reactive({
+    show: false,
+    message: '',
+    color: 'success',
+    timeout: 3000,
+    location: '',
+});
+const list_categories = [
+    'Photo-Self',
+    'Passport-Scan',
+    'Photo-Family',
+    'Photo-Home',
+    'Photo-Interest',
+    'Photo-Important',
+    'Applicant-Letter-Page-1',
+    'Applicant-Letter-Page-2',
+    'Applicant-Letter-Page-3',
+    'Parent-Letter-Page-1',
+    'Parent-Letter-Page-2',
+];
+
+function buildMediaLibrary() {
+    const initial_list = props.ApplicationObj?.media_library || [];
+    const media_library = [];
+
+    const addCategory = (category_label) => {
+        const found = initial_list.find(
+            (i) => i.media_category_label === category_label,
+        );
+        media_library.push(
+            found ?? {
+                id: null,
+                media: null,
+                application_id: null,
+                media_category_label: category_label,
+                brief_caption: '',
+                file_name: '',
+                size: null,
+                media_category_id: '',
+                changed: false,
+                remove: false,
+                selected: false,
+            },
+        );
+    };
+
+    list_categories.forEach((label) => {
+        if (
+            form.exchange_type === 'CAMPS & TOURS' &&
+            (label === 'Photo-Self' || label === 'Passport-Scan')
+        ) {
+            addCategory(label);
+        } else if (form.exchange_type !== 'CAMPS & TOURS') {
+            addCategory(label);
+        }
+    });
+
+    return media_library;
+}
+
+form.media_library = buildMediaLibrary();
+
+function showSnackbar(msg, color = 'success', location = '') {
+    snackbar.message = msg;
+    snackbar.color = color;
+    snackbar.show = true;
+    snackbar.location = location;
+}
+
+const loading = reactive({
+    paymentEmail: false,
+    guideEmail1: false,
+    guideEmail2: false,
+});
+
+const formRules = {
+    nameRules: [
+        (v) => !!v || 'Required Field',
+        (v) => (v && v.length <= 100) || 'Name must be < 100 characters',
+    ],
+    emailRules: [(v) => !v || validateEmail(v) || 'Email format is not valid'],
+    districtRules: [(v) => !!v || 'Required Field'],
+};
+
+const langFormRules = {
+    nameRules: [(v) => !!v || 'Required Field'],
+    yearsRules: [(v) => !!v || 'Required Field'],
+    speakingRules: [(v) => !!v || 'Required Field'],
+    readingRules: [(v) => !!v || 'Required Field'],
+    writingRules: [(v) => !!v || 'Required Field'],
+};
+
+const siblingsFormRules = {
+    fullNameRules: [(v) => !!v || 'Required Field'],
+    ageRules: [(v) => !!v || 'Required Field'],
+    genderRules: [(v) => !!v || 'Required Field'],
+    occupationRules: [],
+    livingAtHomeRules: [(v) => !!v || 'Required Field'],
+};
+
+const uploadFileRules = [
+    (value) =>
+        !value ||
+        value.size < 5120000 ||
+        'Upload size should be less than 5 MB!',
+    (value) =>
+        !value ||
+        ['png', 'gif', 'jpg', 'jpeg', 'bmp'].some((ext) =>
+            value.name.toLowerCase().endsWith(ext),
+        ) ||
+        'Only PNG, JPG, JPEG, GIF and BMP files are allowed',
+];
+
+const uploadCaptionRules = [
+    (v) => !!v || 'Caption Required For File Upload',
+    (v) => v === null || v.length < 151 || 'Maximum 150 Characters Are Allowed',
+];
+
+/* ---------------- TABLE HEADERS ---------------- */
+const languagesTableHeaders = [
+    {
+        title: 'Non Native Language',
+        key: 'language',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Years Studied',
+        key: 'years_studied',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Speaking',
+        key: 'speaking',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Reading',
+        key: 'reading',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Writing',
+        key: 'writing',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Actions',
+        key: 'actions',
+        sortable: false,
+        width: '150px',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+    },
+];
+
+const siblingsTableHeaders = [
+    {
+        title: 'Full Name',
+        key: 'full_name',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Gender',
+        key: 'gender',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Age',
+        key: 'age',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Occupation',
+        key: 'occupation',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Living At Home',
+        key: 'living_at_home',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+        sortable: false,
+    },
+    {
+        title: 'Actions',
+        key: 'actions',
+        sortable: false,
+        width: '150px',
+        headerProps: {
+            class: 'bg-secondary-lighten-3 text-black',
+        },
+    },
+];
+
+const filteredLanguages = computed(
+    () => form.languages?.filter((l) => !l.remove) || [],
+);
+const siblings = computed(() => form.siblings?.filter((s) => !s.remove) || []);
+const filledMediaFiles = computed(
+    () => form.media_library?.filter((m) => m.media !== null) || [],
+);
+
+function validateMedicalInfo(v) {
+    // console.log('validateMedicalInfo', v);
+    const answeredYes = !!(
+        form.medical_condition ||
+        form.treated_condition ||
+        form.prescribed_meds ||
+        form.special_req
+    );
+
+    return answeredYes && !v
+        ? 'Medication and the Reason Prescribed is required if any of above question is answered as Yes.'
+        : true;
+}
+
+function goBack() {
+    window.history.back();
+}
+function viewFiles() {
+    if (form?.id) {
+        router.visit(uploadedFiles(form.id));
+    }
+}
+
+async function submitForm() {
+    const { valid: mainFormValidity } = await formRef.value?.validate();
+    const { valid: uploadFormValidity } = await uploadFormRef.value?.validate();
+
+    //console.log(mainFormValidity, uploadFormValidity);
+
+    await nextTick(() => {
+        if (!(mainFormValidity && uploadFormValidity)) {
+            showSnackbar(
+                'Please fill out all required fields',
+                'error',
+                'top end',
+            );
+            scrollToFirstError();
+
+            return;
+        }
+
+        saving.value = true;
+
+        const options = {
+            preserveScroll: true,
+            preserveState: false, // <-- re-mounts component
+            onSuccess: (page) => {
+                // Re-sync local reactive form from fresh props
+                Object.assign(form, page.props.ApplicationObj);
+                form.media_library = buildMediaLibrary();
+            },
+            onFinish: () => {
+                saving.value = false;
+            },
+        };
+
+        if (form.id > 0) {
+            router.put(update({ id: form.id }), form, options);
+        } else {
+            router.post(store(), form, options);
+        }
+    });
+}
+
+function scrollToFirstError() {
+    const elements = Array.from(
+        document.getElementsByClassName('v-messages__message'),
+    ).filter((el) => el.id !== 'sibling-note' && el.id !== 'language-note');
+
+    if (elements.length > 0) {
+        elements[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function viewEmailHistory() {
+    if (!form?.id) {
+        return;
+    }
+
+    router.get(emailHistory({ application: form.id }));
+}
+
+function sendEmail(type, loadingKey) {
+    if (!form?.id) {
+        return;
+    }
+
+    loading[loadingKey] = true;
+    const routeMap = {
+        payment: sendPayment({ application: form.id }),
+        'guide-part-1': sendPart1({ application: form.id }),
+        'guide-part-2': sendPart2({ application: form.id }),
+    };
+    router.post(
+        routeMap[type],
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                loading[loadingKey] = false;
+            },
+        },
+    );
+}
+
+async function addLanguage() {
+    if (filteredLanguages.value.length >= 3) {
+        showSnackbar('Maximum 03 Languages can be added', 'error');
+
+        return false;
+    }
+
+    if (!langFormValid.value) {
+        langFormRef.value?.validate();
+        showSnackbar('Please complete the language fields', 'error');
+
+        return false;
+    }
+
+    form.languages.push({ ...defaultLanguage });
+    Object.assign(defaultLanguage, getEmptyLanguage());
+
+    await nextTick();
+    langFormRef.value?.resetValidation();
+}
+
+function removeLanguage(item, index) {
+    form.languages[index].remove = true;
+}
+
+async function addSibling() {
+    siblingFormRef.value?.validate();
+
+    if (siblingValid.value && form.siblings.length >= 4) {
+        showSnackbar('Maximum 04 Siblings can be added', 'red');
+
+        return false;
+    }
+
+    form.siblings.push({ ...defaultSibling });
+    Object.assign(defaultSibling, getEmptySibling());
+
+    await nextTick();
+    siblingFormRef.value?.resetValidation();
+}
+function editSibling(item, index) {
+    Object.assign(defaultSibling, item);
+    edited_sibling.value = item;
+    edited_sibling_index.value = index;
+}
+function saveSibling() {
+    Object.assign(form.siblings[edited_sibling_index.value], defaultSibling);
+    Object.assign(defaultSibling, getEmptySibling());
+    siblingFormRef.value?.resetValidation();
+    edited_sibling.value = null;
+    edited_sibling_index.value = null;
+}
+function removeSibling(item, index) {
+    form.siblings[index].remove = true;
+}
+
+function handleFileSelection(event, mediaObj) {
+    const file = event.target.files[0];
+
+    if (file) {
+        const reader = new FileReader();
+        reader.addEventListener(
+            'load',
+            () => {
+                mediaObj.media = reader.result;
+                mediaObj.selected = true;
+                mediaObj.file_name = file.name;
+                mediaObj.size = file.size;
+            },
+            false,
+        );
+        reader.readAsDataURL(file);
+    } else {
+        mediaObj.media = null;
+        mediaObj.selected = false;
+        mediaObj.file_name = '';
+        mediaObj.size = 0;
+    }
+}
+
+const selectedMedia = ref(null);
+function confirmMediaDelete(media) {
+    selectedMedia.value = media;
+    confirmFileDeleteDialog.value = true;
+}
+
+function removeUploadedMedia() {
+    if (!selectedMedia.value) {
+        return false;
+    }
+
+    router.post(
+        removeMedia({ id: selectedMedia.value.id }),
+        {},
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                selectedMedia.value.id = null;
+                selectedMedia.value.media = null;
+                selectedMedia.value.brief_caption = null;
+                selectedMedia.value.file_name = '';
+                confirmFileDeleteDialog.value = false;
+            },
+        },
+    );
+}
+
+function handleActionUpdated(updatedForm) {
+    // form.value = updatedForm;
+    form.dyeo_id = updatedForm.dyeo_id;
+    form.rotary_club_id = updatedForm.rotary_club_id;
+    form.exchange_type = updatedForm.exchange_type;
+    form.application_status = updatedForm.application_status;
+    form.application_status_note = updatedForm.application_status_note;
+    form.application_fee_paid = updatedForm.application_fee_paid;
+    form.dyeo_assigned = updatedForm.dyeo_assigned || null;
+    console.log(updatedForm, form);
+    submitForm();
+}
+</script>
 
 <style scoped>
 #appForm .v-card__title {

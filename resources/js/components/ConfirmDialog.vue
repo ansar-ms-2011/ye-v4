@@ -5,9 +5,9 @@
         @update:model-value="$emit('update:modelValue', $event)"
     >
         <v-card>
-            <v-card-title class="d-flex align-center ga-2">
-                <v-icon :color="iconColor" :icon="icon" />
-                {{ title }}
+            <v-card-title class="d-flex align-center ga-2 border-b">
+                <v-icon :color="iconColor" :icon="icon" size="small" />
+                <span class="text-h5">{{ title }}</span>
             </v-card-title>
 
             <v-card-text>
@@ -48,29 +48,49 @@
     </v-dialog>
 </template>
 
-<script setup>
-const props = defineProps({
-    modelValue: { type: Boolean, default: false },
-    title: { type: String, default: 'Confirm' },
-    message: { type: String, default: 'Are you sure?' },
-    targetName: { type: String, default: '' },
-    warningText: { type: String, default: 'This action cannot be undone.' },
-    confirmText: { type: String, default: 'Confirm' },
-    cancelText: { type: String, default: 'Cancel' },
-    confirmColor: { type: String, default: 'error' },
-    icon: { type: String, default: 'mdi-alert-circle' },
-    iconColor: { type: String, default: 'error' },
-    maxWidth: { type: [String, Number], default: 420 },
-    loading: { type: Boolean, default: false },
+<script setup lang="ts">
+interface Props {
+    modelValue?: boolean;
+    title?: string;
+    message?: string;
+    targetName?: string;
+    warningText?: string;
+    confirmText?: string;
+    cancelText?: string;
+    confirmColor?: string;
+    icon?: string;
+    iconColor?: string;
+    maxWidth?: string | number;
+    loading?: boolean;
+}
+
+
+withDefaults(defineProps<Props>(), {
+    modelValue: false,
+    title: 'Confirm',
+    message: 'Are you sure?',
+    targetName: '',
+    warningText: 'This action cannot be undone.',
+    confirmText: 'Confirm',
+    cancelText: 'Cancel',
+    confirmColor: 'error',
+    icon: 'mdi-alert-circle',
+    iconColor: 'error',
+    maxWidth: 420,
+    loading: false,
 });
 
-const emit = defineEmits(['update:modelValue', 'confirm', 'cancel']);
+const emit = defineEmits<{
+    (e: 'update:modelValue', value: boolean): void;
+    (e: 'confirm'): void;
+    (e: 'cancel'): void;
+}>();
 
-function onConfirm() {
+function onConfirm(): void {
     emit('confirm');
 }
 
-function onCancel() {
+function onCancel(): void {
     emit('cancel');
     emit('update:modelValue', false);
 }

@@ -34,9 +34,10 @@ createInertiaApp({
     withApp: (app) => {
         app.use(vuetify).use(VueViewer);
     },
-}).then(r => {
+}).then((renderFunction) => {
     initializeFlashToast();
-    console.log('App initialized', r);
+    console.log('App initialized');
+    console.log(renderFunction);
 });
 
 // This will listen for flash toast data from the server...

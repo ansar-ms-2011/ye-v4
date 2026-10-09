@@ -59,7 +59,7 @@ Route::middleware(['auth'])->group(function () {
 
 
     Route::group(['middleware' => ['role:admin|cyeo|dyeo|applicant']], function () {
-        Route::get('applications-pdf-view/{id}', function ($id) {
+        Route::get('application-pdf-view/{id}', function ($id) {
             $application = Application::find($id);
             // Check Access By the Right User
             $user = auth()->user();
@@ -82,7 +82,7 @@ Route::middleware(['auth'])->group(function () {
                 return get_STEP_Pdf_v2($application)->Output();
             }
 
-        });
+        })->name('application.fullPdfView');
 
         Route::get('view-signing-page/{id}', function ($id) {
             $application = Application::find($id);
@@ -108,7 +108,7 @@ Route::middleware(['auth'])->group(function () {
                 return get_STEP_Signing_Page_3_5_6($application)->Output();
             }
 
-        });
+        })->name('application.signingPageView');
 
         Route::get('view-signing-page-5-6/{id}', function ($id) {
             $application = Application::find($id);
@@ -127,7 +127,7 @@ Route::middleware(['auth'])->group(function () {
                 'address_parent2']);
 
             return get_CAMPS_Signing_Page_5_6($application)->Output();
-        });
+        })->name('application.signingPageView56');
     });
 });
 

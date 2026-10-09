@@ -1,327 +1,3 @@
-<script setup lang="ts">
-import { Head, router, Deferred } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
-import ConfirmDialog from '@/components/ConfirmDialog.vue';
-import { index, destroy, create, edit } from '@/routes/application';
-import type { Application } from '@/types';
-import { format, parseISO } from 'date-fns';
-
-const props = defineProps<{
-    applicationsPaginator?: any;
-    filters?: {
-        searchText?: string;
-    };
-}>();
-
-const deleteDialog = ref(false);
-const deleteTarget = ref<any>(null);
-const deleting = ref(false);
-const searchText = ref(props.filters?.searchText ?? '');
-let debounceTimer: ReturnType<typeof setTimeout> | null = null;
-const isSearching = ref(false);
-const defaultSort = [{ key: 'application_no', order: 'desc' }] as any;
-
-const headers = [
-    {
-        title: 'Actions',
-        key: 'actions',
-        align: 'center' as const,
-        sortable: false,
-        fixed: true,
-        width: '50px',
-    },
-    {
-        title: 'District',
-        key: 'district_code',
-        align: 'start' as const,
-        sortable: false,
-        nowrap: true,
-        width: '10px',
-    },
-    {
-        title: 'First Name',
-        key: 'firstname',
-        align: 'start' as const,
-        nowrap: true,
-    },
-    {
-        title: 'Surname',
-        key: 'surname',
-        align: 'start' as const,
-        nowrap: true,
-    },
-    {
-        title: 'App. No',
-        key: 'application_no',
-        align: 'start' as const,
-        nowrap: true,
-    },
-    {
-        title: 'App. Type',
-        key: 'exchange_type',
-        align: 'start' as const,
-        nowrap: true,
-    },
-    {
-        title: 'DOB',
-        key: 'dob',
-        align: 'start' as const,
-        nowrap: true,
-    },
-    {
-        title: 'Gender',
-        key: 'gender',
-        align: 'start' as const,
-        nowrap: true,
-    },
-    {
-        title: 'Status',
-        key: 'application_status',
-        align: 'start' as const,
-        nowrap: true,
-    },
-    {
-        title: 'Email',
-        key: 'email_address',
-        align: 'start' as const,
-        nowrap: true,
-    },
-    {
-        title: 'DYEO',
-        key: 'dyeo_name',
-        align: 'start' as const,
-        sortable: false,
-        nowrap: true,
-    },
-    {
-        title: 'App. Date',
-        key: 'date_of_app',
-        align: 'start' as const,
-        nowrap: true,
-        lastFixed: true,
-    },
-];
-
-// Debounced search watcher
-watch(searchText, (newValue) => {
-    if (debounceTimer) {
-        clearTimeout(debounceTimer);
-    }
-
-    debounceTimer = setTimeout(() => {
-        performSearch(newValue);
-    }, 400);
-});
-
-function performSearch(search: string) {
-    isSearching.value = true;
-    router.get(
-        index().url,
-        {
-            page: 1,
-            perPage: props.applicationsPaginator.per_page,
-            searchText: search || undefined,
-        },
-        {
-            preserveState: true,
-            preserveScroll: true,
-            only: ['applicationsPaginator'],
-            onFinish: () => {
-                isSearching.value = false;
-            },
-        },
-    );
-}
-
-function addNewApplication() {
-    router.get(create().url);
-}
-function clearSearch() {
-    searchText.value = '';
-    isSearching.value = true;
-    router.get(
-        index().url,
-        {},
-        {
-            preserveState: true,
-            preserveScroll: true,
-            only: ['applicationsPaginator'],
-            onFinish: () => {
-                isSearching.value = false;
-            },
-        },
-    );
-}
-
-function onOptionsChange({ page, itemsPerPage, sortBy }: any) {
-    router.get(
-        index().url,
-        {
-            page: page,
-            perPage: itemsPerPage,
-            ...(sortBy && { sortBy: sortBy[0]?.key }),
-            ...(sortBy && { sortOrder: sortBy[0]?.order }),
-            ...(searchText.value && { searchText: searchText.value }),
-        },
-        {
-            preserveState: true,
-            preserveScroll: true,
-            only: ['applicationsPaginator'],
-        },
-    );
-}
-
-async function remove() {
-    if (!deleteTarget.value) {
-        return;
-    }
-
-    deleting.value = true;
-
-    try {
-        router.delete(destroy(deleteTarget.value?.id).url, {
-            preserveScroll: true,
-            preserveState: true,
-            onSuccess: () => {
-                cancelRemove();
-            },
-            onFinish: () => {
-                deleting.value = false;
-            },
-        });
-    } finally {
-        deleting.value = false;
-    }
-}
-
-function cancelRemove() {
-    deleteDialog.value = false;
-    deleteTarget.value = null;
-}
-
-const showContextMenu = ref(false);
-const contextMenuTarget = ref(null);
-const contextMenuTargetedApplication = ref<Application | null>(null);
-const contextMenuItems = computed(() => {
-    if (!contextMenuTargetedApplication.value) {
-        return [];
-    }
-
-    const editName =
-        'Edit Application No: ' +
-        contextMenuTargetedApplication.value.application_no;
-
-    if (contextMenuTargetedApplication.value.exchange_type === 'STEP') {
-        return [
-            {
-                title: editName,
-                prependIcon: 'mdi-square-edit-outline',
-                code: 'edit',
-                color: 'success-darker-3',
-            },
-            { type: 'divider' },
-            {
-                title: 'View Application in PDF',
-                prependIcon: 'mdi-file-pdf-box',
-                code: 'view_full_pdf',
-                color: 'secondary',
-            },
-            {
-                title: 'View Signing Page',
-                prependIcon: 'mdi-file-pdf-box',
-                code: 'signing_pdf_full',
-                color: 'secondary',
-            },
-            { type: 'divider' },
-            {
-                title: 'Remove',
-                prependIcon: 'mdi-trash-can',
-                code: 'delete',
-                color: 'error-darker-3',
-            },
-        ];
-    } else {
-        return [
-            {
-                title: editName,
-                prependIcon: 'mdi-square-edit-outline',
-                code: 'edit',
-                color: 'success-darker-3',
-            },
-            { type: 'divider' },
-            {
-                title: 'View Application in PDF',
-                prependIcon: 'mdi-file-pdf-box',
-                code: 'view_full_pdf',
-                color: 'secondary',
-            },
-            {
-                title: 'View Signing Page 3',
-                prependIcon: 'mdi-file-pdf-box',
-                code: 'signing_pdf_3',
-                color: 'secondary',
-            },
-            {
-                title: 'View Signing Page 5-6',
-                prependIcon: 'mdi-file-pdf-box',
-                code: 'signing_pdf_5_6',
-                color: 'secondary',
-            },
-            { type: 'divider' },
-            {
-                title: 'Remove',
-                prependIcon: 'mdi-trash-can',
-                code: 'delete',
-                color: 'error-darker-3',
-            },
-        ];
-    }
-});
-
-async function show(evt: any, application: Application) {
-    document
-        .querySelector('.icon-btn-applications-active')
-        ?.classList.remove('icon-btn-applications-active');
-
-    contextMenuTargetedApplication.value = application;
-
-    if (showContextMenu.value) {
-        showContextMenu.value = false;
-        await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-
-    contextMenuTarget.value = evt.target.closest('.v-icon-btn');
-    showContextMenu.value = true;
-
-    evt.target.parentElement?.parentElement?.classList.add(
-        'icon-btn-applications-active',
-    );
-}
-
-function handleMenuItemClick({ id, value, code }: any) {
-    if (id === 'edit' && contextMenuTargetedApplication.value?.id) {
-        router.visit(edit({ id: contextMenuTargetedApplication.value?.id }));
-    }
-
-    console.log('Clicked item value:', value); // value = item.code
-    console.log('Clicked item id:', id);
-    console.log('Clicked item code:', code);
-}
-
-function hide() {
-    document
-        .querySelector('.icon-btn-applications-active')
-        ?.classList.remove('icon-btn-applications-active');
-}
-function getRowProps(row: any) {
-    if (row?.item?.application_season_class) {
-        return { class: row?.item?.application_season_class };
-    } else {
-        return {};
-    }
-}
-</script>
-
 <template>
     <Head title="Club Youth Exchange Officers" />
     <div class="app-page">
@@ -535,16 +211,373 @@ function getRowProps(row: any) {
 
         <ConfirmDialog
             v-model="deleteDialog"
-            title="Confirm Delete"
-            message="Are you sure you want to delete?"
+            title="Confirmation"
+            message="Are you sure you want to delete this application?"
             confirm-text="Delete"
-            :target-name="deleteTarget?.name"
+            :target-name="deleteTarget?.firstname"
             :loading="deleting"
             @confirm="remove"
             @cancel="cancelRemove"
         />
     </div>
 </template>
+
+<script setup lang="ts">
+import { Head, router, Deferred } from '@inertiajs/vue3';
+import { format, parseISO } from 'date-fns';
+import { computed, ref, watch } from 'vue';
+import ConfirmDialog from '@/components/ConfirmDialog.vue';
+import {
+    index,
+    destroy,
+    create,
+    edit,
+    fullPdfView,
+    signingPageView,
+    signingPageView56,
+} from '@/routes/application';
+import type { Application } from '@/types';
+
+const props = defineProps<{
+    applicationsPaginator?: any;
+    filters?: {
+        searchText?: string;
+    };
+}>();
+
+const deleteDialog = ref(false);
+const deleteTarget = ref<any>(null);
+const deleting = ref(false);
+const searchText = ref(props.filters?.searchText ?? '');
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+const isSearching = ref(false);
+const defaultSort = [{ key: 'application_no', order: 'desc' }] as any;
+const showContextMenu = ref(false);
+const contextMenuTarget = ref(null);
+const contextMenuTargetedApplication = ref<Application | null>(null);
+const contextMenuItems = computed(() => {
+    if (!contextMenuTargetedApplication.value) {
+        return [];
+    }
+
+    const editName =
+        'Edit Application No: ' +
+        contextMenuTargetedApplication.value.application_no;
+
+    if (contextMenuTargetedApplication.value.exchange_type === 'STEP') {
+        return [
+            {
+                title: editName,
+                prependIcon: 'mdi-square-edit-outline',
+                code: 'edit',
+                color: 'success-darker-3',
+            },
+            { type: 'divider' },
+            {
+                title: 'View Application in PDF',
+                prependIcon: 'mdi-file-pdf-box',
+                code: 'view_full_pdf',
+                color: 'secondary',
+            },
+            {
+                title: 'View Signing Page',
+                prependIcon: 'mdi-file-pdf-box',
+                code: 'signing_pdf_full',
+                color: 'secondary',
+            },
+            { type: 'divider' },
+            {
+                title: 'Remove Application',
+                prependIcon: 'mdi-trash-can',
+                code: 'delete',
+                color: 'error-darker-3',
+            },
+        ];
+    } else {
+        return [
+            {
+                title: editName,
+                prependIcon: 'mdi-square-edit-outline',
+                code: 'edit',
+                color: 'success-darker-3',
+            },
+            { type: 'divider' },
+            {
+                title: 'View Application in PDF',
+                prependIcon: 'mdi-file-pdf-box',
+                code: 'view_full_pdf',
+                color: 'secondary',
+            },
+            {
+                title: 'View Signing Page 3',
+                prependIcon: 'mdi-file-pdf-box',
+                code: 'signing_pdf_3',
+                color: 'secondary',
+            },
+            {
+                title: 'View Signing Page 5-6',
+                prependIcon: 'mdi-file-pdf-box',
+                code: 'signing_pdf_5_6',
+                color: 'secondary',
+            },
+            { type: 'divider' },
+            {
+                title: 'Remove Application',
+                prependIcon: 'mdi-trash-can',
+                code: 'delete',
+                color: 'error-darker-3',
+            },
+        ];
+    }
+});
+
+const headers = [
+    {
+        title: 'Actions',
+        key: 'actions',
+        align: 'center' as const,
+        sortable: false,
+        fixed: true,
+        width: '50px',
+    },
+    {
+        title: 'District',
+        key: 'district_code',
+        align: 'start' as const,
+        sortable: false,
+        nowrap: true,
+        width: '10px',
+    },
+    {
+        title: 'First Name',
+        key: 'firstname',
+        align: 'start' as const,
+        nowrap: true,
+    },
+    {
+        title: 'Surname',
+        key: 'surname',
+        align: 'start' as const,
+        nowrap: true,
+    },
+    {
+        title: 'App. No',
+        key: 'application_no',
+        align: 'start' as const,
+        nowrap: true,
+    },
+    {
+        title: 'App. Type',
+        key: 'exchange_type',
+        align: 'start' as const,
+        nowrap: true,
+    },
+    {
+        title: 'DOB',
+        key: 'dob',
+        align: 'start' as const,
+        nowrap: true,
+    },
+    {
+        title: 'Gender',
+        key: 'gender',
+        align: 'start' as const,
+        nowrap: true,
+    },
+    {
+        title: 'Status',
+        key: 'application_status',
+        align: 'start' as const,
+        nowrap: true,
+    },
+    {
+        title: 'Email',
+        key: 'email_address',
+        align: 'start' as const,
+        nowrap: true,
+    },
+    {
+        title: 'DYEO',
+        key: 'dyeo_name',
+        align: 'start' as const,
+        sortable: false,
+        nowrap: true,
+    },
+    {
+        title: 'App. Date',
+        key: 'date_of_app',
+        align: 'start' as const,
+        nowrap: true,
+        lastFixed: true,
+    },
+];
+
+// Debounced search watcher
+watch(searchText, (newValue) => {
+    if (debounceTimer) {
+        clearTimeout(debounceTimer);
+    }
+
+    debounceTimer = setTimeout(() => {
+        performSearch(newValue);
+    }, 400);
+});
+
+function performSearch(search: string) {
+    isSearching.value = true;
+    router.get(
+        index().url,
+        {
+            page: 1,
+            perPage: props.applicationsPaginator.per_page,
+            searchText: search || undefined,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['applicationsPaginator'],
+            onFinish: () => {
+                isSearching.value = false;
+            },
+        },
+    );
+}
+
+function addNewApplication() {
+    router.get(create().url);
+}
+function clearSearch() {
+    searchText.value = '';
+    isSearching.value = true;
+    router.get(
+        index().url,
+        {},
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['applicationsPaginator'],
+            onFinish: () => {
+                isSearching.value = false;
+            },
+        },
+    );
+}
+
+function onOptionsChange({ page, itemsPerPage, sortBy }: any) {
+    router.get(
+        index().url,
+        {
+            page: page,
+            perPage: itemsPerPage,
+            ...(sortBy && { sortBy: sortBy[0]?.key }),
+            ...(sortBy && { sortOrder: sortBy[0]?.order }),
+            ...(searchText.value && { searchText: searchText.value }),
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['applicationsPaginator'],
+        },
+    );
+}
+
+async function remove() {
+    if (!deleteTarget.value) {
+        return;
+    }
+
+    deleting.value = true;
+
+    try {
+        router.delete(destroy(deleteTarget.value?.id).url, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                cancelRemove();
+            },
+            onFinish: () => {
+                deleting.value = false;
+            },
+        });
+    } finally {
+        deleting.value = false;
+    }
+}
+
+function cancelRemove() {
+    deleteDialog.value = false;
+    deleteTarget.value = null;
+}
+
+function handleMenuItemClick({ id }: any) {
+    if (id === 'edit' && contextMenuTargetedApplication.value?.id) {
+        router.visit(edit(contextMenuTargetedApplication.value?.id));
+    }
+
+    if (id === 'view_full_pdf' && contextMenuTargetedApplication.value?.id) {
+        window.open(fullPdfView(contextMenuTargetedApplication.value?.id).url);
+    }
+
+    if (id === 'signing_pdf_full' && contextMenuTargetedApplication.value?.id) {
+        window.open(
+            signingPageView(contextMenuTargetedApplication.value?.id).url,
+        );
+    }
+
+    if (id === 'signing_pdf_3' && contextMenuTargetedApplication.value?.id) {
+        window.open(
+            signingPageView(contextMenuTargetedApplication.value?.id).url,
+        );
+    }
+
+    if (id === 'signing_pdf_5_6' && contextMenuTargetedApplication.value?.id) {
+        window.open(
+            signingPageView56(contextMenuTargetedApplication.value?.id).url,
+        );
+    }
+
+    if (id === 'delete' && contextMenuTargetedApplication.value?.id) {
+        deleteTarget.value = contextMenuTargetedApplication.value?.id;
+        deleteDialog.value = true;
+    }
+
+    console.log('Clicked item id:', id);
+}
+
+async function show(evt: any, application: Application) {
+    document
+        .querySelector('.icon-btn-applications-active')
+        ?.classList.remove('icon-btn-applications-active');
+
+    contextMenuTargetedApplication.value = application;
+
+    if (showContextMenu.value) {
+        showContextMenu.value = false;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
+    contextMenuTarget.value = evt.target.closest('.v-icon-btn');
+    showContextMenu.value = true;
+
+    evt.target.parentElement?.parentElement?.classList.add(
+        'icon-btn-applications-active',
+    );
+}
+
+function hide() {
+    document
+        .querySelector('.icon-btn-applications-active')
+        ?.classList.remove('icon-btn-applications-active');
+}
+
+function getRowProps(row: any) {
+    if (row?.item?.application_season_class) {
+        return { class: row?.item?.application_season_class };
+    } else {
+        return {};
+    }
+}
+</script>
 
 <style scoped>
 :deep(.v-toolbar__content) {
