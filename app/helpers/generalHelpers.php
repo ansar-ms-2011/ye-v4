@@ -39,7 +39,7 @@ function SaveApplicationMediaFiles(Application $application)
         $path = storage_path('app/media-library/'.$application->id);
         createDirectory($path);
         foreach ($media_library as $media) {
-            $image = Image::make($media->media);
+            $image = Image::decode($media->media);
             $image->save(storage_path('app/media-library/'.$application->id.'/'.$media->media_category_label.'.png'));
         }
     }

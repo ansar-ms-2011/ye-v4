@@ -14,13 +14,16 @@
     "require": {
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^3.4",
+        "intervention/image": "^4.3",
+        "intervention/image-laravel": "^4.1",
         "laravel/fortify": "^1.40",
         "laravel/framework": "^13.33",
         "laravel/tinker": "^3.0.2",
         "laravel/wayfinder": "^0.1.21",
         "setasign/fpdf": "^1.9",
         "setasign/fpdi": "^2.6",
-        "spatie/laravel-permission": "^8.3"
+        "spatie/laravel-permission": "^8.3",
+        "ext-iconv": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.24.1",

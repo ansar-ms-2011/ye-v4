@@ -42,7 +42,7 @@ class ApplicationController extends Controller
         // Role-Based Filtering of Applications
         if ($user->hasRole('dyeo')) {
             $dyeo = RibiDyeo::where('user_id', $user->id)->first();
-            if (! $dyeo) {
+            if (!$dyeo) {
                 Inertia::flash('toast', ['type' => 'warning', 'message' => 'You dont have any associated DYEO record']);
             }
             $applications = $applications->where('dyeo_id', $dyeo->id);
@@ -207,7 +207,10 @@ class ApplicationController extends Controller
     {
         $media_library = Media::where('application_id', $id)->get();
 
-        return Inertia::render('applications/UploadedFiles', ['files' => $media_library, 'application_id' => $id]);
+        return Inertia::render('applications/UploadedFiles', [
+            'files' => $media_library,
+            'applicationId' => $id
+        ]);
     }
 
     /**

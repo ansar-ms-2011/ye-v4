@@ -1,3 +1,10 @@
+export interface PageProps {
+    auth?: {
+        role?: string;
+    };
+    [key: string]: unknown;
+}
+
 export type SelectOption = {
     value: string | number;
     text: string | null;

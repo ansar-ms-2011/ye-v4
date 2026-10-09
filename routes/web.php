@@ -37,16 +37,16 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::group(['middleware' => ['role:admin|dyeo|applicant']], function () {
-        Route::get('email-guide/{application}', [EmailGuideController::class, 'GetEmailGuideView']);
-        Route::post('send-email-guide-part-1/{application}', [EmailGuideController::class, 'SendPart1GuideThroughEmail']);
-        Route::post('send-email-guide-part-2/{application}', [EmailGuideController::class, 'SendPart2GuideThroughEmail']);
-        Route::post('send-payment-email/{application}', [EmailGuideController::class, 'SendPaymentEmailToApplicant']);
+        Route::get('email-guide/{application}', [EmailGuideController::class, 'GetEmailHistory'])->name('email.emailHistory');
+        Route::post('send-email-guide-part-1/{application}', [EmailGuideController::class, 'SendPart1GuideThroughEmail'])->name('email.sendPart1');
+        Route::post('send-email-guide-part-2/{application}', [EmailGuideController::class, 'SendPart2GuideThroughEmail'])->name('email.sendPart2');
+        Route::post('send-payment-email/{application}', [EmailGuideController::class, 'SendPaymentEmailToApplicant'])->name('email.sendPayment');
 
         Route::get('email-file/{id}.pdf', function ($id) {
             $fileName = 'app/'.$id.'.pdf';
 
             return response()->file(storage_path($fileName));
-        });
+        })->name('email.file');
     });
 
     // Separated Application Edit route for applicant

@@ -1,7 +1,7 @@
 <?php
 
 use Carbon\Carbon;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\Laravel\Facades\Image;
 use setasign\Fpdi\Fpdi;
 use setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException;
 use setasign\Fpdi\PdfParser\Filter\FilterException;
@@ -525,7 +525,7 @@ function get_CAMPS_Signing_Page($application): Fpdi
     $iconv_name = iconv('UTF-8', 'ISO-8859-1', $application->full_name);
 
     if ($application->media_id && $application->image_data) {
-        $image = Image::make($application->image_data);
+        $image = Image::decode($application->image_data);
         $image->save(storage_path($image_name));
     }
 
@@ -646,7 +646,7 @@ function get_CAMPS_Signing_Page_5_6($application): Fpdi
     $iconv_name = iconv('UTF-8', 'ISO-8859-1', $application->full_name);
 
     if ($application->media_id && $application->image_data) {
-        $image = Image::make($application->image_data);
+        $image = Image::decode($application->image_data);
         $image->save(storage_path($image_name));
     }
 

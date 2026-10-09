@@ -1,10 +1,12 @@
 import { createInertiaApp } from '@inertiajs/vue3';
+import VueViewer from 'v-viewer';
 import { initializeTheme } from '@/composables/useAppearance';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
 import vuetify from '@/plugins/vuetify';
+import 'viewerjs/dist/viewer.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -30,9 +32,12 @@ createInertiaApp({
         color: '#fff',
     },
     withApp: (app) => {
-        app.use(vuetify);
+        app.use(vuetify).use(VueViewer);
     },
+}).then(r => {
+    initializeFlashToast();
+    console.log('App initialized', r);
 });
 
 // This will listen for flash toast data from the server...
-initializeFlashToast();
+// initializeFlashToast();

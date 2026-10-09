@@ -8,10 +8,11 @@ use App\Models\Application;
 use App\Models\SentEmail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Mail;
+use Inertia\Inertia;
 
 class EmailGuideController extends Controller
 {
-    public function GetEmailGuideView(Application $application)
+    public function GetEmailHistory(Application $application)
     {
         $emailSent = SentEmail::where('application_id', $application->id)->with('email_type')->get();
         $fileName = null;
@@ -21,28 +22,31 @@ class EmailGuideController extends Controller
             $fileName = generateGuideFileStep($application);
         }
 
-        return view('email-guide')->with([
+        return Inertia::render('applications/EmailHistoryTable', [
             'application' => $application,
             'fileName' => $fileName,
             'emailSentList' => $emailSent,
+            'appId' => $application->id
         ]);
     }
 
-    public function SendPart1GuideThroughEmail(Application $application): JsonResponse
+    public function SendPart1GuideThroughEmail(Application $application)
     {
         $emailSentList = sendGuidePart1ThroughEmail($application);
 
-        return response()->json(['message' => 'Guide (Part 1) has been emailed to applicant', 'emailSentList' => $emailSentList]);
+        return Inertia::flash('toast', ['message' => 'Guide (Part 1) has been emailed to applicant'])
+            ->back()->with(['emailSentList' => $emailSentList]);
     }
 
-    public function SendPart2GuideThroughEmail(Application $application): JsonResponse
+    public function SendPart2GuideThroughEmail(Application $application)
     {
         $emailSentList = sendGuidePart2ThroughEmail($application);
 
-        return response()->json(['message' => 'Guide (Part 2) has been emailed to applicant', 'emailSentList' => $emailSentList]);
+        return Inertia::flash('toast', ['message' => 'Guide (Part 2) has been emailed to applicant'])
+            ->back()->with(['emailSentList' => $emailSentList]);
     }
 
-    public function SendPaymentEmailToApplicant(Application $application): JsonResponse
+    public function SendPaymentEmailToApplicant(Application $application)
     {
         // Send Email to Applicant regarding payment of Administration Fee
         if ($application->exchange_type == 'CAMPS & TOURS') {
@@ -63,6 +67,7 @@ class EmailGuideController extends Controller
             ]);
         }
 
-        return response()->json(['message' => 'Email has been sent to applicant for Payment']);
+        return Inertia::flash('toast', ['message' => 'Email has been sent to applicant for Payment'])
+            ->back();
     }
 }

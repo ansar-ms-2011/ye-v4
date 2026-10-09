@@ -337,7 +337,7 @@ const recentApplicationsHeaders = [
                                         color="primary"
                                         class="bg-primary"
                                         prepend-icon="mdi-pencil-outline"
-                                        :href="`/applications/${applicantApplication.id}/edit`"
+                                        :href="`/application/${applicantApplication.id}/edit`"
                                     >
                                         Edit Application
                                     </VBtn>
@@ -1025,7 +1025,7 @@ const recentApplicationsHeaders = [
                                                 size="small"
                                                 variant="text"
                                                 color="primary"
-                                                :href="`/applications/${item.id}/edit`"
+                                                :href="`/application/${item.id}/edit`"
                                             />
                                         </template>
                                     </VTooltip>

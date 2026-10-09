@@ -3,7 +3,18 @@ import { router, usePage } from '@inertiajs/vue3';
 import { ref, reactive, computed, nextTick } from 'vue';
 import { getEmptyLanguage, getEmptySibling, validateEmail } from '@/helpers';
 import ActionModal from '@/pages/applications/ActionModal.vue';
-import { store, update, removeMedia } from '@/routes/application';
+import {
+    store,
+    update,
+    removeMedia,
+    uploadedFiles,
+} from '@/routes/application';
+import {
+    emailHistory,
+    sendPart1,
+    sendPart2,
+    sendPayment,
+} from '@/routes/email';
 
 const props = defineProps({
     ApplicationObj: { type: Object, required: true },
@@ -16,7 +27,7 @@ const formRef = ref(null);
 const langFormRef = ref(null);
 const siblingFormRef = ref(null);
 const uploadFormRef = ref(null);
-
+const confirmFileDeleteDialog = ref(false);
 const valid = ref(false);
 const langFormValid = ref(false);
 const uploadFormValid = ref(false);
@@ -284,17 +295,16 @@ function goBack() {
     window.history.back();
 }
 function viewFiles() {
-    router.visit(props.routes.uploadedFiles.replace(':id', form.id));
-}
-function goToEmailGuide() {
-    router.visit(props.routes.emailGuide.replace(':id', form.id));
+    if (form?.id) {
+        router.visit(uploadedFiles(form.id));
+    }
 }
 
 async function submitForm() {
     const { valid: mainFormValidity } = await formRef.value?.validate();
     const { valid: uploadFormValidity } = await uploadFormRef.value?.validate();
 
-    console.log(mainFormValidity, uploadFormValidity);
+    //console.log(mainFormValidity, uploadFormValidity);
 
     await nextTick(() => {
         if (!(mainFormValidity && uploadFormValidity)) {
@@ -341,21 +351,30 @@ function scrollToFirstError() {
     }
 }
 
+function viewEmailHistory() {
+    if (!form?.id) {
+        return;
+    }
+
+    router.get(emailHistory({ application: form.id }));
+}
+
 function sendEmail(type, loadingKey) {
+    if (!form?.id) {
+        return;
+    }
+
     loading[loadingKey] = true;
     const routeMap = {
-        payment: props.routes.sendPaymentEmail,
-        'guide-part-1': props.routes.sendGuide1,
-        'guide-part-2': props.routes.sendGuide2,
+        payment: sendPayment({ application: form.id }),
+        'guide-part-1': sendPart1({ application: form.id }),
+        'guide-part-2': sendPart2({ application: form.id }),
     };
     router.post(
-        routeMap[type].replace(':id', form.id),
+        routeMap[type],
         {},
         {
             preserveScroll: true,
-            onSuccess: (p) =>
-                showSnackbar(p.props.flash?.success || 'Email sent'),
-            onError: () => showSnackbar('Failed to send email', 'red'),
             onFinish: () => {
                 loading[loadingKey] = false;
             },
@@ -443,16 +462,28 @@ function handleFileSelection(event, mediaObj) {
     }
 }
 
-function removedUploadedMedia(media) {
+const selectedMedia = ref(null);
+function confirmMediaDelete(media) {
+    selectedMedia.value = media;
+    confirmFileDeleteDialog.value = true;
+}
+
+function removeUploadedMedia() {
+    if (!selectedMedia.value) {
+        return false;
+    }
+
     router.post(
-        removeMedia({ id: media.id }),
+        removeMedia({ id: selectedMedia.value.id }),
         {},
         {
             preserveScroll: true,
             onSuccess: () => {
-                media.id = null;
-                media.media = null;
-                media.file_name = '';
+                selectedMedia.value.id = null;
+                selectedMedia.value.media = null;
+                selectedMedia.value.brief_caption = null;
+                selectedMedia.value.file_name = '';
+                confirmFileDeleteDialog.value = false;
             },
         },
     );
@@ -481,10 +512,10 @@ function handleActionUpdated(updatedForm) {
         </VCard>
 
         <VSnackbar
+            elevation="24"
             v-model="snackbar.show"
             :timeout="snackbar.timeout"
             :color="snackbar.color"
-            elevation="24"
             :location="snackbar.location"
         >
             {{ snackbar.message }}
@@ -500,94 +531,109 @@ function handleActionUpdated(updatedForm) {
         </VSnackbar>
 
         <VRow class="mb-4" v-if="['admin', 'applicant'].includes(role)">
-            <VCol cols="3" sm="3" md="3" class="d-flex justify-content-start">
+            <!-- LEFT: navigation buttons -->
+            <VCol
+                cols="12"
+                sm="6"
+                md="3"
+                class="d-flex flex-wrap ga-2 mb-2 mb-md-0"
+            >
                 <VBtn
                     variant="outlined"
                     color="secondary"
-                    style="float: left"
+                    class="flex-grow-0"
                     @click="goBack"
+                    title="Go Back"
+                    prepend-icon="mdi-arrow-left"
                 >
                     Back
                 </VBtn>
+
                 <VBtn
-                    :disabled="filledMediaFiles.length === 0"
-                    class="ml-2"
+                    :disabled="filledMediaFiles?.length === 0"
                     color="primary"
                     variant="outlined"
+                    class="flex-grow-0"
                     @click="viewFiles"
+                    prepend-icon="mdi-file-multiple"
+                    title="View Media Files"
                 >
-                    View Files
-                    {{
-                        filledMediaFiles.length > 0
-                            ? '(' + filledMediaFiles.length + ')'
-                            : ''
-                    }}
+                    ({{ filledMediaFiles.length }})
                 </VBtn>
             </VCol>
 
-            <VCol cols="6" sm="6" md="6">
-                <template v-if="role !== 'applicant'">
-                    <VRow>
-                        <VCol
-                            cols="12"
-                            sm="12"
-                            md="12"
-                            class="d-flex justify-content-between"
-                        >
-                            <VBtn
-                                color="primary darken-1"
-                                class="mr-2"
-                                variant="outlined"
-                                @click="
-                                    sendEmail('guide-part-1', 'guideEmail1')
-                                "
-                                :loading="loading.guideEmail1"
-                            >
-                                SEND GUIDE (PART 1)
-                            </VBtn>
-                            <VBtn
-                                color="primary darken-1"
-                                class="mr-2"
-                                variant="outlined"
-                                @click="sendEmail('payment', 'paymentEmail')"
-                                :loading="loading.paymentEmail"
-                                :disabled="
-                                    loading.paymentEmail ||
-                                    form.application_status === 'Paid'
-                                "
-                            >
-                                SEND PAYMENT EMAIL
-                            </VBtn>
-                            <VBtn
-                                color="primary darken-1"
-                                class="mr-2"
-                                variant="outlined"
-                                @click="
-                                    sendEmail('guide-part-2', 'guideEmail2')
-                                "
-                                :loading="loading.guideEmail2"
-                            >
-                                SEND GUIDE (PART 2)
-                            </VBtn>
-                        </VCol>
-                    </VRow>
-                </template>
+            <!-- MIDDLE: send email buttons (non-applicants only) -->
+            <VCol
+                v-if="role !== 'applicant'"
+                cols="12"
+                sm="12"
+                md="12"
+                lg="6"
+                class="d-flex flex-wrap justify-start ga-1 ga-md-2 ga-lg-3 mb-2 mb-md-0 order-3 order-md-2"
+            >
+                <VBtn
+                    title="Send Email for Guide Part 1"
+                    color="primary darken-1"
+                    variant="outlined"
+                    class="flex-grow-1 flex-sm-grow-0"
+                    :loading="loading.guideEmail1"
+                    prepend-icon="mdi-email"
+                    @click="sendEmail('guide-part-1', 'guideEmail1')"
+                >
+                    EMAIL PART 1
+                </VBtn>
+
+                <VBtn
+                    title="Send Email for Payment"
+                    color="primary darken-1"
+                    variant="outlined"
+                    class="flex-grow-1 flex-sm-grow-0"
+                    :loading="loading.paymentEmail"
+                    :disabled="
+                        loading.paymentEmail ||
+                        form.application_status === 'Paid'
+                    "
+                    prepend-icon="mdi-email"
+                    @click="sendEmail('payment', 'paymentEmail')"
+                >
+                    EMAIL PAYMENT
+                </VBtn>
+
+                <VBtn
+                    title="Send Email for Guide Part 2"
+                    color="primary darken-1"
+                    variant="outlined"
+                    class="flex-grow-1 flex-sm-grow-0"
+                    :loading="loading.guideEmail2"
+                    prepend-icon="mdi-email"
+                    @click="sendEmail('guide-part-2', 'guideEmail2')"
+                >
+                    EMAIL PART 2
+                </VBtn>
             </VCol>
 
-            <VCol cols="3" sm="3" md="3">
-                <div class="d-flex justify-end">
-                    <VBtn
-                        color="primary darken-5"
-                        variant="outlined"
-                        @click="goToEmailGuide"
-                    >
-                        EMAILS SENT HISTORY
-                    </VBtn>
-                    <ActionModal
-                        :ApplicationObj="form"
-                        @actionUpdated="handleActionUpdated"
-                    />
-                </div>
+            <!-- RIGHT: history + action modal -->
+            <VCol
+                cols="12"
+                sm="6"
+                md="3"
+                class="d-flex flex-wrap justify-end align-center ga-2 order-2 order-md-3"
+            >
+                <VBtn
+                    title="View Email History"
+                    color="primary darken-5"
+                    variant="outlined"
+                    class="flex-grow-1 flex-sm-grow-0"
+                    @click="viewEmailHistory"
+                    prepend-icon="mdi-email-multiple-outline"
+                >
+                    EMAILS HISTORY
+                </VBtn>
+
+                <ActionModal
+                    :ApplicationObj="form"
+                    @actionUpdated="handleActionUpdated"
+                />
             </VCol>
         </VRow>
 
@@ -980,7 +1026,12 @@ function handleActionUpdated(updatedForm) {
                                     variant="outlined"
                                 ></VAutocomplete>
                             </VCol>
-                            <VCol cols="12" sm="1" md="1" class="d-flex justify-end">
+                            <VCol
+                                cols="12"
+                                sm="1"
+                                md="1"
+                                class="d-flex justify-end"
+                            >
                                 <v-btn
                                     v-if="edited_sibling !== null"
                                     variant="outlined"
@@ -1006,7 +1057,6 @@ function handleActionUpdated(updatedForm) {
                     <VRow>
                         <VCol cols="12" sm="12" md="12">
                             <VDataTable
-                                headerProps=""
                                 :headers="siblingsTableHeaders"
                                 :items="siblings"
                                 hide-default-footer
@@ -1504,21 +1554,31 @@ function handleActionUpdated(updatedForm) {
                                     accept=".jpg,.jpeg, png,.bmp,.gif,.svg,.webp"
                                     label="Select File To Upload"
                                     :rules="uploadFileRules"
+                                    prepend-icon=""
                                     hide-details
                                     density="compact"
                                     variant="outlined"
                                 ></v-file-input>
                             </VCol>
                             <VCol cols="12" sm="1" md="1">
-                                <v-btn
-                                    :disabled="media.id === null"
-                                    small
-                                    color="red"
-                                    class="text-white"
-                                    @click="removedUploadedMedia(media)"
+                                <v-tooltip
+                                    text="Remove this file"
+                                    location="top"
                                 >
-                                    REMOVE
-                                </v-btn>
+                                    <template
+                                        #activator="{ props: tooltipProps }"
+                                    >
+                                        <vBtn
+                                            v-bind="tooltipProps"
+                                            icon="mdi-trash-can"
+                                            :disabled="media.id === null"
+                                            size="small"
+                                            color="red"
+                                            class="text-white"
+                                            @click="confirmMediaDelete(media)"
+                                        />
+                                    </template>
+                                </v-tooltip>
                             </VCol>
                         </VRow>
                     </VForm>
@@ -1536,6 +1596,7 @@ function handleActionUpdated(updatedForm) {
                     :disabled="saving"
                     color="primary"
                     location="bottom center"
+                    title="Click to save / update the application"
                     min-width="250"
                     hover-elevation="5"
                     size="large"
@@ -1545,6 +1606,32 @@ function handleActionUpdated(updatedForm) {
                 />
             </VCol>
         </VRow>
+
+        <VDialog v-model="confirmFileDeleteDialog" max-width="400">
+            <VCard>
+                <VCardTitle class="border-b">
+                    <VCardTitle>Confirm Delete</VCardTitle>
+                </VCardTitle>
+                <VCardText>
+                    Are you sure you want to delete this media? This is
+                    permanent action and cannot be undone.
+                </VCardText>
+                <VCardActions class="pa-4">
+                    <VSpacer />
+                    <VBtn
+                        variant="text"
+                        @click="confirmFileDeleteDialog = false"
+                        >Cancel</VBtn
+                    >
+                    <VBtn
+                        color="red"
+                        variant="flat"
+                        @click="removeUploadedMedia"
+                        >Delete</VBtn
+                    >
+                </VCardActions>
+            </VCard>
+        </VDialog>
     </div>
 </template>
 
