@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
+import { VDateInput } from 'vuetify/labs/components';
 import TextLink from '@/components/TextLink.vue';
 import { login } from '@/routes';
 import { store } from '@/routes/applicant';
@@ -29,7 +30,7 @@ defineProps<{
         v-slot="{ errors, processing }"
     >
         <div class="starter-field mb-4">
-            <label for="email">Application Number</label>
+            <label for="application_no">Application Number</label>
             <VTextField
                 id="application_no"
                 type="application_no"
@@ -39,19 +40,20 @@ defineProps<{
                 hide-details="auto"
                 required
                 autofocus
-                placeholder="Enter your application number i.e 45698"
+                placeholder="Enter your application number i.e 4568"
                 autocomplete="application_no"
                 :error-messages="errors.application_no"
             />
         </div>
 
         <div class="starter-field mb-2">
-            <label for="email">Applicant's DOB</label>
+            <label for="applicant_dob">Applicant's DOB</label>
             <VDateInput
                 id="applicant_dob"
                 name="applicant_dob"
                 density="compact"
                 prepend-icon=""
+                append-icon="mdi-calendar"
                 variant="outlined"
                 inputFormat="dd-mm-yyyy"
                 placeholder="Enter your application's DOB (dd-mm-yyyy)"

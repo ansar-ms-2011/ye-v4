@@ -180,7 +180,7 @@ const recentApplicationsHeaders = [
                             Welcome back, {{ userContext.name || 'User' }}
                         </h1>
                         <p class="text-body-2 text-white opacity-90 mb-0">
-                            <span class="text-capitalize">{{ role }}</span>
+                            <span class="text-uppercase">{{ role }}</span>
                             Portal
                             <template v-if="userContext.district">
                                 &bull; District
@@ -883,7 +883,7 @@ const recentApplicationsHeaders = [
                                         <div
                                             class="text-caption text-medium-emphasis"
                                         >
-                                            Active Rotary Clubs
+                                            Rotary Clubs
                                         </div>
                                     </div>
                                     <VChip

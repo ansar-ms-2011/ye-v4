@@ -314,7 +314,7 @@ function cancelRemove() {
                         :items-per-page="cyeoPaginator.per_page"
                         :items-per-page-options="[15, 35, 65, 100]"
                         :page="cyeoPaginator.current_page"
-                        :loading="isSearching"
+                        :loading="isSearching || reloading"
                         @update:page="onPageChange"
                         @update:items-per-page="onPerPageChange"
                         @dblclick:row="onRowClick"
@@ -355,19 +355,25 @@ function cancelRemove() {
 
                         <template v-slot:[`item.actions`]="{ item }">
                             <div class="d-flex ga-2 justify-end">
-                                <v-icon
+                                <VBtn
+                                    rounded="xl"
+                                    title="Edit CYEO"
                                     color="success"
+                                    variant="outlined"
                                     icon="mdi-square-edit-outline"
-                                    size="small"
+                                    size="x-small"
                                     @click.stop="edit(item as Cyeo)"
-                                ></v-icon>
+                                ></VBtn>
 
-                                <v-icon
+                                <VBtn
+                                    rounded="xl"
+                                    title="Delete CYEO"
                                     color="red"
+                                    variant="outlined"
                                     icon="mdi-delete"
-                                    size="small"
+                                    size="x-small"
                                     @click.stop="confirmRemove(item as Cyeo)"
-                                ></v-icon>
+                                ></VBtn>
                             </div>
                         </template>
 
@@ -388,14 +394,25 @@ function cancelRemove() {
                                 <span v-if="reloading"
                                     >Deferred data is being loaded ...</span
                                 >
-                                <v-btn
+                                <div
                                     v-else
-                                    prepend-icon="mdi-backup-restore"
-                                    rounded="lg"
-                                    text="Reset filters"
-                                    variant="text"
-                                    @click="clearSearch"
-                                ></v-btn>
+                                    class="d-flex flex-column align-center ga-4"
+                                >
+                                    <span
+                                        >No records found matching your
+                                        query.</span
+                                    >
+                                    <VBtn
+                                        width="50%"
+                                        prepend-icon="mdi-backup-restore"
+                                        rounded="lg"
+                                        density="compact"
+                                        text="Reset filters"
+                                        variant="outlined"
+                                        color="primary"
+                                        @click="clearSearch"
+                                    ></VBtn>
+                                </div>
                             </div>
                         </template> </v-data-table-server
                 ></template>

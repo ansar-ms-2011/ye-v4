@@ -272,31 +272,51 @@ function cancelRemove() {
 
                 <template v-slot:[`item.actions`]="{ item }">
                     <div class="d-flex ga-2 justify-end">
-                        <v-icon
+                        <VBtn
+                            rounded="xl"
+                            title="Edit Club"
                             color="success"
+                            variant="outlined"
                             icon="mdi-square-edit-outline"
-                            size="small"
+                            size="x-small"
                             @click="edit(item as Club)"
-                        ></v-icon>
+                        ></VBtn>
 
-                        <v-icon
+                        <VBtn
+                            rounded="xl"
+                            title="Delete Club"
                             color="red"
+                            variant="outlined"
                             icon="mdi-delete"
-                            size="small"
+                            size="x-small"
                             @click="confirmRemove(item as Club)"
-                        ></v-icon>
+                        ></VBtn>
                     </div>
                 </template>
 
                 <template v-slot:no-data>
                     <div class="d-flex justify-center pa-4">
-                        <v-btn
-                            prepend-icon="mdi-backup-restore"
-                            rounded="lg"
-                            text="Reset filters"
-                            variant="text"
-                            @click="clearSearch"
-                        ></v-btn>
+                        <span v-if="isSearching"
+                            >Deferred data is being loaded ...</span
+                        >
+                        <div
+                            v-else
+                            class="d-flex flex-column align-center ga-4"
+                        >
+                            <span class="text-high-emphasis"
+                                >No records found matching your query.</span
+                            >
+                            <VBtn
+                                width="50%"
+                                prepend-icon="mdi-backup-restore"
+                                rounded="lg"
+                                density="compact"
+                                text="Reset filters"
+                                variant="outlined"
+                                color="primary"
+                                @click="clearSearch"
+                            ></VBtn>
+                        </div>
                     </div>
                 </template>
             </v-data-table-server>

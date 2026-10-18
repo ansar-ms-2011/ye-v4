@@ -25,7 +25,16 @@ const usersPage = computed(() => (page.props as any).users); // the paginator
 const users = computed<User[]>(() => (page.props as any).users?.data ?? []);
 const districts = computed(() => (page.props as any).districts ?? []);
 const clubs = computed(() => (page.props as any).clubs ?? []);
-const roles = computed(() => (page.props as any).roles ?? []);
+const roles = computed(
+    () =>
+        (page.props as any).roles
+            .filter((role: any) => role.title !== 'applicant')
+            .map((role: any) => {
+                role.title = role.title.toUpperCase();
+
+                return role;
+            }) ?? [],
+);
 
 const deleteDialog = ref(false);
 const deleteTarget = ref<any>(null);
@@ -291,31 +300,51 @@ function cancelRemove() {
 
                     <template v-slot:[`item.actions`]="{ item }">
                         <div class="d-flex ga-2 justify-end">
-                            <v-icon
+                            <VBtn
+                                rounded="xl"
+                                title="Edit User"
                                 color="success"
+                                variant="outlined"
                                 icon="mdi-square-edit-outline"
-                                size="small"
+                                size="x-small"
                                 @click="edit(item)"
-                            ></v-icon>
+                            ></VBtn>
 
-                            <v-icon
+                            <VBtn
+                                rounded="xl"
+                                title="Delete User"
                                 color="red"
+                                variant="outlined"
                                 icon="mdi-delete"
-                                size="small"
+                                size="x-small"
                                 @click="confirmRemove(item as User)"
-                            ></v-icon>
+                            ></VBtn>
                         </div>
                     </template>
 
                     <template v-slot:no-data>
                         <div class="d-flex justify-center pa-4">
-                            <v-btn
-                                prepend-icon="mdi-backup-restore"
-                                rounded="lg"
-                                text="Reset filters"
-                                variant="text"
-                                @click="clearSearch"
-                            ></v-btn>
+                            <span v-if="isSearching"
+                                >Deferred data is being loaded ...</span
+                            >
+                            <div
+                                v-else
+                                class="d-flex flex-column align-center ga-4"
+                            >
+                                <span class="text-high-emphasis"
+                                    >No records found matching your query.</span
+                                >
+                                <VBtn
+                                    width="50%"
+                                    prepend-icon="mdi-backup-restore"
+                                    rounded="lg"
+                                    density="compact"
+                                    text="Reset filters"
+                                    variant="outlined"
+                                    color="primary"
+                                    @click="clearSearch"
+                                ></VBtn>
+                            </div>
                         </div>
                     </template>
                 </v-data-table-server>
@@ -328,7 +357,15 @@ function cancelRemove() {
                 :reset-on-success="['password']"
                 v-slot="{ errors, processing }"
                 @success="onFormSuccess"
-                :transform="(data) => ({ ...data, active: !!formModel.active })"
+                :transform="
+                    (data) => ({
+                        ...data,
+                        active: !!formModel.active,
+                        role_id: formModel.role_id,
+                        district: formModel.district,
+                        rotary_club_id: formModel.rotary_club_id,
+                    })
+                "
             >
                 <v-card
                     :subtitle="`${isEditing ? 'Update' : 'Create'} user account`"
@@ -370,7 +407,7 @@ function cancelRemove() {
                             </v-col>
 
                             <v-col cols="12" md="6" class="py-1">
-                                <VCombobox
+                                <VAutocomplete
                                     name="role_id"
                                     itemTitle="title"
                                     itemValue="value"
@@ -381,11 +418,11 @@ function cancelRemove() {
                                     :items="roles"
                                     label="Role"
                                     :error-messages="errors.role_id"
-                                ></VCombobox>
+                                ></VAutocomplete>
                             </v-col>
 
                             <v-col cols="12" md="6" class="py-1">
-                                <VCombobox
+                                <VAutocomplete
                                     name="district"
                                     itemTitle="title"
                                     itemValue="value"
@@ -396,11 +433,11 @@ function cancelRemove() {
                                     label="District"
                                     hide-details="auto"
                                     :error-messages="errors.district"
-                                ></VCombobox>
+                                ></VAutocomplete>
                             </v-col>
 
                             <v-col cols="12" md="6" class="py-1">
-                                <VCombobox
+                                <VAutocomplete
                                     name="rotary_club_id"
                                     itemTitle="title"
                                     itemValue="value"
@@ -411,7 +448,7 @@ function cancelRemove() {
                                     variant="outlined"
                                     hide-details="auto"
                                     :error-messages="errors.rotary_club_id"
-                                ></VCombobox>
+                                ></VAutocomplete>
                             </v-col>
                             <VCol cols="12" md="6" class="py-1">
                                 <v-checkbox
