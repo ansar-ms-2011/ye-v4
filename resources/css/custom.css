@@ -2,6 +2,18 @@
     outline: 1px solid #848a90;
 }
 
+input[readonly]{
+    background-color: #f5f5f5;
+    border-color: #ccc;
+    color: #666;
+}
+
+.v-theme--dark input[readonly]{
+    background-color: unset;
+    border-color: unset;
+    color: unset;
+}
+
 .v-data-table__th--fixed{
     background-color: #005E96 !important;
 }

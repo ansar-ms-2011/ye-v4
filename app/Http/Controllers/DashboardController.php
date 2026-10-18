@@ -46,7 +46,7 @@ class DashboardController extends Controller
             $stats['total_applications'] = Application::count();
             $stats['camps_count'] = Application::where('exchange_type', 'CAMPS & TOURS')->count();
             $stats['step_count'] = Application::where('exchange_type', '!=', 'CAMPS & TOURS')->count();
-            $stats['fee_paid_count'] = Application::where('application_fee_paid', true)->orWhere('application_fee_paid', 1)->count();
+            $stats['fee_paid_count'] = Application::where('application_status', 'Paid')->count();
             $stats['total_clubs'] = RibiClub::count();
             $stats['total_dyeos'] = RibiDyeo::count();
             $stats['total_cyeos'] = RibiCyeo::count();
@@ -66,7 +66,7 @@ class DashboardController extends Controller
 
             $recentApplications = Application::with(['club', 'dyeo'])
                 ->orderByDesc('id')
-                ->take(8)
+                ->take(10)
                 ->get()
                 ->map(fn($app) => [
                     'id' => $app->id,

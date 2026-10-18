@@ -23,13 +23,12 @@ const isEditing = toRef(() => !!formModel.value.id);
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 const isSearching = ref(false);
 
-
 const filteredClubs = computed(() => {
     const clubs = props.clubs.filter(
         (club: any) => club.district_id === formModel.value.district_id,
     );
 
-    if(!clubs.some((club: any) => club.id === formModel.value.ribi_club_id)){
+    if (!clubs.some((club: any) => club.id === formModel.value.ribi_club_id)) {
         // eslint-disable-next-line vue/no-side-effects-in-computed-properties
         formModel.value.ribi_club_id = null;
     }
@@ -282,7 +281,7 @@ function cancelRemove() {
 </script>
 
 <template>
-    <Head title="Club Youth Exchange Officers" />
+    <Head title="CYEOs" />
     <div class="app-page">
         <v-sheet border rounded :elevation="2">
             <Deferred data="cyeoPaginator">
@@ -406,6 +405,13 @@ function cancelRemove() {
         <v-dialog v-model="dialog" max-width="800">
             <Form
                 v-bind="isEditing ? update.form(formModel.id!) : store.form()"
+                :transform="
+                    (data) => ({
+                        ...data,
+                        district_id: formModel.district_id as string,
+                        ribi_club_id: formModel.ribi_club_id as string,
+                    })
+                "
                 v-slot="{ errors, processing }"
                 @success="onFormSuccess"
             >

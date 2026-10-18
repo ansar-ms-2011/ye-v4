@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import WelcomeLogo from '@/assets/images/welcome-logo.png';
 import { dashboard, login as officialLogin } from '@/routes';
 import { index as applicantLogin } from '@/routes/applicant';
 
+const page = usePage();
 </script>
 
 <template>
@@ -15,17 +16,17 @@ import { index as applicantLogin } from '@/routes/applicant';
                 <div class="d-flex justify-space-between align-center mb-10">
                     <div></div>
                     <div class="d-flex ga-2">
-                        <Link v-if="$page.props.auth.user" :href="dashboard()">
+                        <Link v-if="page.props.auth.user" :href="dashboard()">
                             <VBtn color="primary">Dashboard</VBtn>
                         </Link>
                         <template v-else>
                             <Link :href="officialLogin()">
-                                <VBtn variant="outlined" color="primary"
+                                <VBtn variant="outlined" color="bg-primary"
                                     >Officials Log in</VBtn
                                 >
                             </Link>
                             <Link :href="applicantLogin()">
-                                <VBtn variant="outlined" color="primary"
+                                <VBtn variant="outlined" color="bg-primary"
                                     >Applicant Login</VBtn
                                 >
                             </Link>

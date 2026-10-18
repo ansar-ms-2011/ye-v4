@@ -205,6 +205,10 @@ class ApplicationController extends Controller
 
     public function ViewUploadedFiles($id)
     {
+        // check if user has access to application
+        $user = auth()->user();
+        checkApplicationAccess(Application::findOrFail($id), $user);
+
         $media_library = Media::where('application_id', $id)->get();
 
         return Inertia::render('applications/UploadedFiles', [

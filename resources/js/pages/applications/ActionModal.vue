@@ -92,7 +92,7 @@ async function submitActions() {
                 Application Actions
             </VCardTitle>
             <VCardText>
-                <VRow v-if="['admin', 'dyeo', 'cyeo'].includes(role)">
+                <VRow>
                     <VCol cols="12" sm="6" md="6">
                         <VAutocomplete
                             required

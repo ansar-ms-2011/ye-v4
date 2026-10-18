@@ -58,7 +58,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
-    Route::group(['middleware' => ['role:admin|cyeo|dyeo|applicant']], function () {
+    Route::group(['middleware' => ['role:admin|cyeo|dyeo|applicant', 'long.task:300']], function () {
         Route::get('application-pdf-view/{id}', function ($id) {
             $application = Application::find($id);
             // Check Access By the Right User
@@ -137,11 +137,6 @@ Route::get('get-media-file/{media}', function (Media $media) {
     return response()->file(storage_path('app/'.$media->media_path));
 });
 
-Route::get('/update-app', function () {
-    Artisan::call('dump-autoload');
-    echo 'dump-autoload complete';
-});
-
 Route::get('/view-part-2/{application}', function (Application $application) {
     if ($application->exchange_type == 'CAMPS & TOURS') {
         $file = generateGuidePart2FileCamps($application);
@@ -168,10 +163,16 @@ Route::get('/update-media', function () {
     return 'All media files updated successfully';
 });
 
-require __DIR__.'/settings.php';
-
 Route::get('/clear-cache', function () {
     Artisan::call('cache:clear');
+    Artisan::call('view:clear');
 
-    return 'Application cache cleared';
+    return 'Application cache/views cleared';
 });
+
+Route::get('/update-app', function () {
+    Artisan::call('dump-autoload');
+    echo 'dump-autoload complete';
+});
+
+require __DIR__.'/settings.php';

@@ -39,7 +39,7 @@ const headers = [
         nowrap: true,
     },
     {
-        title: 'DEYO Name',
+        title: 'DYEO Name',
         key: 'dyeo_name',
         align: 'start' as const,
         nowrap: true,
@@ -261,7 +261,7 @@ function cancelRemove() {
 </script>
 
 <template>
-    <Head title="Club Youth Exchange Officers" />
+    <Head title="DYEOs" />
     <div class="app-page">
         <v-sheet border rounded :elevation="2">
             <Deferred data="dyeoPaginator">
@@ -385,6 +385,12 @@ function cancelRemove() {
         <v-dialog v-model="dialog" max-width="800">
             <Form
                 v-bind="isEditing ? update.form(formModel.id!) : store.form()"
+                :transform="
+                    (data) => ({
+                        ...data,
+                        district_code: formModel.district_code,
+                    })
+                "
                 v-slot="{ errors, processing }"
                 @success="onFormSuccess"
             >
@@ -464,7 +470,7 @@ function cancelRemove() {
                             <v-col cols="12" md="6" class="py-1">
                                 <VTextField
                                     name="dyeo_state"
-                                    label="City"
+                                    label="State"
                                     v-model="formModel.dyeo_state"
                                     density="compact"
                                     variant="outlined"

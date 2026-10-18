@@ -26,12 +26,23 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const page = usePage();
-const auth = computed(() => page.props.auth);
+const auth = computed(() => page.props.auth) as any;
 const { mdAndDown } = useDisplay();
 const isMobile = computed(() => mdAndDown.value);
 const drawer = ref(!isMobile.value);
 const rail = ref(false);
+
 const { isCurrentUrl } = useCurrentUrl();
+
+const settingLink = computed(() => {
+    const role = auth.value?.user?.role?.name;
+
+    if (role === 'applicant') {
+        return '/settings/appearance';
+    }
+
+    return editProfile(auth.value?.user?.id);
+});
 
 const pageTitle = computed(
     () =>
@@ -272,7 +283,7 @@ const isRail = computed(() => !isMobile.value && rail.value);
 
                         <VList density="compact">
                             <Link
-                                :href="editProfile()"
+                                :href="settingLink"
                                 class="app-sidebar-user-menu-action"
                                 prefetch
                             >

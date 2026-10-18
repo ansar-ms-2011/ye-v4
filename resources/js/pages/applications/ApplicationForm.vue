@@ -1,11 +1,5 @@
 <template>
     <div id="appForm">
-        <VCard v-show="alert.show">
-            <v-alert dense id="alertBox" dismissible :type="alert.type">
-                {{ alert.message }}
-            </v-alert>
-        </VCard>
-
         <VSnackbar
             elevation="24"
             v-model="snackbar.show"
@@ -25,10 +19,7 @@
             </template>
         </VSnackbar>
 
-        <VRow
-            class="mb-4"
-            v-if="['admin', 'applicant'].includes(role)"
-        >
+        <VRow class="mb-4" v-if="['admin', 'applicant'].includes(role)">
             <!-- LEFT: navigation buttons -->
             <VCol
                 cols="12"
@@ -90,9 +81,9 @@
                         class="flex-grow-1 flex-sm-grow-0"
                         :loading="loading.paymentEmail"
                         :disabled="
-                        loading.paymentEmail ||
-                        form.application_status === 'Paid'
-                    "
+                            loading.paymentEmail ||
+                            form.application_status === 'Paid'
+                        "
                         prepend-icon="mdi-email"
                         @click="sendEmail('payment', 'paymentEmail')"
                     >
@@ -112,6 +103,7 @@
                     </VBtn>
                 </template>
             </VCol>
+            <v-spacer v-else></v-spacer>
 
             <VCol
                 cols="12"
@@ -132,6 +124,7 @@
                     </VBtn>
 
                     <ActionModal
+                        v-if="['admin', 'dyeo', 'cyeo'].includes(role)"
                         :ApplicationObj="form"
                         @actionUpdated="handleActionUpdated"
                     />
@@ -217,6 +210,7 @@
                     <VRow>
                         <VCol cols="12" sm="3" md="3">
                             <VTextField
+                                :readonly="role==='applicant'"
                                 label="Date of Birth"
                                 v-model="form.dob"
                             ></VTextField>
@@ -331,6 +325,232 @@
                             ></VTextField>
                         </VCol>
                     </VRow>
+                </VCardText>
+            </VCard>
+
+            <!-- ============ PARENTAL INFORMATION ============ -->
+            <VCard class="mb-3" elevation="3">
+                <VCardTitle class="text-h5 bg-primary-lighten-5 mb-3">
+                    Parental Information
+                    <i style="font-size: 0.7em; color: #666"
+                        >(Preferred but not essential if applicant is over 18
+                        years of age)</i
+                    >
+                </VCardTitle>
+                <VCardText>
+                    <fieldset class="mb-3">
+                        <legend>Parent 1</legend>
+                        <v-row>
+                            <VCol cols="12" sm="5" md="5">
+                                <VTextField
+                                    hide-details
+                                    label="Parent 1 / Guardian Name"
+                                    v-model="form.parent_1"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="2" md="2">
+                                <VAutocomplete
+                                    variant="outlined"
+                                    hide-details
+                                    density="compact"
+                                    :items="['Yes', 'No']"
+                                    label="Rotarian"
+                                    v-model="form.parent1_rotarian"
+                                ></VAutocomplete>
+                            </VCol>
+                            <VCol cols="12" sm="5" md="5">
+                                <VTextField
+                                    hide-details
+                                    label="If Yes, Name of Rotary Club"
+                                    v-model="form.parent1_rotary_club"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="3" md="3">
+                                <VTextField
+                                    label="Street"
+                                    v-model="form.address_parent1.street"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="3" md="3">
+                                <VTextField
+                                    label="Town / City"
+                                    v-model="form.address_parent1.city"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="2" md="2">
+                                <VTextField
+                                    label="County"
+                                    v-model="form.address_parent1.county"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="2" md="2">
+                                <VTextField
+                                    label="Postal Code"
+                                    v-model="form.address_parent1.postcode"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="2" md="2">
+                                <VTextField
+                                    label="Country"
+                                    v-model="form.address_parent1.country"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="3" md="3">
+                                <VTextField
+                                    label="Email Address"
+                                    v-model="form.parent1_email"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="3" md="3">
+                                <VTextField
+                                    label="Home Phone No"
+                                    v-model="form.parent1_tel"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="2" md="2">
+                                <VTextField
+                                    label="Mobile No"
+                                    v-model="form.parent1_mobile"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="2" md="2">
+                                <VTextField
+                                    label="Business No"
+                                    v-model="form.parent1_btel"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="2" md="2">
+                                <VTextField
+                                    label="Occupation"
+                                    v-model="form.parent1_occupation"
+                                ></VTextField>
+                            </VCol>
+                        </v-row>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Parent 2</legend>
+                        <v-row>
+                            <VCol cols="12" sm="5" md="5">
+                                <VTextField
+                                    label="Parent 2 / Guardian Name"
+                                    v-model="form.parent_2"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="2" md="2">
+                                <VAutocomplete
+                                    density="compact"
+                                    variant="outlined"
+                                    hide-details
+                                    :items="['Yes', 'No']"
+                                    label="Rotarian"
+                                    v-model="form.parent2_rotarian"
+                                ></VAutocomplete>
+                            </VCol>
+                            <VCol cols="12" sm="5" md="5">
+                                <VTextField
+                                    label="If Yes, Name of Rotary Club"
+                                    v-model="form.parent2_rotary_club"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="3" md="3">
+                                <VTextField
+                                    label="Street"
+                                    v-model="form.address_parent2.street"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="3" md="3">
+                                <VTextField
+                                    label="Town / City"
+                                    v-model="form.address_parent2.city"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="2" md="2">
+                                <VTextField
+                                    label="County"
+                                    v-model="form.address_parent2.county"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="2" md="2">
+                                <VTextField
+                                    label="Postal Code"
+                                    v-model="form.address_parent2.postcode"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="2" md="2">
+                                <VTextField
+                                    label="Country"
+                                    v-model="form.address_parent2.country"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="3" md="3">
+                                <VTextField
+                                    label="Email Address"
+                                    v-model="form.parent2_email"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="3" md="3">
+                                <VTextField
+                                    label="Home Phone No"
+                                    v-model="form.parent2_tel"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="2" md="2">
+                                <VTextField
+                                    label="Mobile No"
+                                    v-model="form.parent2_mobile"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="2" md="2">
+                                <VTextField
+                                    label="Business No"
+                                    v-model="form.parent2_btel"
+                                ></VTextField>
+                            </VCol>
+                            <VCol cols="12" sm="2" md="2">
+                                <VTextField
+                                    label="Occupation"
+                                    v-model="form.parent2_occupation"
+                                ></VTextField>
+                            </VCol>
+                        </v-row>
+                        <v-row>
+                            <VCol cols="12" sm="4" md="4">
+                                <span class="text-grey-darken-1">
+                                    In the event of an emergency, Which parent
+                                    or legal guardian should be contacted
+                                    first?
+                                </span>
+                                <v-radio-group
+                                    v-model="form.emergency_contact"
+                                    inline
+                                >
+                                    <v-radio
+                                        label="Parent 1"
+                                        :value="0"
+                                    ></v-radio>
+                                    <v-radio
+                                        label="Parent 2"
+                                        :value="1"
+                                    ></v-radio>
+                                </v-radio-group>
+                            </VCol>
+                            <VCol cols="12" sm="8" md="8">
+                                <span class="text-grey-darken-1">If applicant is under 18 authorisation must
+                                    be obtained from all parents/legal guardians
+                                    and others who have legal rights to
+                                    decisions affecting the student's
+                                    participation, Explanation is required if
+                                    signatures of two parents or legal guardians
+                                    are not provided.</span
+                                >
+                                <v-checkbox
+                                    v-model="form.parent_div_sep"
+                                    label="Check here if your parents are divorced or separated"
+                                ></v-checkbox>
+                            </VCol>
+                        </v-row>
+                    </fieldset>
                 </VCardText>
             </VCard>
 
@@ -1669,5 +1889,16 @@ function handleActionUpdated(updatedForm) {
     margin-left: auto;
     margin-right: auto;
     display: block;
+}
+
+fieldset {
+    border: none;
+    border-top: 1px solid #bec3c8;
+    padding: 1rem 0 0;
+}
+
+legend {
+    font-weight: bold;
+    margin: 0 1rem;
 }
 </style>

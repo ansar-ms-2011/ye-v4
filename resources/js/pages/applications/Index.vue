@@ -1,5 +1,5 @@
 <template>
-    <Head title="Club Youth Exchange Officers" />
+    <Head title="Applications" />
     <div class="app-page">
         <v-sheet border rounded :elevation="2">
             <Deferred data="applicationsPaginator">
@@ -58,32 +58,26 @@
                                     density="compact"
                                 ></VTextField>
 
-                                <v-btn
-                                    color="primary"
-                                    class="me-2"
-                                    prepend-icon="mdi-plus"
-                                    rounded="lg"
-                                    text="Add New Application"
-                                    variant="outlined"
-                                    @click="addNewApplication"
-                                ></v-btn>
+<!--                                <v-btn-->
+<!--                                    color="primary"-->
+<!--                                    class="me-2"-->
+<!--                                    prepend-icon="mdi-plus"-->
+<!--                                    rounded="lg"-->
+<!--                                    text="Add New Application"-->
+<!--                                    variant="outlined"-->
+<!--                                    @click="addNewApplication"-->
+<!--                                ></v-btn>-->
                             </v-toolbar>
                         </template>
 
                         <template v-slot:[`item.actions`]="{ item }">
-                            <div class="ga-2">
-                                <v-icon-btn
-                                    icon="mdi-dots-vertical"
-                                    size="small"
-                                    hover-elevation="5"
-                                    class="icon-btn-applications mx-2"
-                                    variant="outlined"
-                                    @click.stop="
-                                        (evt: any) =>
-                                            show(evt, item as Application)
-                                    "
-                                ></v-icon-btn>
-                            </div>
+                            <VBtn
+                                rounded="xl"
+                                icon="mdi-dots-vertical"
+                                hover-elevation="5"
+                                density="compact"
+                                @click="(evt: any) =>show(evt, item as Application)"
+                            ></VBtn>
                         </template>
 
                         <template
@@ -103,7 +97,7 @@
                                 item: any;
                             }"
                         >
-                            <span class="font-weight-bold text-primary">
+                            <span class="font-weight-bold">
                                 {{ item.application_no }}
                             </span>
                         </template>
@@ -545,6 +539,7 @@ function handleMenuItemClick({ id }: any) {
 }
 
 async function show(evt: any, application: Application) {
+    console.log('show', evt, application);
     document
         .querySelector('.icon-btn-applications-active')
         ?.classList.remove('icon-btn-applications-active');
@@ -556,7 +551,7 @@ async function show(evt: any, application: Application) {
         await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    contextMenuTarget.value = evt.target.closest('.v-icon-btn');
+    contextMenuTarget.value = evt.target.closest('.v-btn');
     showContextMenu.value = true;
 
     evt.target.parentElement?.parentElement?.classList.add(

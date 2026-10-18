@@ -14,7 +14,7 @@ const tabs = [
     <VBtnToggle
         :model-value="appearance"
         mandatory
-        color="primary"
+        color="bg-primary"
         variant="outlined"
         divided
         density="compact"
@@ -27,6 +27,7 @@ const tabs = [
             :value="value"
             density="compact"
             size="small"
+            variant="text"
         >
             {{ label }}
         </VBtn>

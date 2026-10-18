@@ -14,7 +14,7 @@
         min-width: 320px;
     }
 
-    a {
+    a:not(.v-btn) {
         color: inherit;
         text-decoration: none;
     }

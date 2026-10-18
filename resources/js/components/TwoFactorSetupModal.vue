@@ -206,16 +206,7 @@ watch(
                             />
                         </div>
 
-                        <div class="d-flex ga-3">
-                            <VBtn
-                                type="button"
-                                variant="tonal"
-                                block
-                                :disabled="processing"
-                                @click="showVerificationStep = false"
-                            >
-                                Back
-                            </VBtn>
+                        <div class="d-flex flex-wrap ga-3">
                             <VBtn
                                 type="submit"
                                 color="primary"
@@ -224,6 +215,15 @@ watch(
                                 :disabled="processing || code.length < 6"
                             >
                                 Confirm
+                            </VBtn>
+                            <VBtn
+                                type="button"
+                                variant="tonal"
+                                block
+                                :disabled="processing"
+                                @click="showVerificationStep = false"
+                            >
+                                Back
                             </VBtn>
                         </div>
                     </Form>

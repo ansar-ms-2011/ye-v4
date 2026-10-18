@@ -219,7 +219,7 @@ function cancelRemove() {
 </script>
 
 <template>
-    <Head title="Users" />
+    <Head title="Clubs" />
     <div class="app-page">
         <v-sheet border rounded :elevation="2">
             <v-data-table-server
@@ -305,6 +305,12 @@ function cancelRemove() {
         <v-dialog v-model="dialog" max-width="700">
             <Form
                 v-bind="isEditing ? update.form(formModel.id!) : store.form()"
+                :transform="
+                    (data) => ({
+                        ...data,
+                        district_id: formModel.district_id as string,
+                    })
+                "
                 :reset-on-success="['password']"
                 v-slot="{ errors, processing }"
                 @success="onFormSuccess"

@@ -30,7 +30,7 @@ defineOptions({
     },
 });
 
-const page = usePage();
+const page = usePage() as any;
 const role = computed(() => page.props.auth.user.role);
 const user = computed(() => page.props.auth.user);
 const cyeo = ref<Cyeo>((page.props.cyeo as Cyeo) ?? getNewCyeo());

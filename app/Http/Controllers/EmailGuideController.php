@@ -6,7 +6,6 @@ use App\Mail\PaymentEmailCamps;
 use App\Mail\PaymentEmailStep;
 use App\Models\Application;
 use App\Models\SentEmail;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
@@ -14,6 +13,10 @@ class EmailGuideController extends Controller
 {
     public function GetEmailHistory(Application $application)
     {
+        // check if user has access to application
+        $user = auth()->user();
+        checkApplicationAccess($application, $user);
+
         $emailSent = SentEmail::where('application_id', $application->id)->with('email_type')->get();
         $fileName = null;
         if ($application->exchange_type == 'CAMPS & TOURS') {
@@ -26,7 +29,7 @@ class EmailGuideController extends Controller
             'application' => $application,
             'fileName' => $fileName,
             'emailSentList' => $emailSent,
-            'appId' => $application->id
+            'appId' => $application->id,
         ]);
     }
 

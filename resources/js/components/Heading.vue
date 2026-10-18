@@ -12,7 +12,7 @@ withDefaults(defineProps<Props>(), {
 
 <template>
     <header :class="variant === 'small' ? 'mb-4' : 'mb-8'">
-        <h2 :class="variant === 'small' ? 'text-h6' : 'text-h5'">
+        <h2 class="mt-0 mb-0" :class="variant === 'small' ? 'text-h6' : 'text-h5'">
             {{ title }}
         </h2>
         <p v-if="description" class="text-body-2 text-medium-emphasis mt-1">

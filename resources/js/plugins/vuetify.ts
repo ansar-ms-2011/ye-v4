@@ -1,6 +1,5 @@
 import '@mdi/font/css/materialdesignicons.css';
 import 'vuetify/styles';
-
 import { createVuetify } from 'vuetify';
 import type { Appearance } from '@/types';
 
@@ -47,14 +46,15 @@ export default createVuetify({
                 dark: false,
                 colors: {
                     primary: '#005E96',
+                    'on-primary': '#ffffff',
+                    'on-primary-hover': '#f5f5f5',
+
                     'primary-darken-1': '#014066',
                     'primary-lighten-1': '#028fe2',
                     'primary-lighten-2': '#219ae1',
                     'primary-lighten-3': '#42a6e1',
                     'primary-lighten-4': '#70b3db',
                     'primary-lighten-5': '#b7d6e8',
-                    'on-primary': '#f4ecec',
-                    'on-primary-hover': '#ede4e4',
 
                     secondary: '#5a5a5f',
                     'secondary-lighten-1': '#808086',
@@ -109,10 +109,10 @@ export default createVuetify({
             dark: {
                 dark: true,
                 colors: {
-                    primary: '#e6e6e8',
+                    primary: '#1f1f25',
+                    'on-primary': '#ffffff',
                     'primary-darken-1': '#c7c7cc',
                     'primary-lighten-1': '#ffffff',
-                    'on-primary': '#1c1c1e',
 
                     secondary: '#a0a0a5',
                     'secondary-darken-1': '#7a7a80',

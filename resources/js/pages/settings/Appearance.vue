@@ -25,6 +25,6 @@ defineOptions({
             title="Appearance settings"
             description="Update your account's appearance settings"
         />
-        <AppearanceTabs />
+        <AppearanceTabs  class="mt-4"/>
     </section>
 </template>

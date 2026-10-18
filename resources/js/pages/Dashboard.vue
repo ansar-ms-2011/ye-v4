@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
+import { format } from 'date-fns';
 import { computed } from 'vue';
 import { dashboard } from '@/routes';
-import { format } from 'date-fns';
+import { index as applicationIndex } from '@/routes/application';
 
 interface Stats {
     total_applications: number;
@@ -85,7 +86,7 @@ defineOptions({
 const isApplicant = computed(() => props.role === 'applicant');
 const isAdmin = computed(() => props.role === 'admin');
 const isDyeo = computed(() => props.role === 'dyeo');
-const isCyeo = computed(() => props.role === 'cyeo');
+//const isCyeo = computed(() => props.role === 'cyeo');
 
 const statusColors: Record<string, string> = {
     Submitted: 'primary',
@@ -105,17 +106,49 @@ function getStatusColor(status?: string | null): string {
 }
 
 const recentApplicationsHeaders = [
-    { title: 'App No', key: 'application_no', align: 'start' as const },
-    { title: 'Applicant', key: 'full_name', align: 'start' as const },
-    { title: 'Exchange Type', key: 'exchange_type', align: 'start' as const },
-    { title: 'District', key: 'district_code', align: 'center' as const },
-    { title: 'Club', key: 'club_name', align: 'start' as const },
-    { title: 'Status', key: 'application_status', align: 'center' as const },
+    {
+        title: 'App No',
+        key: 'application_no',
+        align: 'start' as const,
+        minWidth: '100px',
+        headerProps: { class: 'bg-primary text-nowrap' },
+    },
+    {
+        title: 'Applicant',
+        key: 'full_name',
+        align: 'start' as const,
+        headerProps: { class: 'bg-primary text-nowrap' },
+    },
+    {
+        title: 'Exchange Type',
+        key: 'exchange_type',
+        align: 'start' as const,
+        headerProps: { class: 'bg-primary text-nowrap' },
+    },
+    {
+        title: 'District',
+        key: 'district_code',
+        align: 'center' as const,
+        headerProps: { class: 'bg-primary text-nowrap' },
+    },
+    {
+        title: 'Club',
+        key: 'club_name',
+        align: 'start' as const,
+        headerProps: { class: 'bg-primary text-nowrap' },
+    },
+    {
+        title: 'Status',
+        key: 'application_status',
+        align: 'center' as const,
+        headerProps: { class: 'bg-primary text-nowrap' },
+    },
     {
         title: 'Actions',
         key: 'actions',
         align: 'center' as const,
         sortable: false,
+        headerProps: { class: 'bg-primary text-nowrap' },
     },
 ];
 </script>
@@ -172,18 +205,18 @@ const recentApplicationsHeaders = [
                             />
                             {{ role.toUpperCase() }}
                         </VChip>
-                        <template v-if="!isApplicant">
-                            <VBtn
-                                color="white"
-                                variant="outlined"
-                                prepend-icon="mdi-plus"
-                                href="/application/create"
-                                size="small"
-                                class="text-white"
-                            >
-                                New Application
-                            </VBtn>
-                        </template>
+                        <!--                        <template v-if="!isApplicant">-->
+                        <!--                            <VBtn-->
+                        <!--                                color="white"-->
+                        <!--                                variant="outlined"-->
+                        <!--                                prepend-icon="mdi-plus"-->
+                        <!--                                href="/application/create"-->
+                        <!--                                size="small"-->
+                        <!--                                class="text-white"-->
+                        <!--                            >-->
+                        <!--                                New Application-->
+                        <!--                            </VBtn>-->
+                        <!--                        </template>-->
                     </div>
                 </div>
             </VCardText>
@@ -222,7 +255,12 @@ const recentApplicationsHeaders = [
                                             }}
                                             &bull; Applied:
                                             {{
-                                                applicantApplication.date_of_app? format(applicantApplication.date_of_app, 'dd-MM-yyyy') : 'N/A'
+                                                applicantApplication.date_of_app
+                                                    ? format(
+                                                          applicantApplication.date_of_app,
+                                                          'dd-MM-yyyy',
+                                                      )
+                                                    : 'N/A'
                                             }}
                                         </div>
                                     </div>
@@ -258,30 +296,30 @@ const recentApplicationsHeaders = [
                                             }}
                                         </div>
                                     </VCol>
-                                    <VCol cols="12" sm="6">
-                                        <div
-                                            class="text-caption text-medium-emphasis"
-                                        >
-                                            Fee Status
-                                        </div>
-                                        <div>
-                                            <VChip
-                                                size="small"
-                                                :color="
-                                                    applicantApplication.application_fee_paid
-                                                        ? 'success'
-                                                        : 'warning'
-                                                "
-                                                variant="flat"
-                                            >
-                                                {{
-                                                    applicantApplication.application_fee_paid
-                                                        ? 'Fee Paid'
-                                                        : 'Fee Pending'
-                                                }}
-                                            </VChip>
-                                        </div>
-                                    </VCol>
+                                    <!--                                    <VCol cols="12" sm="6">-->
+                                    <!--                                        <div-->
+                                    <!--                                            class="text-caption text-medium-emphasis"-->
+                                    <!--                                        >-->
+                                    <!--                                            Fee Status-->
+                                    <!--                                        </div>-->
+                                    <!--                                        <div>-->
+                                    <!--                                            <VChip-->
+                                    <!--                                                size="small"-->
+                                    <!--                                                :color="-->
+                                    <!--                                                    applicantApplication.application_fee_paid-->
+                                    <!--                                                        ? 'success'-->
+                                    <!--                                                        : 'warning'-->
+                                    <!--                                                "-->
+                                    <!--                                                variant="flat"-->
+                                    <!--                                            >-->
+                                    <!--                                                {{-->
+                                    <!--                                                    applicantApplication.application_fee_paid-->
+                                    <!--                                                        ? 'Fee Paid'-->
+                                    <!--                                                        : 'Fee Pending'-->
+                                    <!--                                                }}-->
+                                    <!--                                            </VChip>-->
+                                    <!--                                        </div>-->
+                                    <!--                                    </VCol>-->
                                     <VCol cols="12" sm="6">
                                         <div
                                             class="text-caption text-medium-emphasis"
@@ -310,49 +348,49 @@ const recentApplicationsHeaders = [
                                             }})
                                         </div>
                                     </VCol>
-                                    <VCol
-                                        cols="12"
-                                        v-if="
-                                            applicantApplication.application_status_note
-                                        "
-                                    >
-                                        <div
-                                            class="text-caption text-medium-emphasis"
-                                        >
-                                            Coordinator Notes
-                                        </div>
-                                        <div
-                                            class="pa-3 bg-grey-lighten-4 rounded text-body-2"
-                                        >
-                                            {{
-                                                applicantApplication.application_status_note
-                                            }}
-                                        </div>
-                                    </VCol>
+                                    <!--                                    <VCol-->
+                                    <!--                                        cols="12"-->
+                                    <!--                                        v-if="-->
+                                    <!--                                            applicantApplication.application_status_note-->
+                                    <!--                                        "-->
+                                    <!--                                    >-->
+                                    <!--                                        <div-->
+                                    <!--                                            class="text-caption text-medium-emphasis"-->
+                                    <!--                                        >-->
+                                    <!--                                            Coordinator Notes-->
+                                    <!--                                        </div>-->
+                                    <!--                                        <div class="pa-3 rounded text-body-2">-->
+                                    <!--                                            {{-->
+                                    <!--                                                applicantApplication.application_status_note-->
+                                    <!--                                            }}-->
+                                    <!--                                        </div>-->
+                                    <!--                                    </VCol>-->
                                 </VRow>
 
-                                <div class="d-flex ga-2 mt-15 flex-wrap">
+                                <div class="d-flex ga-2 mt-10 flex-wrap">
                                     <VBtn
-                                        style="color: white;"
+                                        variant="flat"
+                                        border
                                         color="primary"
-                                        class="bg-primary"
                                         prepend-icon="mdi-pencil-outline"
                                         :href="`/application/${applicantApplication.id}/edit`"
                                     >
                                         Edit Application
                                     </VBtn>
                                     <VBtn
-                                        variant="outlined"
+                                        variant="flat"
+                                        border
                                         color="primary"
                                         prepend-icon="mdi-file-document-outline"
-                                        :href="`/applications-pdf-view/${applicantApplication.id}`"
+                                        :href="`/application-pdf-view/${applicantApplication.id}`"
                                         target="_blank"
                                     >
                                         View PDF Form
                                     </VBtn>
                                     <VBtn
-                                        variant="outlined"
-                                        color="info"
+                                        variant="flat"
+                                        border
+                                        color="primary"
                                         prepend-icon="mdi-email-outline"
                                         :href="`/email-guide/${applicantApplication.id}`"
                                     >
@@ -378,13 +416,13 @@ const recentApplicationsHeaders = [
                                         yet or it has not been linked to your
                                         account.
                                     </p>
-                                    <VBtn
-                                        color="primary"
-                                        href="/application/create"
-                                        prepend-icon="mdi-plus"
-                                    >
-                                        Start New Application
-                                    </VBtn>
+                                    <!--                                    <VBtn-->
+                                    <!--                                        color="primary"-->
+                                    <!--                                        href="/application/create"-->
+                                    <!--                                        prepend-icon="mdi-plus"-->
+                                    <!--                                    >-->
+                                    <!--                                        Start New Application-->
+                                    <!--                                    </VBtn>-->
                                 </div>
                             </template>
                         </VCardText>
@@ -456,30 +494,30 @@ const recentApplicationsHeaders = [
                                         files uploaded</VListItemSubtitle
                                     >
                                 </VListItem>
-                                <VListItem>
-                                    <template #prepend>
-                                        <VIcon
-                                            :icon="
-                                                applicantApplication?.application_fee_paid
-                                                    ? 'mdi-check-circle'
-                                                    : 'mdi-alert-circle'
-                                            "
-                                            :color="
-                                                applicantApplication?.application_fee_paid
-                                                    ? 'success'
-                                                    : 'warning'
-                                            "
-                                        />
-                                    </template>
-                                    <VListItemTitle
-                                        >Application Fee</VListItemTitle
-                                    >
-                                    <VListItemSubtitle>{{
-                                        applicantApplication?.application_fee_paid
-                                            ? 'Confirmed'
-                                            : 'Awaiting payment confirmation'
-                                    }}</VListItemSubtitle>
-                                </VListItem>
+                                <!--                                <VListItem>-->
+                                <!--                                    <template #prepend>-->
+                                <!--                                        <VIcon-->
+                                <!--                                            :icon="-->
+                                <!--                                                applicantApplication?.application_fee_paid-->
+                                <!--                                                    ? 'mdi-check-circle'-->
+                                <!--                                                    : 'mdi-alert-circle'-->
+                                <!--                                            "-->
+                                <!--                                            :color="-->
+                                <!--                                                applicantApplication?.application_fee_paid-->
+                                <!--                                                    ? 'success'-->
+                                <!--                                                    : 'warning'-->
+                                <!--                                            "-->
+                                <!--                                        />-->
+                                <!--                                    </template>-->
+                                <!--                                    <VListItemTitle-->
+                                <!--                                        >Application Fee</VListItemTitle-->
+                                <!--                                    >-->
+                                <!--                                    <VListItemSubtitle>{{-->
+                                <!--                                        applicantApplication?.application_fee_paid-->
+                                <!--                                            ? 'Confirmed'-->
+                                <!--                                            : 'Awaiting payment confirmation'-->
+                                <!--                                    }}</VListItemSubtitle>-->
+                                <!--                                </VListItem>-->
                             </VList>
                         </VCardText>
                     </VCard>
@@ -537,7 +575,7 @@ const recentApplicationsHeaders = [
                                     Total Applications
                                 </div>
                                 <div
-                                    class="text-h4 font-weight-bold mt-1 text-primary"
+                                    class="text-h4 font-weight-bold mt-1 text-info"
                                 >
                                     {{ stats.total_applications }}
                                 </div>
@@ -701,7 +739,12 @@ const recentApplicationsHeaders = [
                                     class="mr-2"
                                 />
                             </template>
-                            <VCardTitle>Status Overview</VCardTitle>
+                            <VCardTitle
+                                >Status Overview
+                                <span class="text-sm-body-medium"
+                                    >(All Years)</span
+                                >
+                            </VCardTitle>
                         </VCardItem>
                         <VCardText class="pa-4">
                             <template
@@ -771,12 +814,17 @@ const recentApplicationsHeaders = [
                                     class="mr-2"
                                 />
                             </template>
-                            <VCardTitle>Exchange Types</VCardTitle>
+                            <VCardTitle>
+                                Exchange Types
+                                <span class="text-sm-body-medium"
+                                    >(All Years)</span
+                                >
+                            </VCardTitle>
                         </VCardItem>
                         <VCardText class="pa-4">
                             <div class="d-flex flex-column ga-3">
                                 <div
-                                    class="pa-3 rounded bg-grey-lighten-4 d-flex justify-space-between align-center"
+                                    class="pa-2 rounded d-flex justify-space-between align-center"
                                 >
                                     <div>
                                         <div
@@ -800,7 +848,7 @@ const recentApplicationsHeaders = [
                                 </div>
 
                                 <div
-                                    class="pa-3 rounded bg-grey-lighten-4 d-flex justify-space-between align-center"
+                                    class="pa-2 rounded d-flex justify-space-between align-center"
                                 >
                                     <div>
                                         <div
@@ -824,7 +872,7 @@ const recentApplicationsHeaders = [
                                 </div>
 
                                 <div
-                                    class="pa-3 rounded bg-grey-lighten-4 d-flex justify-space-between align-center"
+                                    class="pa-2 rounded d-flex justify-space-between align-center"
                                 >
                                     <div>
                                         <div
@@ -866,16 +914,16 @@ const recentApplicationsHeaders = [
                         </VCardItem>
                         <VCardText class="pa-4">
                             <div class="d-flex flex-column ga-2">
-                                <VBtn
-                                    block
-                                    variant="tonal"
-                                    color="primary"
-                                    prepend-icon="mdi-plus"
-                                    href="/application/create"
-                                    class="justify-start text-none"
-                                >
-                                    Create New Application
-                                </VBtn>
+                                <!--                                <VBtn-->
+                                <!--                                    block-->
+                                <!--                                    variant="tonal"-->
+                                <!--                                    color="primary"-->
+                                <!--                                    prepend-icon="mdi-plus"-->
+                                <!--                                    href="/application/create"-->
+                                <!--                                    class="justify-start text-none"-->
+                                <!--                                >-->
+                                <!--                                    Create New Application-->
+                                <!--                                </VBtn>-->
 
                                 <template v-if="isAdmin || isDyeo">
                                     <VBtn
@@ -944,35 +992,40 @@ const recentApplicationsHeaders = [
                                     class="mr-2"
                                 />
                             </template>
-                            <VCardTitle>Recent Applications</VCardTitle>
+                            <VCardTitle>Recent 10 Applications</VCardTitle>
                             <template #append>
-                                <VBtn
+                                <Link
                                     variant="text"
                                     color="primary"
                                     size="small"
-                                    href="/applications"
+                                    :href="applicationIndex()"
                                 >
-                                    View All Applications
-                                    <VIcon end icon="mdi-chevron-right" />
-                                </VBtn>
+                                    <div
+                                        class="d-flex align-center text-body-small text-primary"
+                                    >
+                                        View All Applications
+                                        <VIcon end icon="mdi-chevron-right" />
+                                    </div>
+                                </Link>
                             </template>
                         </VCardItem>
 
                         <VDataTable
+                            hover
                             :headers="recentApplicationsHeaders"
                             :items="recentApplications"
-                            :items-per-page="8"
+                            hide-default-footer
+                            disable-pagination
                             density="compact"
-                            hover
                             no-data-text="No recent applications available."
                         >
-                            <template #item.application_no="{ item }">
-                                <span class="font-weight-bold text-primary">
+                            <template #[`item.application_no`]="{ item }">
+                                <span class="font-weight-bold">
                                     {{ item.application_no || `#${item.id}` }}
                                 </span>
                             </template>
 
-                            <template #item.full_name="{ item }">
+                            <template #[`item.full_name`]="{ item }">
                                 <div class="d-flex flex-column">
                                     <span class="font-weight-medium">{{
                                         item.full_name
@@ -984,7 +1037,7 @@ const recentApplicationsHeaders = [
                                 </div>
                             </template>
 
-                            <template #item.exchange_type="{ item }">
+                            <template #[`item.exchange_type`]="{ item }">
                                 <VChip
                                     size="small"
                                     :color="
@@ -998,7 +1051,7 @@ const recentApplicationsHeaders = [
                                 </VChip>
                             </template>
 
-                            <template #item.application_status="{ item }">
+                            <template #[`item.application_status`]="{ item }">
                                 <VChip
                                     size="small"
                                     :color="
@@ -1010,7 +1063,7 @@ const recentApplicationsHeaders = [
                                 </VChip>
                             </template>
 
-                            <template #item.actions="{ item }">
+                            <template #[`item.actions`]="{ item }">
                                 <div class="d-flex justify-center ga-1">
                                     <VTooltip
                                         text="Edit Application"
@@ -1040,7 +1093,7 @@ const recentApplicationsHeaders = [
                                                 size="small"
                                                 variant="text"
                                                 color="error"
-                                                :href="`/applications-pdf-view/${item.id}`"
+                                                :href="`/application-pdf-view/${item.id}`"
                                                 target="_blank"
                                             />
                                         </template>
@@ -1059,9 +1112,6 @@ const recentApplicationsHeaders = [
 .dashboard-container {
     padding: 0;
 }
-
-
-
 
 .kpi-card {
     transition:
